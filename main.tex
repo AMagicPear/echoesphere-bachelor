@@ -1,4 +1,5 @@
 \documentclass[bachelor]{njupthesis}
+\usepackage{tabularx}
 
 \title{面向实体展览的沉浸式多模态交互系统设计与实现}
 \author{沈立}
@@ -16,21 +17,15 @@
 \makecover
 
 \begin{chineseabstract}
-这是论文摘要。 
+随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity游戏引擎为核心交互平台，整合了手势识别、面部情绪识别、游戏状态感知等多源信息，并基于大语言模型智能体（Qwen3.5 + DeepAgent）构建中央决策模块，实现对虚拟场景与物理装置（LED灯阵、音效等）的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
 
-需要的话可以用多个段落。
-
-……
-
-\chinesekeyword{当代生活；机器学习；大咕咕咕鸡}
+\chinesekeyword{多模态交互；沉浸式体验；游戏引擎；智能体；情感计算；实体展览}
 \end{chineseabstract}
 
 \begin{englishabstract}
-With the going on of contemporary life......
+With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity game engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and game state perception, and constructs a central decision-making module based on large language model agents (Qwen3.5 + DeepAgent) to achieve coordinated control of virtual scenes and physical devices (LED arrays, sound effects, etc.). This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
 
-
-
-\englishkeyword{Contemporary Life；Machine Learning；Big GuGuGu Chicken}
+\englishkeyword{Multimodal Interaction; Immersive Experience; Game Engine; Agent; Affective Computing; Physical Exhibition}
 \end{englishabstract}
 
 \thesistableofcontents
@@ -38,75 +33,308 @@ With the going on of contemporary life......
 \thesischapterexordium
 
 \chapter{绪论}
-这是正文了！
 
-\section{研究工作的背景与意义}
+\section{研究背景}
 
-当代生活\citing{pedregosa2011scikit}是严肃文学大师的作品。
+随着虚拟现实、人工智能等数字技术的快速发展，现代人机交互方式正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。公共交互装置作为现代城市空间与博物展览中的新兴艺术表达媒介，致力于构建人与作品之间的深度对话，而上述技术进步为其体验深度与表现形式拓展了新的可能。
 
+从当今的实体展览的现状来看，实体展览逐渐从藏品陈列和静态信息呈现的展示模式，向强调观众参与和体验感受的方向演进。博物馆等机构持续致力于优化其与观众的互动方式，特别是在观众与文物、艺术品等展品的交互层面，当代博物馆与艺术展厅致力于打破“请勿触摸”的传统禁锢，转而追求更具实践性、叙事性与沉浸感的互动体验。
 
-\section{当代生活的国内外研究历史与现状}
-字数字数字数。
+然而，当前展览中的公共交互装置在交互体验上仍存在明显不足。一方面，部分系统仅简单引入数字屏幕与触控交互，参观者的体验与操作普通电子设备无异，未能充分发挥实体展览特有的现场感与空间优势。另一方面，由于设计范式趋同，许多装置的交互方式、反馈逻辑与视觉表现呈现同质化倾向，难以有效促进参与者的情感投入与持续探索，导致可互动但不耐体验的现象。这使得互动装置未能充分实现其作为展览媒介应有的情感沟通与意义建构价值，观众与作品之间难以建立稳定而深入的联系。
 
-\section{本文的主要贡献与创新}
-本论文主要创新点与贡献如下：
+\section{研究意义}
 
-\section{本论文的结构安排}
-本文的章节结构安排如下：
+针对上述问题，本课题引入游戏引擎技术作为核心开发平台。Unity等现代游戏引擎凭借其卓越的实时渲染、场景管理与图形处理能力，使高性能、高复杂度的三维空间表现和实时反馈成为可能，为交互式视觉内容的构建提供了强大的平台支持。通过借鉴成熟的电子游戏交互机制与空间叙事方法，可以有效反哺现实展览系统，增强其趣味性与体验深度。
 
+在多模态情感识别技术方面，随着深度学习在计算机视觉与运动捕捉领域的广泛应用，系统能够精准捕捉用户的身体姿态、手势及面部表情。相较于传统控制器，这种具身化的交互方式能更自然地映射用户的心理状态，从而实现更高维度的情感化沉浸体验。与此同时，人类对计算机情感理解与交互的需求愈加广泛。根据中国科学院科技战略咨询研究院发布的《2021年研究前沿热度指数》报告，“多模态情感计算”相关研究热度指数位居前列。
 
-\chapter{第二章的名字}
+在此背景下，围绕实体展览场景，开展多模态沉浸式交互系统的设计研究，对于重构用户体验、创新情感反馈机制、探索技术融合应用具有重要的现实意义。
 
-\section{管他叫啥}
+\section{本文的组织结构}
 
-\subsection{严肃文学}
-严肃文学的具体定义如下：
-\begin{equation}
-c^2 = a^2 + b^2
-\end{equation}
+本文共分为六章。第一章阐述研究背景与意义；第二章综述多模态交互技术、实体展览交互装置及游戏引擎应用的相关研究进展；第三章进行系统总体设计，包括需求分析与系统架构；第四章论述情绪与艺术表达的设计理念；第五章详细描述系统的制作流程与关键技术实现；第六章总结全文工作并展望未来研究方向。
 
-其中，$a, b, c$为三角形边的长度。
+\chapter{国内外研究现状}
 
-\begin{figure}[h]
-\includegraphics{pica.pdf}
-\caption{我也不知道这个是什么图}
-\label{pica}
-\end{figure}
-balabalasd
+\section{多模态交互技术研究进展}
 
+多模态交互是一种变革性的人机交互方法，允许用户通过语音、手势、触控、注视和触觉等多种输入与输出模态与系统进行交互。随着传感器技术和机器学习的进步，多模态系统在虚拟助手、智能环境、医疗保健和辅助技术等各类应用中日益重要。
 
+多模态系统涉及不同层面：在模态层面，涵盖视觉、听觉、触觉等多种感官形式；在技术层面，包括手势识别、语音识别、运动传感、虚拟现实等软硬件解决方案；在学习与干预层面，则关注如何通过系统设计支持用户的认知、情感与技能发展。多模态交互技术结合数据融合算法，允许用户通过自然手势、语音指令等方式与虚拟展品互动，从而提升参与的直观性与沉浸感。通过加权融合来自不同传感器的数据，系统可以更准确地解读用户意图。
 
-\subsection{当代文学人物}
+近年来，大模型技术的迅速发展为情感识别提供了全新的研究范式。吴敖等人的《情感识别大模型研究综述》将多模态情感识别分为统一编码、层次化融合和生成式模型三种架构。统一编码架构将不同模态或任务的异构数据映射到一个统一的语义表示空间中，具有很高的挑战性。例如张艺媛等人提出的Meta-Transformer能将多达12种模态统一映射到参数冻结的Transformer编码器，显著减少了新模态的对齐参数量，实现广泛模态兼容性。
 
-\subsubsection{狗熊}
+对于本课题的具体需求，由于按钮序列、虚拟空间内事件信息较为简单，可直接使用固定算法处理，因此可以单独针对视觉信息使用单模态情感识别模型，再进行融合计算。单模态情感识别模型优势在于计算开销小，同时在特定受限场景下能实现很高的情感识别准确率。
 
-\subsubsection{李中猫}
+面部表情作为最直接的视觉情感表达载体，能够精确反映个体的情绪状态。近期的学术研究包括分层窗口机制、预训练ViT、双流协作机制等。然而，高精度面部解码存在明显局限性，在面对遮挡、低分辨率或复杂情感时，其分析能力会显著下降。当面部信息不明确时，肢体动作便成为解读情感强度与行为意图的关键线索。本课题中，面部表情和肢体动作的视觉识别均采用成熟的工业级方案（如MediaPipe、DeepFace等），以快速搭建可用环境并方便集成于展览系统。
 
+在人工智能体方面，传统智能体通常依赖强化学习在封闭环境中完成单一目标，缺乏泛化能力和实时交互能力。2025年ByteDance发布的Lumine工作首次实现了在3D开放世界游戏中完成小时级任务的能力，展现了视觉语言模型（VLM）在复杂交互场景中的巨大潜力。尽管本系统的目标是面向展览的交互系统，但其与通用GUI智能体及具身智能领域的VLA（视觉-语言-动作）模型一脉相承。
 
-\chapter{全文总结与展望}
+\section{实体展览交互装置研究进展}
 
-\section{全文总结}
-本文以当代生活为研究背景……
+现有研究指出，一套完整的博物馆交互展览系统通常包含数据层、逻辑层与展示层三层架构。其中，展示层负责提供高保真的三维渲染与多模态交互界面，支持用户在实体空间中以多样方式与虚拟内容互动。本课题的设计与实现聚焦于展示层的构建与优化。
 
-\section{后续工作展望}
-严肃文学的研究近几年发展迅速，在本文研究工作的基础上，仍有以下方向值得进一步研究：
+互动装置艺术作为连接展览内容与观众的关键媒介，其价值不仅在于满足基础的视听需求，更在于营造用户在参与过程中生理、心理乃至精神层面的综合情感体验。温文龙等学者基于互动仪式链理论指出，通过预设具有规范性、表演性与趣味性的互动仪式，可以为参与者创造特定的体验情境。在仪式化的互动过程中，情感能量得以产生、分享与传递，并通过“仪式链”的连续性维持高强度的参与体验，这为互动装置的情感化设计提供了理论依据。
+
+情感化设计是一种将人的情感需求放在首位的设计方式。李静雅、温文龙等研究者分别从实验验证与设计应用层面证实了情感化设计在提升用户参与度和满意度方面的重要性。本课题旨在将这一思路延伸至通用展览场景，通过多模态交互强化装置的情感沟通与意义建构能力，从而在观众与作品之间建立更稳固的深层连接。
+
+在具体设计实践方面，李静雅等人通过TouchDesigner软件实验，提出了节奏与视觉形态关联的音乐可视化模型（圆形—慢节奏、方形—中节奏、三角形—快节奏），为视听联觉反馈设计提供了参考，也为本课题交互作品《回声之境》的视觉生成逻辑提供了实证依据。
+
+此外，交互装置的核心技术基础在于其输入设备与交互方式。Manca Ogrizek等人的研究表明，在博物馆的虚拟现实交互中，为机械结构复杂的交互任务提供实体工具，能对用户体验产生积极影响。这支撑了本课题实体装置与虚拟反馈结合的设计路线。
+
+\section{游戏引擎在沉浸式体验中的技术应用}
+
+视觉生成的历史可追溯至20世纪70年代J. B. Mitroo等人的音乐可视化研究。而在当今，游戏引擎已成为构建沉浸式虚拟环境与交互系统的核心工具。程序化视觉生成技术利用算法动态创建视觉内容，能够根据实时输入参数驱动视觉元素的形态、颜色与运动规律变化，从而实现内容表现的无限多样性与自适应特性。Unity与Unreal Engine等引擎提供了强大的图形渲染、物理模拟、音频处理与脚本逻辑支持，极大地降低了复杂交互应用的开发门槛，并已广泛应用于数字展览和互动艺术领域。
+
+例如，Epic Games在旗下《堡垒之夜》游戏中举办的虚拟演唱会，通过根据演出内容实时改变场景、角色Shader和后期处理参数，实现了华丽且富有感染力的演出效果。国际性跨域艺术团队teamLab在沉浸式展览中基于自研引擎实时演算生成花朵的绽放、瀑布的流淌、蝴蝶的路径等视觉效果，并根据观众互动实时改变，其作品被世界各大艺术机构收藏。
+
+\chapter{系统总体设计}
+
+\section{需求分析}
+
+本系统面向实体展览场景，旨在构建一套沉浸式多模态交互系统。主要需求包括：
+
+\begin{enumerate}
+\item \textbf{多模态感知能力}：能够实时捕捉用户的手势、面部情绪，并同步游戏内部状态。
+\item \textbf{智能决策能力}：基于多源信息，实现情感驱动的动态反馈决策。
+\item \textbf{虚实融合执行能力}：能够同时控制虚拟场景中的视觉、音效表现，以及实体空间中的灯光等物理装置。
+\item \textbf{模块化与可扩展性}：各模块松耦合，便于独立开发、调试与后续扩展。
+\item \textbf{实时性与稳定性}：满足展览场景下的低延迟响应与长时间稳定运行要求。
+\end{enumerate}
+
+\section{系统架构设计}
+
+本系统采用多源数据融合与集中式决策的架构，主要包含以下三个组成部分：
+
+\subsection*{感知层}
+
+\begin{itemize}
+\item \textbf{摄像头模块}：实时捕获玩家画面。
+\item \textbf{手势识别模块}：利用MediaPipe等工具识别玩家手势（如挥手、指向、点赞等）。
+\item \textbf{面部情绪识别模块}：识别玩家情绪状态（如开心、困惑、惊讶等）。
+\item \textbf{游戏状态同步模块}：通过TCP通信从Unity客户端获取当前游戏进度、章节位置、内部事件等状态信息。
+\end{itemize}
+
+上述各模块均封装为TCP Client，统一将数据发送至中央决策模块。
+
+\subsection*{决策层}
+
+\begin{itemize}
+\item \textbf{核心推理引擎}：采用Qwen3.6 Plus VLM作为推理引擎。
+\item \textbf{智能体框架}：基于 \textbf{LangChain / DeepAgent} 框架实现Tool Calling能力，使模型能够调用外部工具函数。
+\item \textbf{工具函数}：包括控制灯光颜色/亮度/模式、推进游戏章节、触发游戏事件、播放背景音乐、设置环境效果等。
+\item \textbf{上下文管理}：系统维护短期上下文记忆，用于理解连续交互状态。
+\item \textbf{TCP Server}：决策层同时作为TCP服务端，统一接收所有客户端（Unity、MediaPipe、树莓派）的连接与数据上报，并将决策结果下发至执行层。
+\end{itemize}
+
+\subsection*{执行层}
+
+\begin{itemize}
+\item 决策结果通过TCP发送至Unity客户端、外部灯条等硬件设备。
+\item Unity客户端统一调度游戏内事件与外部物理设备。
+\item 形成完整的“感知—决策—执行”闭环。
+\end{itemize}
+
+在开题阶段，我曾考虑两种多模态识别方案：第一种基于罗素环形情绪理论，由简单规则或小模型驱动，以固定数学公式计算情感融合；第二种采用统一编码器架构，实现广泛模态兼容性，但部署难度较高且不够成熟。随着2026年智能体技术的快速发展，本设计最终采用基于多模态基础模型（如Qwen3.5）与智能体框架的方案，实现实时、灵活的情感驱动决策。
+
+\chapter{情绪与艺术表达}
+
+恰如未来人们与虚拟世界的交互方式将超越传统的键盘鼠标输入，本项目探索一种由人工智能驱动的、富有趣味性的新型游戏交互方式。结合实体的按钮装置和玩家情绪，在游戏中做出相应的图形图像变化，并以此作为核心游戏交互手段设计游戏关卡。本交互应用遵循情感化设计理念，交互设计以情绪变化为导向。以下为核心设计要点：
+
+\section{场景情绪基调}
+
+《回声之境》交互应用具有叙事性质，伴随着玩家情绪变化和游戏节奏的推进，在不同阶段设计了不同情绪基调的场景。在每个场景内，旅人的音符音色和音阶会适应场景而变化，力求营造富有诗意的参观体验。
+
+\section{叙事结构与手法}
+
+《回声之境》的故事隐喻了作者步入大学以来的心路历程。作品通过旅人的旅程，探讨自我认知、成长与未来召唤的主题。
+
+\section{旅人人物形象设计}
+
+\textbf{「那位没有过去，却正被未来召唤的人」}
+
+没有人知道旅人从何而来。当他睁开眼时，正立于“未定之原”的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。
+
+他没有名字，不是因为遗忘，而是因为他从未真正拥有过。旅人不是被放逐，也不是被召唤。他之所以存在，是因为回声之境“正在形成”，而只有那些\textbf{心中仍在寻找自我形状的人}，才会在世界未成形之时走进它。
+
+在他胸口，有一块微弱跳动的光核——不是心脏，而是\textbf{他尚未理解的自己}。随着他前行，光会改变颜色、节奏与温度，它既是力量，又是负担；既是答案，又是疑问本身。旅人来到这里，是因为他已走到人生某个模糊的分叉：不再属于过去，却尚未准备好面对未来。回声之境正是这种状态的具象化。因此，旅人不是外来的闯入者，而是\textbf{这个世界尚未成形部分的化身}。
+
+\section{音乐与交互设计}
+
+从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动游戏，即“an experimental interactive game where sound shapes the world”。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个游戏场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
+
+\section{交互场景与关卡设计}
+
+在定下场景情绪基调与叙事结构后，进一步设计了具体的交互场景与关卡流程，确保情绪变化与游戏机制的有机结合。
+
+\chapter{制作流程与实现}
+
+\section{宏观系统设计}
+
+整个系统分为多个部分。首先是交互应用内部的设计，与传统电子游戏设计一脉相承。经前期调研，选用Unity引擎作为交互应用载体。
+
+在完成整体章节印象设计和旅人形象构想后，使用Nano Banana生成旅人的美术形象，其后使用字节跳动的Seed 3D生成带PBR材质的旅人3D模型，在Blender中完成骨骼绑定和权重绘制，并制作简单的走路动画。完成后导出FBX模型并导入Unity，使用状态机、Character Controller及新输入系统共同实现旅人的走路动画。
+
+第一章的山峦采用菲涅尔材质实现发光边缘效果，并对其顶点着色器应用UV偏移效果。草地部分使用了较为复杂的着色器（详见5.4.4节）。
+
+在智能体框架选型方面，我评估了多种AI智能体框架，最终选用 \textbf{LangChain 生态中的 DeepAgent}。DeepAgent基于LangGraph和LangChain构建，其核心是有状态的多智能体协作能力，能够轻松定义任务流转逻辑，并方便实现人机协作（HITL），非常适合本交互系统。
+
+实体装置部分使用椴木板及WS2812灯条制作了展览中的技能图标，与交互应用中的技能使用和点亮情况做同步，以增强观展者的沉浸感。灯条使用树莓派加PWM控制器控制。
+
+\textbf{网络拓扑说明}：智能体服务端（决策层）启动一个TCP Socket服务器，Unity客户端、MediaPipe客户端、树莓派客户端分别作为TCP客户端连接至该服务器。所有感知数据上报与决策指令下发均通过该统一通道完成。
+
+\section{网络通信设计}
+
+系统采用TCP/IP协议进行模块间通信。\textbf{TCP Server与智能体服务端一体化部署}，Unity、MediaPipe、树莓派等模块作为客户端，将感知数据发送至决策模块；决策模块将工具调用结果下发至各客户端。所有数据采用JSON格式封装，保证跨平台兼容性。该架构实现了各模块的松耦合设计，便于独立开发与调试。
+
+\subsection*{自定义TCP Socket协议}
+
+在前期开发中，我对比了TCP Socket与WebSocket，最终选择TCP Socket以获得更低的传输延迟和更精细的控制。
+
+本系统采用\textbf{长度前缀+UTF-8的JSON协议}。早期曾尝试二进制协议（4字节长度 + 1字节类型标识 + 载荷），但在实际使用中，图片与文本采用不同编码格式导致智能体处理繁琐。因此最终统一将图片使用Base64编码为文本，采用JSON格式传输，包含以下字段：
+
+\begin{itemize}
+\item \texttt{type}：消息类型（text / image / command / register）
+\item \texttt{data}：文本内容或Base64编码数据
+\item \texttt{client\_type}：发送者身份（deepagent / unity / mediapipe / raspberry\_pi）
+\item \texttt{request\_id}：请求标识（UUID）
+\end{itemize}
+
+协议使用实例如下：
+
+\begin{itemize}
+\item 注册消息：\texttt{\{"type": "register", "client\_type": "mediapipe"\}}
+\item 智能体请求截图：\texttt{\{"type": "command", "client\_type": "deepagent", "data": "request\_screenshot", "request\_id": "..."\}}
+\end{itemize}
+
+\section{智能体实现}
+
+智能体作为整个系统的决策层和中枢节点，其实现与TCP Server深度耦合，两者之间采用生产者-消费者模式处理消息队列。
+
+\subsection*{核心决策层}
+
+本系统采用 \textbf{DeepAgent（LangChain生态）} 框架，基座模型为 \textbf{Qwen3.5}。DeepAgent基于LangGraph和LangChain构建，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制。其核心优势包括：
+
+\begin{itemize}
+\item \textbf{内置规划与任务分解}：通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划。
+\item \textbf{高效的上下文工程}：通过内置的文件系统中间件读写文件，有效解决超长任务带来的上下文溢出问题。
+\item \textbf{子代理嵌套与隔离}：支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效。
+\item \textbf{生态深度集成}：无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
+\end{itemize}
+
+\subsection*{工具函数设计}
+
+系统定义以下核心工具函数供VLM调用：
+
+\begin{table}[h]
+\centering
+\caption{工具函数列表}
+\begin{tabularx}{\linewidth}{|c|X|X|X|X|}
+\hline
+工具名称 & 功能 & 参数 & 描述 \\
+\hline
+control\_lights & 控制灯光 & color, brightness, pattern & 调节LED灯阵的颜色、亮度与模式 \\
+\hline
+send\_to\_client & 向特定客户端发送消息 & client\_type, message & 灵活的消息发送工具 \\
+\hline
+advance\_game\_chapter & 推进游戏章节 & chapter & 切换游戏叙事章节 \\
+\hline
+trigger\_game\_event & 触发游戏事件 & event\_id, params & 触发游戏内特定事件 \\
+\hline
+play\_music & 播放背景音乐 & track, volume & 控制背景音乐播放 \\
+\hline
+set\_environment & 设置环境效果 & effect, intensity & 调节环境特效（如雾气、粒子强度） \\
+\hline
+\end{tabularx}
+\end{table}
+
+VLM根据玩家当前的手势、情绪以及游戏状态，自主选择调用合适的工具函数，实现智能化的实时响应。
+
+\subsection*{上下文管理}
+
+智能体维护短期上下文记忆，用于理解连续交互状态。通过LangGraph的状态机机制，系统能够记住用户最近若干轮的情感变化与操作历史，从而实现更加连贯和自然的交互体验。
+
+\section{交互应用实现}
+
+\subsection*{旅人人物实现}
+
+旅人的形象设计已在第四章中描述。在得到概念设计后，使用ChatGPT和Gemini辅助生成了不同版本的旅人形象，并最终确定视觉风格。
+
+\subsection*{音符UI动效}
+
+\textbf{使用DOTween实现UI动效}：DOTween是Unity引擎中一款轻量级的补间动画插件，其核心机制是将任意数值属性在起始值与结束值之间按预设的缓动曲线进行插值运算，生成平滑的过渡动画。在《回声之境》的MusicNote组件中，DOTween被用于实现音符获取与演奏两类核心交互动效。获取音符时，系统根据类型分支执行差异化的时序编排；演奏音符时，利用\texttt{DOTween.Sequence()}组合颜色过渡与发光脉冲循环，实现具有节奏感的演奏反馈。
+
+\textbf{不同场景变化音色和音阶}：根据场景情绪基调与调式设置，动态改变音符的音色采样与音阶范围，确保与背景音乐的和声协调。
+
+\subsection*{轨道摄像机}
+
+\textbf{Cinemachine}是Unity引擎中一套功能完备的程序化相机控制模块。其核心设计理念在于将相机的行为抽象层与实际物理相机相分离，实现高度灵活且可组合的镜头系统。在本课题中，Cinemachine主要用于实现旅人跟随功能，使画面表现更具叙事性和电影感。
+
+具体实现上，首先在场景中设置一个基准Camera，并为其挂载\textbf{Cinemachine Brain}组件，该组件负责管理虚拟相机之间的切换。随后创建\textbf{Cinemachine Camera}实体，并对其Procedural Components进行配置：\textbf{Position Control}设为\textbf{Spline Dolly}模式，使相机能够沿预设路径移动；\textbf{Rotation Control}设为\textbf{Rotation Composer}模式，用于动态调整相机旋转角度以保持对目标的追踪；\textbf{Noise}采用\textbf{Basic Multi Channel Perlin}配置，为相机轨迹添加可控的微震动效果，增强画面层次感与真实度。
+
+进一步地，在场景中构建一条\textbf{Spline（样条曲线）}路径，并将Cinemachine Camera的Spline Dolly组件与该样条曲线绑定，约束相机的移动范围。设置\textbf{Automatic Dolly}功能，选择\textbf{Nearest Point To Target}跟随策略，使相机自动定位至样条曲线上距追踪目标最近的点位。综合上述配置，相较于传统直接跟随模式，基于样条曲线的轨道式跟随机制可实现更加平滑且富有叙事感的镜头运动，显著提升画面表现的电影化程度。
+
+\subsection*{风格化渲染}
+
+在本课题的交互作品《回声之境》中，草地场景的实现面临两大挑战：
+
+\textbf{（1）动态视觉表现}
+
+为了制作一片富有视觉美感的风格化草地，需要模拟草随风摆动、从上到下的色彩渐变、阴影色彩等效果。对于整片草地，还需能够根据Terrain颜色改变区域草地颜色。为此，采用非真实感渲染（NPR）的着色模型。
+
+草地动态效果本质上是草丛几何体顶点的规律性偏移，需要在顶点着色器上操作。为模拟随风摆动，核心工具是连续噪声函数。在Unity基于URP渲染管线中，使用ShaderGraph编写着色器，将风速、强度、噪声纹理缩放、草地区域色彩值等设置为可实时调整的材质属性，以便后续结合多模态情感识别结果进行动态变化。
+
+\textbf{（2）性能优化}
+
+针对草地场景中大量渲染实体带来的性能问题，采用剔除技术和GPU Instancing技术进行优化。视锥体剔除去除摄像机视锥体范围之外的模型，显著降低每帧需提交的几何体数量，减少DrawCall。此外，通过开启Terrain的Draw Instanced选项、将渲染管线中GPU Resident Drawer设置为Instanced Drawing以及开启草丛材质的Enable GPU Instancing选项，进一步合并相同网格的多次绘制调用，提升渲染效率。
+
+\subsection*{动画实现}
+
+旅人的行走、演奏等动画通过Unity的Animator组件与状态机实现，部分动作使用了Seedance 2.0等工具辅助生成。
+
+\section{实体装置实现}
+
+\subsection*{现实空间动态灯光实现}
+
+LED灯阵通过树莓派与PWM控制器驱动。树莓派作为TCP Client，连接至智能体服务端，接收来自Agent的灯光控制指令，实时改变灯条的颜色、亮度与闪烁模式，实现与虚拟场景的同步变化。
+
+\subsection*{手势和面部动态捕捉}
+
+本系统采用MediaPipe方案进行实时手势关键点检测与面部动态捕捉。MediaPipe作为轻量级、跨平台的解决方案，能够在普通摄像头下实现稳定的实时识别，适合展览场景部署。
+
+\textbf{系统架构}：整个捕捉系统采用事件驱动的模块化架构，主要包含三个核心组件。\textbf{HandDetector}和\textbf{FaceDetector}分别运行在独立的守护线程中，负责从摄像头捕获帧并进行关键点检测；检测器内部维护状态机，仅在检测状态变化时生成事件，避免每帧发送冗余数据。事件通过\textbf{EventBus}（基于Python的queue.Queue实现线程安全队列）发布，形成生产者—消费者模型。\textbf{TcpSender}在后台线程中运行asyncio事件循环，从EventBus消费事件并通过TCP协议发送至智能体服务端。这种解耦设计使得检测器与网络发送逻辑完全独立，异常处理完善，网络错误不影响检测流水线正常运行。
+
+\textbf{手部检测器}：基于MediaPipe HandLandmarker模型，支持21个手部关键点检测。检测器内部维护状态机，状态转换路径为：\texttt{NO\_HAND $\rightarrow$ HAND\_PRESENT $\rightarrow$ PINCH $\rightarrow$ PINCH\_RELEASED $\rightarrow$ NO\_HAND}。支持的手势事件包括：\texttt{hand\_detected}（手部首次出现）、\texttt{hand\_lost}（手部完全消失）、\texttt{pinch}（拇指与食指捏合，触发时附带平均坐标）、\texttt{pinch\_released}（捏合释放）、\texttt{open\_both\_hands}（左右手同时张开）、\texttt{swipe\_left}与\texttt{swipe\_right}（手腕快速左右滑动）。关键算法方面，捏合检测通过计算拇指尖（landmark 4）和食指尖（landmark 8）的欧氏距离实现，阈值设为0.06（归一化坐标）；手部张开检测检查所有指尖（landmark 8, 12, 16, 20）与手腕（landmark 0）的距离；滑动手势则通过跟踪手腕X坐标的速度，超过阈值时触发。
+
+\textbf{面部检测器}：基于MediaPipe FaceLandmarker模型，检测468个面部关键点。检测器以鼻尖位置（landmark 1）作为面部中心参考点，维护简单的布尔状态（\texttt{face\_present}或\texttt{face\_absent}）。支持的事件包括：\texttt{face\_detected}（面部首次出现，附带鼻尖坐标）、\texttt{face\_lost}（面部完全消失）。与手部检测器相同，面部检测器也采用状态机驱动，仅在面部出现/消失状态变化时发布事件，避免每帧发送冗余数据。
+
+\textbf{统一事件格式}：所有检测器共享的\textbf{UnifiedEvent}数据结构包含以下属性：\texttt{source}（事件来源，"hand"或"face"）、\texttt{event}（事件名称）、\texttt{data}（字典类型，包含位置坐标、置信度分数等）、\texttt{timestamp\_ms}（事件时间戳，毫秒级）。事件通过JSON格式序列化后，经TCP协议发送至智能体服务端，协议采用长度前缀（4字节大端序无符号整数）+ UTF-8编码JSON载荷的二进制帧格式。
+
+MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报识别结果。
+
+\subsection*{场景布置}
+
+技能图标使用矢量绘图工具（Affinity）绘制四个音符图案，采用贝塞尔曲线（Bézier Curve）构建流畅的音符轮廓线条。贝塞尔曲线是一种广泛应用于计算机图形学的参数曲线，通过控制点定义曲线形态。本设计使用三次贝塞尔曲线（cubic Bézier），其数学表达式为$B(t) = (1-t)^3P_0 + 3(1-t)^2tP_1 + 3(1-t)t^2P_2 + t^3P_3$，其中$P_0$、$P_1$、$P_2$、$P_3$为控制点，$t \in [0,1]$为参数。通过调整中间控制点$P_1$、$P_2$的位置，可以灵活控制曲线的弯曲方向与曲率，使音符图案呈现出自然、优美的线条形态。矢量绘图完成后，将图案缩放到合适比例打印在A4纸上，粘贴于椴木板，使用美工刀雕刻出镂空图形，最后用装饰性麻绳串联并固定于展台。整体场景布置注重实体装置与虚拟界面的视觉呼应。
+
+\chapter{总结与反思}
+
+完成这一整套面向实体展览的沉浸式多模态交互系统的设计与实现，是一项工程量庞大且涉及多学科知识的复杂工作。在真实的应用场景中，此类系统往往需要多学科人才协作完成。在本毕业设计中，我完成了基本的应用与原型设计，并打通了整套“感知—决策—执行”的流程。但在具体内容填充、用户体验优化等方面仍有打磨空间。若考虑实际落地，还需大量优化工作。
+
+本系统的主要贡献与创新点包括：
+
+\begin{enumerate}
+\item \textbf{轻量化数据需求}：不同于Lumine等研究需要数千小时的标注游戏数据，本系统基于现成VLM的零样本能力，仅需少量场景-决策对应关系即可运行，大幅降低了数据收集与标注成本。
+\item \textbf{多模态融合决策}：系统同时整合视觉（手势、情绪）、游戏内部状态以及上下文记忆，做出综合决策，而非单一模态的简单映射。
+\item \textbf{物理世界交互}：系统不仅控制游戏剧情，还能实时影响展厅内的物理设备（灯光、音效等），实现虚拟与现实的无缝融合。
+\end{enumerate}
+
+在技术实现上，通过LangChain DeepAgent框架实现VLM与外部工具的有机结合，完成了完整的“感知—推理—执行”交互链路。
+
+展望未来，尽管本系统使用了通用的视觉语言模型作为决策智能体的基座模型，但具身智能、智能眼镜等前沿领域已涌现出许多更适合空间推理的模型架构，例如腾讯混元实验室推出的Spatial-TTT，解决了长时序视频输入的空间理解问题。将其应用于实体展览，有望进一步提高交互系统的模型决策精度。
 
 \thesisacknowledgement
-本论文采用南京邮电大学本科论文\LaTeX 模版编写。
-
+本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。
 
 \thesisloadbibliography[nocite]{reference}
-
-%
-% Uncomment following codes to load bibliography database with native
-% \bibliography command.
-%
-% \nocite{*}
-% \bibliographystyle{njupthesis}
-% \bibliography{reference}
-%
-
-\thesisappendix
-这里是附录，没有请删除。
 
 \end{document}
