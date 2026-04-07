@@ -29,21 +29,10 @@
   \newCJKfontfamily{\heiti}{SimHei}
   \newCJKfontfamily{\kaiti}{SimKai}
 \else
-\ifmacosx
   \setallmainfonts{Times New Roman}
   \setCJKmainfont[AutoFakeBold=true]{Songti SC}
   \newCJKfontfamily{\heiti}{Heiti SC}
   \newCJKfontfamily{\kaiti}{Kaiti SC}
-\else
-  \setCJKmainfont[AutoFakeBold=true]{simsun.ttc}
-  \newCJKfontfamily{\heiti}{simhei.ttf}
-  \newCJKfontfamily{\kaiti}{simkai.ttf}
-  \setallmainfonts[
-    BoldFont=timesbd.ttf,
-    ItalicFont=timesi.ttf,
-    BoldItalicFont=timesbi.ttf,
-  ]{times.ttf}
-\fi
 \fi
 
 \RequirePackage{zhnumber}
