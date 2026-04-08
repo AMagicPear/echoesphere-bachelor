@@ -35,6 +35,7 @@ This is a standalone LaTeX thesis project with no code architecture to speak of.
 
 - **Template class** (`njupthesis.cls`): Defines NJUPT bachelor's thesis formatting (cover page, abstract styles, chapter/section headings, etc.)
 - **Bibliography**: Uses BibTeX with `njupthesis.bst` style, entries in `reference.bib`
+- **Citation format**: Use `\citing{key}` (NOT `\cite{key}`) for in-text citations
 - **Main document** (`main.tex`): Uses `\chapter{}` for major sections and `\section{}` for subsections
 
 ## Important Notes

@@ -5,7 +5,7 @@
 \author{沈立}
 \advisor{刘思江}
 \school{数字媒体与设计艺术学院}
-\major{计算机科学与技术}
+\major{数字媒体技术}
 \studentclass{B227103}
 \studentid{B22710323}
 \graduateyear{2026}
@@ -36,7 +36,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{研究背景}
 
-随着虚拟现实、人工智能等数字技术的快速发展，现代人机交互方式正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。公共交互装置作为现代城市空间与博物展览中的新兴艺术表达媒介，致力于构建人与作品之间的深度对话，而上述技术进步为其体验深度与表现形式拓展了新的可能。
+随着虚拟现实、人工智能等数字技术的快速发展，现代人机交互方式正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。公共交互装置作为现代城市空间与博物展览中的新兴艺术表达媒介，致力于构建人与作品之间的深度对话\citing{wen2022huadong}，而上述技术进步为其体验深度与表现形式拓展了新的可能。
 
 从当今的实体展览的现状来看，实体展览逐渐从藏品陈列和静态信息呈现的展示模式，向强调观众参与和体验感受的方向演进。博物馆等机构持续致力于优化其与观众的互动方式，特别是在观众与文物、艺术品等展品的交互层面，当代博物馆与艺术展厅致力于打破“请勿触摸”的传统禁锢，转而追求更具实践性、叙事性与沉浸感的互动体验。
 
@@ -90,7 +90,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 现有研究指出，一套完整的博物馆交互展览系统通常包含数据层、逻辑层与展示层三层架构。其中，展示层负责提供高保真的三维渲染与多模态交互界面，支持用户在实体空间中以多样方式与虚拟内容互动。本课题的设计与实现聚焦于展示层的构建与优化。
 
-互动装置艺术作为连接展览内容与观众的关键媒介，其价值不仅在于满足基础的视听需求，更在于营造用户在参与过程中生理、心理乃至精神层面的综合情感体验。温文龙等学者基于互动仪式链理论指出，通过预设具有规范性、表演性与趣味性的互动仪式，可以为参与者创造特定的体验情境。
+互动装置艺术作为连接展览内容与观众的关键媒介，其价值不仅在于满足基础的视听需求，更在于营造用户在参与过程中生理、心理乃至精神层面的综合情感体验。温文龙等学者基于互动仪式链理论指出\citing{wen2022huadong}，通过预设具有规范性、表演性与趣味性的互动仪式，可以为参与者创造特定的体验情境。
 
 \begin{figure}[htbp]
   \centering
@@ -180,6 +180,22 @@ With the rapid development of digital technologies such as virtual reality and a
 
 在开题阶段，我曾考虑两种多模态识别方案：第一种基于罗素环形情绪理论，由简单规则或小模型驱动，以固定数学公式计算情感融合；第二种采用统一编码器架构，实现广泛模态兼容性，但部署难度较高且不够成熟。随着2026年智能体技术的快速发展，本设计最终采用基于多模态基础模型（如Qwen3.5）与智能体框架的方案，实现实时、灵活的情感驱动决策。
 
+\section{系统实现方案}
+
+在确定系统架构后，本节具体说明各模块的技术选型与实现概要。
+
+\subsection*{Unity引擎与交互应用}
+
+经前期调研，选用Unity引擎作为交互应用载体。Unity凭借其卓越的实时渲染、场景管理与图形处理能力，能够支撑高性能、高复杂度的三维空间表现和实时反馈需求。
+
+在完成整体章节印象设计和旅人形象构想后，使用Nano Banana生成旅人的美术形象，其后使用字节跳动的Seed 3D生成带PBR材质的旅人3D模型，在Blender中完成骨骼绑定和权重绘制，并制作简单的走路动画。完成后导出FBX模型并导入Unity，使用状态机、Character Controller及新输入系统共同实现旅人的走路动画。
+
+第一章的山峦采用菲涅尔材质实现发光边缘效果，并对其顶点着色器应用UV偏移效果。草地部分使用了较为复杂的着色器（详见5.3.4节）。
+
+\subsection*{实体装置}
+
+实体装置使用椴木板及WS2812灯条制作展览中的技能图标，与交互应用中的技能使用和点亮情况做同步，以增强观展者的沉浸感。灯条使用树莓派加PWM控制器控制。
+
 \chapter{情绪与艺术表达}
 
 恰如未来人们与虚拟世界的交互方式将超越传统的键盘鼠标输入，本项目探索一种由人工智能驱动的、富有趣味性的新型游戏交互方式。结合实体的按钮装置和玩家情绪，在游戏中做出相应的图形图像变化，并以此作为核心游戏交互手段设计游戏关卡。本交互应用遵循情感化设计理念，交互设计以情绪变化为导向。以下为核心设计要点：
@@ -204,7 +220,30 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{音乐与交互设计}
 
-从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动游戏，即“an experimental interactive game where sound shapes the world”。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个游戏场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
+从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动游戏，即”an experimental interactive game where sound shapes the world”。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个游戏场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
+
+旅人在旅程中一共可获得四个音符。音符不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式。每个音符都承载着隐喻性的象征意义，其演奏效果对应着精神层面的某种能力，如表\ref{tbl:note-design}所示。
+
+\begin{table}[h]
+\centering
+\caption{音符设计表}
+\begin{tabularx}{\linewidth}{|c|c|X|}
+\hline
+音符名称 & 英文名 & 演奏效果与象征意义 \\
+\hline
+水滴 & waterdrop & 奏响它，可让流动、未定的世界元素固化成型，为自己锚定前行的路标。 \\
+\hline
+道路交错 & crossing & 奏响它，可与他人的灵魂产生共鸣，连接彼此的道路；也可划定自己的边界，让自己不受他人情绪与评价的影响。 \\
+\hline
+海浪 & tide & 奏响它，可驾驭知识的潮水，让流动的未知成为你前行的路；也可让你在潮水里保持稳定，不被洪流吞噬。 \\
+\hline
+风 & breeze & 奏响它，可让你的声音传遍整个回声之境，你走过的路，会成为后来者的路标；你也可以化作风，去往任何你想去的地方，无拘无束。 \\
+\hline
+\end{tabularx}
+\label{tbl:note-design}
+\end{table}
+
+上述四个音符的设计层层递进，映射了旅人从认识自我、到处理与他人关系、再到汲取知识、最终获得自由的成长路径。在游戏进程中，四个音符通过指引依次获得——这既是叙事节奏的安排，也隐喻着人生中认知与能力逐步展开的顺序。音符的演奏将触发不同的视觉与音效反馈，同时驱动场景元素的动态变化，使音乐真正成为塑造游戏世界面貌的核心力量。
 
 \section{交互场景与关卡设计}
 
@@ -212,43 +251,65 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \chapter{制作流程与实现}
 
-\section{宏观系统设计}
+\section{网络通信实现}
 
-整个系统分为多个部分。首先是交互应用内部的设计，与传统电子游戏设计一脉相承。经前期调研，选用Unity引擎作为交互应用载体。
+在分布式多模态交互系统中，各模块间的通信效率与可靠性直接影响系统的实时响应能力与用户体验。本节详细阐述系统网络通信的整体架构、协议设计演进过程以及关键实现机制。
 
-在完成整体章节印象设计和旅人形象构想后，使用Nano Banana生成旅人的美术形象，其后使用字节跳动的Seed 3D生成带PBR材质的旅人3D模型，在Blender中完成骨骼绑定和权重绘制，并制作简单的走路动画。完成后导出FBX模型并导入Unity，使用状态机、Character Controller及新输入系统共同实现旅人的走路动画。
+\subsection*{通信架构概述}
 
-第一章的山峦采用菲涅尔材质实现发光边缘效果，并对其顶点着色器应用UV偏移效果。草地部分使用了较为复杂的着色器（详见5.4.4节）。
+系统采用TCP/IP协议实现模块间通信。决策模块（智能体服务端）与TCP Server一体化部署，作为通信中枢接收来自各感知模块的数据上报，并将决策指令下发至执行模块。Unity客户端、MediaPipe客户端、树莓派客户端等感知与执行模块均作为TCP客户端连接至决策中枢。这种星型拓扑结构实现了各模块的松耦合设计：各感知模块仅需关注自身数据采集，无需了解其他模块的存在；决策模块则充当统一的信息汇聚与分发中心，负责协调各模块间的数据流转。
 
-在智能体框架选型方面，我评估了多种AI智能体框架，最终选用 \textbf{LangChain 生态中的 DeepAgent}。DeepAgent基于LangGraph和LangChain构建，其核心是有状态的多智能体协作能力，能够轻松定义任务流转逻辑，并方便实现人机协作（HITL），非常适合本交互系统。
+在通信协议的选择上，本系统经过深入比较，最终确定采用TCP Socket而非WebSocket作为传输层协议。TCP Socket相比WebSocket具有更低的协议开销和传输延迟，且能够提供更精细的流量控制与连接管理能力。此外，TCP Socket支持更底层的网络配置选项，便于针对展览场景的特定需求进行优化调参。
 
-实体装置部分使用椴木板及WS2812灯条制作了展览中的技能图标，与交互应用中的技能使用和点亮情况做同步，以增强观展者的沉浸感。灯条使用树莓派加PWM控制器控制。
+\subsection*{协议设计演进}
 
-\textbf{网络拓扑说明}：智能体服务端（决策层）启动一个TCP Socket服务器，Unity客户端、MediaPipe客户端、树莓派客户端分别作为TCP客户端连接至该服务器。所有感知数据上报与决策指令下发均通过该统一通道完成。
+在协议格式的设计过程中，本系统经历了从二进制协议到JSON文本协议的演进历程。
 
-\section{网络通信设计}
+\textbf{（1）二进制协议方案}
 
-系统采用TCP/IP协议进行模块间通信。\textbf{TCP Server与智能体服务端一体化部署}，Unity、MediaPipe、树莓派等模块作为客户端，将感知数据发送至决策模块；决策模块将工具调用结果下发至各客户端。所有数据采用JSON格式封装，保证跨平台兼容性。该架构实现了各模块的松耦合设计，便于独立开发与调试。
+早期设计采用长度前缀+消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。这种二进制协议在理论上具有最高的解析效率，但在实际开发中暴露出若干问题：由于图片数据与文本数据采用完全不同的编码方式，智能体在处理混合类型消息时需要额外的类型判断与解码逻辑，增加了中间件的开发复杂度；此外，二进制协议的调试与维护也较为困难，难以在开发阶段进行直观的协议检查。
 
-\subsection*{自定义TCP Socket协议}
+\textbf{（2）JSON文本协议方案}
 
-在前期开发中，我对比了TCP Socket与WebSocket，最终选择TCP Socket以获得更低的传输延迟和更精细的控制。
-
-本系统采用\textbf{长度前缀+UTF-8的JSON协议}。早期曾尝试二进制协议（4字节长度 + 1字节类型标识 + 载荷），但在实际使用中，图片与文本采用不同编码格式导致智能体处理繁琐。因此最终统一将图片使用Base64编码为文本，采用JSON格式传输，包含以下字段：
+基于上述实践经验，本系统最终采用长度前缀+UTF-8编码的JSON协议格式。该协议将所有数据统一封装为JSON对象，包含以下四个核心字段：
 
 \begin{itemize}
-\item \texttt{type}：消息类型（text / image / command / register）
-\item \texttt{data}：文本内容或Base64编码数据
-\item \texttt{client\_type}：发送者身份（deepagent / unity / mediapipe / raspberry\_pi）
-\item \texttt{request\_id}：请求标识（UUID）
+\item \texttt{type}：消息类型，取值为 \texttt{text}（普通文本消息）、\texttt{image}（Base64编码的图片数据）、\texttt{command}（控制命令）、\texttt{register}（客户端注册）
+\item \texttt{data}：载荷内容，文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据
+\item \texttt{client\_type}：发送者身份标识，取值包括 \texttt{echoagent}（智能体）、\texttt{unity}（Unity客户端）、\texttt{mediapipe}（感知模块）、\texttt{raspberry\_pi}（树莓派控制端）
+\item \texttt{request\_id}：请求追踪标识，采用UUID格式，用于关联请求与响应
 \end{itemize}
 
-协议使用实例如下：
+该协议格式具有以下优势：JSON的文本形式便于开发阶段的调试与日志分析；统一的数据封装方式简化了智能体端的协议解析逻辑；Base64编码虽然增加了约33\%的数据体积，但换取了协议的一致性与可维护性。考虑到本系统运行于本机与局域网环境下，网络带宽充足且延迟极低（通常低于5ms），上述开销在实际使用中完全可以接受。
 
-\begin{itemize}
-\item 注册消息：\texttt{\{"type": "register", "client\_type": "mediapipe"\}}
-\item 智能体请求截图：\texttt{\{"type": "command", "client\_type": "deepagent", "data": "request\_screenshot", "request\_id": "..."\}}
-\end{itemize}
+协议使用实例如表\ref{tbl:protocol-examples}所示。
+
+\begin{table}[h]
+\centering
+\caption{协议使用实例}
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+场景 & 消息格式 \\
+\hline
+客户端注册 & \texttt{\{"type": "register", "client\_type": "mediapipe"\}} \\
+\hline
+智能体请求截图 & \texttt{\{"type": "command", "client\_type": "echoagent", "data": "request\_screenshot", "request\_id": "uuid-xxx"\}} \\
+\hline
+Unity上报游戏状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
+\hline
+Unity发送截图响应 & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
+\hline
+\end{tabularx}
+\label{tbl:protocol-examples}
+\end{table}
+
+\subsection*{Unity客户端的线程安全发送机制}
+
+Unity引擎基于单线程执行模型，其生命周期方法（如 \texttt{Update}、\texttt{FixedUpdate}等）均在主线程中运行。然而，TCP网络通信涉及I/O操作，为避免阻塞主线程导致帧率下降，本系统在 \texttt{AgentCommunicator} 组件中采用了异步发送机制，并通过信号量（Semaphore）实现线程安全的发送控制。
+
+具体实现上，\texttt{SendRawAsync} 方法采用 \texttt{SemaphoreSlim} 作为发送锁，确保在同一时刻仅有一个发送任务持有网络流的使用权。当多个协程或异步任务同时发起发送请求时，发送锁保证这些请求被串化执行，避免TCP粘包或数据交错问题。锁的获取与释放位于 \texttt{try-finally} 块中，确保即使在网络异常情况下也能正确释放资源，防止死锁发生。
+
+此外，\texttt{AgentCommunicator} 通过 \texttt{SynchronizationContext} 将接收到的网络消息投递回Unity主线程执行回调，从而在不影响游戏帧率的前提下完成消息的解析与分发。这种设计在保持网络通信高效性的同时，确保了所有游戏逻辑均在主线程中执行，符合Unity的线程安全要求。
 
 \section{智能体实现}
 
@@ -267,7 +328,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \subsection*{工具函数设计}
 
-系统定义以下核心工具函数供VLM调用：
+系统定义以下核心工具函数供VLM调用，如表5.2所示。
 
 \begin{table}[h]
 \centering
@@ -296,6 +357,23 @@ VLM根据玩家当前的手势、情绪以及游戏状态，自主选择调用�
 \subsection*{上下文管理}
 
 智能体维护短期上下文记忆，用于理解连续交互状态。通过LangGraph的状态机机制，系统能够记住用户最近若干轮的情感变化与操作历史，从而实现更加连贯和自然的交互体验。
+
+\subsection*{调试与可观测性}
+
+智能体实现了完整的调试与可观测性体系，支持多层次的调试信息输出：
+
+\begin{itemize}
+\item \textbf{分层日志系统}：系统采用 Python 标准库 \texttt{logging} 模块实现分层日志记录，按模块划分为 \texttt{Server} 与 \texttt{Agent} 两个独立的日志命名空间。日志同时输出至控制台与文件，采用时间戳 + 模块名 + 级别的格式，便于事后分析与问题追溯。日志文件按启动时间自动命名（\texttt{echoagent\_YYYYMMDD\_HHMMSS.log}），保存于 \texttt{logs/} 目录下。
+\item \textbf{链路追踪}：系统集成 OpenTelemetry 与 Phoenix 实现端到端链路追踪（如图\ref{fig:phoenix-trace}所示），追踪面板可通过 \texttt{http://localhost:6006} 访问，追踪项目名为 \texttt{echoesphere-debug}。通过 LangChainInstrumentor 对 LangChain 调用进行自动插桩，可以完整观察 VLM 的 Tool Calling 决策过程、上下文窗口变化以及各工具函数的执行时序，为智能体行为分析提供了可视化的调试手段。
+\item \textbf{运行时调试日志}：在开发阶段可通过 \texttt{--log-level DEBUG} 参数开启调试级别日志，输出更详细的消息内容、队列状态与异常堆栈，帮助定位间歇性问题。
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{pic/phoenix-trace-example.png}
+  \caption{Phoenix 链路追踪面板示例}
+  \label{fig:phoenix-trace}
+\end{figure}
 
 \section{交互应用实现}
 
@@ -347,7 +425,7 @@ LED灯阵通过树莓派与PWM控制器驱动。树莓派作为TCP Client，连�
 
 \textbf{系统架构}：整个捕捉系统采用事件驱动的模块化架构，主要包含三个核心组件。\textbf{HandDetector}和\textbf{FaceDetector}分别运行在独立的守护线程中，负责从摄像头捕获帧并进行关键点检测；检测器内部维护状态机，仅在检测状态变化时生成事件，避免每帧发送冗余数据。事件通过\textbf{EventBus}（基于Python的queue.Queue实现线程安全队列）发布，形成生产者—消费者模型。\textbf{TcpSender}在后台线程中运行asyncio事件循环，从EventBus消费事件并通过TCP协议发送至智能体服务端。这种解耦设计使得检测器与网络发送逻辑完全独立，异常处理完善，网络错误不影响检测流水线正常运行。
 
-\textbf{手部检测器}：基于MediaPipe HandLandmarker模型，支持21个手部关键点检测。检测器内部维护状态机，状态转换路径为：\texttt{NO\_HAND $\rightarrow$ HAND\_PRESENT $\rightarrow$ PINCH $\rightarrow$ PINCH\_RELEASED $\rightarrow$ NO\_HAND}。支持的手势事件包括：\texttt{hand\_detected}（手部首次出现）、\texttt{hand\_lost}（手部完全消失）、\texttt{pinch}（拇指与食指捏合，触发时附带平均坐标）、\texttt{pinch\_released}（捏合释放）、\texttt{open\_both\_hands}（左右手同时张开）、\texttt{swipe\_left}与\texttt{swipe\_right}（手腕快速左右滑动）。关键算法方面，捏合检测通过计算拇指尖（landmark 4）和食指尖（landmark 8）的欧氏距离实现，阈值设为0.06（归一化坐标）；手部张开检测检查所有指尖（landmark 8, 12, 16, 20）与手腕（landmark 0）的距离；滑动手势则通过跟踪手腕X坐标的速度，超过阈值时触发。
+\textbf{手部检测器}：基于MediaPipe HandLandmarker模型，支持21个手部关键点检测。检测器内部维护状态机，状态转换路径为：\texttt{NO\_HAND} $\rightarrow$ \texttt{HAND\_PRESENT} $\rightarrow$ \texttt{PINCH} $\rightarrow$ \texttt{PINCH\_RELEASED} $\rightarrow$ \texttt{NO\_HAND}。支持的手势事件包括：\texttt{hand\_detected}（手部首次出现）、\texttt{hand\_lost}（手部完全消失）、\texttt{pinch}（拇指与食指捏合，触发时附带平均坐标）、\texttt{pinch\_released}（捏合释放）、\texttt{open\_both\_hands}（左右手同时张开）、\texttt{swipe\_left}与\texttt{swipe\_right}（手腕快速左右滑动）。关键算法方面，捏合检测通过计算拇指尖（landmark 4）和食指尖（landmark 8）的欧氏距离实现，阈值设为0.06（归一化坐标）；手部张开检测检查所有指尖（landmark 8, 12, 16, 20）与手腕（landmark 0）的距离；滑动手势则通过跟踪手腕X坐标的速度，超过阈值时触发。
 
 \textbf{面部检测器}：基于MediaPipe FaceLandmarker模型，检测468个面部关键点。检测器以鼻尖位置（landmark 1）作为面部中心参考点，维护简单的布尔状态（\texttt{face\_present}或\texttt{face\_absent}）。支持的事件包括：\texttt{face\_detected}（面部首次出现，附带鼻尖坐标）、\texttt{face\_lost}（面部完全消失）。与手部检测器相同，面部检测器也采用状态机驱动，仅在面部出现/消失状态变化时发布事件，避免每帧发送冗余数据。
 
@@ -361,23 +439,66 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 
 \chapter{总结与反思}
 
-完成这一整套面向实体展览的沉浸式多模态交互系统的设计与实现，是一项工程量庞大且涉及多学科知识的复杂工作。在真实的应用场景中，此类系统往往需要多学科人才协作完成。在本毕业设计中，我完成了基本的应用与原型设计，并打通了整套“感知—决策—执行”的流程。但在具体内容填充、用户体验优化等方面仍有打磨空间。若考虑实际落地，还需大量优化工作。
+\section{工作总结}
 
-本系统的主要贡献与创新点包括：
+完成这一整套面向实体展览的沉浸式多模态交互系统的设计与实现，是一项工程量庞大且涉及多学科知识的复杂工作。本课题从实体展览交互体验的现实问题出发，设计并实现了一套以Unity游戏引擎为核心、以大语言模型智能体为决策中枢的沉浸式多模态交互系统《回声之境》。本毕业设计基本完成了预定的各项研究任务，以下从多个维度对本次毕业设计进行总结。
+
+\subsection*{系统架构层面}
+
+本系统采用”感知层—决策层—执行层”的三层星型拓扑架构，实现了多源数据的统一汇聚与分发。感知层由手势识别、面部情绪识别与游戏状态同步三大模块构成，各模块通过TCP协议以独立客户端身份连接至决策中枢，实现了模块间的松耦合设计。决策层以Qwen3.5 VLM为基座模型，结合LangChain/DeepAgent框架实现Tool Calling能力，使模型能够根据玩家当前的手势、情绪与游戏状态自主调用外部工具函数，完成从感知到决策的闭环。执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制的任务。这种架构设计使得整个系统的扩展性与可维护性得到了保障，新增感知模块或执行设备仅需实现标准的TCP Client接口即可无缝接入。
+
+\subsection*{网络通信层面}
+
+在通信协议的设计上，本系统经历了从二进制协议到JSON文本协议的演进过程，最终确定采用长度前缀（4字节大端序）+ UTF-8编码JSON载荷的协议格式。该协议支持四种消息类型（text、image、command、register），通过统一的字段结构封装所有数据载荷。协议设计过程中充分权衡了解析效率与可维护性：JSON文本形式便于开发阶段的调试与日志分析，而Base64编码虽然增加了约33\%的体积，但在本机与局域网环境下网络带宽充足、延迟极低，实际使用中完全可以接受。此外，Unity客户端通过异步发送机制与信号量（Semaphore）实现线程安全的发送控制，避免了TCP粘包与数据交错问题。
+
+\subsection*{智能体实现层面}
+
+智能体是本系统的核心决策模块，其与TCP Server深度耦合，采用生产者—消费者模式处理消息队列。在框架选型上，采用DeepAgent（基于LangChain/LangGraph）作为智能体框架，利用其内置的规划与任务分解能力、文件系统中间件支持的上下文管理能力以及子代理嵌套机制，完成了VLM与外部工具的有机结合。系统定义了六个核心工具函数（\texttt{control\_lights}、\texttt{send\_to\_client}、\texttt{advance\_game\_chapter}、\texttt{trigger\_game\_event}、\texttt{play\_music}、\texttt{set\_environment}），VLM可根据感知信息自主选择调用，实现对虚拟场景与物理设备的协同控制。在可观测性方面，系统集成了OpenTelemetry与Phoenix链路追踪，支持多层次的分层日志输出与端到端的Tool Calling过程可视化，为智能体行为的调试与优化提供了有力支撑。
+
+\subsection*{交互应用层面}
+
+《回声之境》作为本课题的交互应用载体，在设计上融合了情感化理念与空间叙事手法。游戏中的四个音符——水滴（waterdrop）、道路交错（crossing）、海浪（tide）、风（breeze）——不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式，映射了从认识自我、到处理他人关系、再到汲取知识、最终获得自由的成长路径。在技术实现上，旅人动画通过状态机与新输入系统驱动，草地场景采用NPR着色模型与GPU Instancing优化，相机系统基于Cinemachine的Spline Dolly实现富有叙事感的轨道式跟随，音符UI动效则借助DOTween实现获取与演奏的差异化时序编排。
+
+\subsection*{实体装置层面}
+
+实体装置的设计注重虚拟与现实的视觉呼应。技能图标使用Affinity矢量绘图工具绘制四个音符图案，采用贝塞尔曲线构建流畅的音符轮廓线条，雕刻于椴木板后配合麻绳串联固定于展台。灯条控制通过树莓派加PWM控制器实现，作为TCP Client连接至智能体服务端，实时响应来自决策模块的灯光控制指令，实现与虚拟场景的同步变化。
+
+\section{主要贡献与创新点}
+
+综合上述工作，本系统的主要贡献与创新点可以归纳为以下三个方面：
 
 \begin{enumerate}
-\item \textbf{轻量化数据需求}：不同于Lumine等研究需要数千小时的标注游戏数据，本系统基于现成VLM的零样本能力，仅需少量场景-决策对应关系即可运行，大幅降低了数据收集与标注成本。
-\item \textbf{多模态融合决策}：系统同时整合视觉（手势、情绪）、游戏内部状态以及上下文记忆，做出综合决策，而非单一模态的简单映射。
-\item \textbf{物理世界交互}：系统不仅控制游戏剧情，还能实时影响展厅内的物理设备（灯光、音效等），实现虚拟与现实的无缝融合。
+\item \textbf{轻量化数据需求}：不同于Lumine等研究需要数千小时的标注游戏数据，本系统基于现成VLM的零样本能力，仅需少量场景-决策对应关系即可运行，大幅降低了数据收集与标注成本，使系统在有限资源下仍具备快速部署的能力。
+\item \textbf{多模态融合决策}：系统同时整合视觉（手势、面部情绪）、游戏内部状态以及上下文记忆，通过VLM做出综合决策，而非传统系统的单一模态简单映射。这种融合决策机制使系统能够更准确地理解玩家的整体状态，输出更贴合情境的响应。
+\item \textbf{物理世界交互}：系统不仅控制游戏剧情的推进与虚拟场景的视觉变化，还能实时影响展厅内的物理设备（LED灯阵等），通过TCP通信驱动树莓派PWM控制器实现灯光的动态变化，真正实现了虚拟世界与现实空间的无缝融合，使展览交互体验从屏幕内延伸至实体空间。
 \end{enumerate}
 
-在技术实现上，通过LangChain DeepAgent框架实现VLM与外部工具的有机结合，完成了完整的“感知—推理—执行”交互链路。
+\section{不足与反思}
 
-展望未来，尽管本系统使用了通用的视觉语言模型作为决策智能体的基座模型，但具身智能、智能眼镜等前沿领域已涌现出许多更适合空间推理的模型架构，例如腾讯混元实验室推出的Spatial-TTT，解决了长时序视频输入的空间理解问题。将其应用于实体展览，有望进一步提高交互系统的模型决策精度。
+尽管本次毕业设计基本完成了预定目标，但在实际开发过程中也暴露出若干不足之处，值得在后续工作中加以改进。
+
+\begin{enumerate}
+\item \textbf{游戏内容深度不足}：由于开发时间与个人精力有限，《回声之境》在叙事内容、关卡设计与情感表达等方面仍有较大的打磨空间。四个音符的象征意义与游戏机制的结合尚不够紧密，部分场景的情绪基调与交互反馈之间的关联度可以进一步提升。
+\item \textbf{情绪识别精度有限}：当前系统采用现成的MediaPipe方案进行手势与面部关键点检测，情绪状态的量化维度较为单一，尚未充分利用面部关键点的时序变化实现更细腻的情感推断。
+\item \textbf{实体装置与虚拟场景的同步精度}：目前灯条控制与游戏内事件之间存在一定的响应延迟，实体装置的物理反馈与虚拟画面的时间一致性尚有优化空间。如需提升至展览级别的用户体验，需在通信延迟优化与同步策略设计上做更多工作。
+\item \textbf{智能体的决策可解释性}：尽管系统集成了Phoenix链路追踪工具，但VLM在Tool Calling决策过程中的推理逻辑仍像一个”黑箱”，难以向非技术用户解释为何在某一时刻选择了特定的工具调用。在面向普通观众的展览场景中，增加决策的可解释性将有助于提升用户对系统的信任感。
+\end{enumerate}
+
+\section{未来展望}
+
+展望未来，本系统可从以下几个方向进行拓展与深化：
+
+在模型层面，尽管本系统使用了通用的视觉语言模型作为决策智能体的基座模型，但具身智能、智能眼镜等前沿领域已涌现出许多更适合空间推理的模型架构，例如腾讯混元实验室推出的Spatial-TTT，解决了长时序视频输入的空间理解问题。将其应用于实体展览，有望进一步提高交互系统的模型决策精度，使系统能够更好地理解用户在实体空间中的行为意图。
+
+在交互模态层面，当前系统的感知通道主要包括手势、面部情绪与游戏状态。未来可进一步引入语音交互、目光注视追踪或心率传感等更多模态，实现更丰富的多模态融合决策，使系统能够更全面地感知观众的心理状态与交互需求。
+
+在内容层面，游戏的叙事深度与关卡设计仍有较大的拓展空间。未来的版本可以进一步挖掘四个音符的象征意义，设计更丰富的演奏组合与场景变化，使音乐真正成为塑造游戏世界面貌的核心力量，同时为观众带来更具情感深度与艺术感染力的沉浸式体验。
+
+总之，本次毕业设计为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考，也为后续的持续优化与实际落地应用奠定了基础。
 
 \thesisacknowledgement
 
-有时候我觉得大学生活十分漫长，却也有时候我发现这四年的时光转瞬即逝。这四年，整个世界都相当不平凡。记得刚走入大学的那会儿，疫情还欲止未止，
+有时候我觉得大学生活十分漫长，却也有时候我发现这四年的时光转瞬即逝。这四年，整个世界都相当不平凡。记得刚走入大学的那会儿，疫情还欲止未止，我也像这《回声之境》中的旅人，既憧憬着未来又小心翼翼地在迷雾中前行。
 
 本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。
 
