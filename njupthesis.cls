@@ -27,7 +27,7 @@
   \setallmainfonts{Times New Roman}
   \setCJKmainfont[AutoFakeBold=true]{SimSun}
   \newCJKfontfamily{\heiti}{SimHei}
-  \newCJKfontfamily{\kaiti}{SimKai}
+  \newCJKfontfamily{\kaiti}{STKaiti}
 \else
   \setallmainfonts{Times New Roman}
   \setCJKmainfont[AutoFakeBold=true]{Songti SC}

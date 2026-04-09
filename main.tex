@@ -161,7 +161,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 经前期调研，选用Unity引擎作为交互应用载体。Unity凭借其卓越的实时渲染、场景管理与图形处理能力，能够支撑高性能、高复杂度的三维空间表现和实时反馈需求。
 
-\textbf{旅人动画系统}：在完成整体章节印象设计和旅人形象构想后，使用Nano Banana生成旅人的美术形象，其后使用字节跳动的Seed 3D生成带PBR材质的旅人3D模型，在Blender中完成骨骼绑定和权重绘制，并制作简单的走路动画。完成后导出FBX模型并导入Unity，使用Animator状态机、Character Controller及新输入系统共同实现旅人的移动控制与动画驱动。
+\textbf{旅人动画系统}：在完成整体章节印象设计和旅人形象构想后，使用Gemini + Nano Banana生成旅人的美术形象，其后使用字节跳动的Seed 3D生成带PBR材质的旅人3D模型，在Blender中完成骨骼绑定和权重绘制，并制作简单的走路动画。完成后导出FBX模型并导入Unity，使用Animator状态机、Character Controller及新输入系统共同实现旅人的移动控制与动画驱动。
 
 \textbf{轨道摄像机系统}：采用Unity的Cinemachine插件实现程序化相机控制。将相机的行为抽象层与物理相机相分离，通过Spline Dolly模式使相机沿预设样条曲线移动，配合Rotation Composer模式动态追踪旅人，并引入Basic Multi Channel Perlin噪声为相机轨迹添加微震动效果，实现富有叙事感的轨道式跟随镜头。
 
@@ -205,7 +205,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 在他胸口，有一块微弱跳动的光核——不是心脏，而是\textbf{他尚未理解的自己}。随着他前行，光会改变颜色、节奏与温度，它既是力量，又是负担；既是答案，又是疑问本身。旅人来到这里，是因为他已走到人生某个模糊的分叉：不再属于过去，却尚未准备好面对未来。回声之境正是这种状态的具象化。因此，旅人不是外来的闯入者，而是\textbf{这个世界尚未成形部分的化身}。
 
-\section{音乐与交互设计}
+\section{音乐交互设计}
 
 从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动游戏，即 \textit{an experimental interactive game where sound shapes the world}。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个游戏场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
 
@@ -298,11 +298,30 @@ Unity引擎基于单线程执行模型，其生命周期方法（如 \texttt{Upd
 
 此外，\texttt{AgentCommunicator} 通过 \texttt{SynchronizationContext} 将接收到的网络消息投递回Unity主线程执行回调，从而在不影响游戏帧率的前提下完成消息的解析与分发。这种设计在保持网络通信高效性的同时，确保了所有游戏逻辑均在主线程中执行，符合Unity的线程安全要求。
 
-\section{智能体实现}
+\section{智能体EchoAgent实现}
 
-智能体作为整个系统的决策层和中枢节点，其实现与TCP Server深度耦合，两者之间采用生产者-消费者模式处理消息队列。
+作为为《回声之境》服务的智能体，本文将其命名为 EchoAgent。EchoAgent 内部基于大语言模型构建，作为整个系统的决策层和中枢节点。TCP Socket 服务器与 EchoAgent 之间通过一个异步消息队列进行通信：服务器负责接收来自各类客户端（Unity、MediaPipe、Raspberry Pi 等）的消息，并将它们投入共享的消息队列；EchoAgent 则定时从队列中批量取出消息，经大语言模型理解后，自主决策并调用相应工具完成响应。
 
-\subsection{智能体技能（SKILL）设计}
+在系统启动流程上，本设计先创建全局消息队列，再创建 TCP 服务器并注入该队列的引用，最后创建 EchoAgent 实例，使其同时持有队列与服务器的引用。这种顺序确保了各组件在初始化时能够正确建立关联。
+
+由于智能体需要主动向各个已连接的客户端发送消息或命令，本系统将这类操作封装为可被大语言模型调用的工具（Tools）。这里存在一个设计上的矛盾：工具的参数必须是字符串或数字等简单类型，以便大语言模型生成，然而向客户端发消息这一操作本质上需要持有 TCP 服务器实例的引用。为解决这一矛盾，本系统利用面向对象的闭包特性，在 EchoAgent 初始化时将 TCP 服务器实例保存为其成员属性，而工具函数则作为内部方法定义，通过隐式绑定到 \texttt{self} 来访问服务器实例，从而在不破环工具参数类型约束的前提下实现了对服务器的控制。
+
+整个系统运行时，TCP 服务器与 EchoAgent 各自在独立的无限循环中运作：TCP 服务器持续监听端口、接收并解析来自客户端的消息，同时暴露发送消息的接口供外部调用；EchoAgent 则按固定时间间隔（默认五秒）批量取出消息队列中积压的所有消息，交由大语言模型进行理解与推理，再由模型自主选择并调用合适的工具完成响应。
+
+\subsection{DeepAgent}
+
+本系统采用 \textbf{DeepAgent} 框架，基座模型采用 \textbf{Qwen3.5-Plus}。DeepAgent基于LangGraph和LangChain构建，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制，可通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划；自动记忆压缩有效解决超长任务带来的上下文溢出问题；支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效；无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
+
+下面的时序图\ref{fig:agent-trace}展示了一个智能体的完整决策流程。（图片描述：玩家触发交互事件 如MediaPipe模块检测到玩家做了挥手动作->挥手事件通过TCP Socket发送到智能体->智能体根据当前正在游玩的章节、玩家进度、情绪等信息决策->智能体认为需要查看游戏现状以判断下一步动作->智能体调用工具截图->截图请求通过TCP发送到Unity客户端->Unity做截图操作->截图通过TCP发送到智能体->智能体理解收到的截图->智能体发起下一步的交互应用内事件）
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{pic/智能体决策完整流程时序图.pdf}
+\caption{智能体决策流程时序图}
+\label{fig:agent-trace}
+\end{figure}
+
+\subsection{技能（SKILL）设计}
 
 在大语言模型智能体的实际部署中，如何让模型有效理解任务环境并执行相应操作，是一个核心问题。传统的方案通常依赖提示词工程（Prompt Engineering），通过自然语言描述向智能体传递系统知识。然而，这种方式存在显著局限：提示词长度受限、描述易产生歧义、模型对结构化信息的理解效率远高于自由文本。
 
@@ -336,24 +355,13 @@ Tool Calling是智能体控制外部设备的唯一途径。SKILL定义了六个
 
 为防止智能体产生异常行为，SKILL还定义了系统级的约束边界，包括实时性要求（手势响应延迟低于100ms、灯光控制延迟低于200ms）、技术部署约束（仅支持局域网环境）以及内容安全限制（四个音符须按序获得、情绪反馈须柔和避免强刺激）。这些约束作为智能体决策的边界条件，确保系统在可控范围内运行。
 
-\subsection{核心决策层}
-
-本系统采用 \textbf{DeepAgent（LangChain生态）} 框架，基座模型为 \textbf{Qwen3.5}。DeepAgent基于LangGraph和LangChain构建，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制。其核心优势包括：
-
-\begin{itemize}
-\item \textbf{内置规划与任务分解}：通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划。
-\item \textbf{高效的上下文工程}：通过内置的文件系统中间件读写文件，有效解决超长任务带来的上下文溢出问题。
-\item \textbf{子代理嵌套与隔离}：支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效。
-\item \textbf{生态深度集成}：无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
-\end{itemize}
-
 \subsection{调试与可观测性}
 
 智能体实现了完整的调试与可观测性体系，支持多层次的调试信息输出：
 
 \begin{itemize}
-\item \textbf{分层日志系统}：系统采用 Python 标准库 \texttt{logging} 模块实现分层日志记录，按模块划分为 \texttt{Server} 与 \texttt{Agent} 两个独立的日志命名空间。日志同时输出至控制台与文件，采用时间戳 + 模块名 + 级别的格式，便于事后分析与问题追溯。日志文件按启动时间自动命名（\texttt{echoagent\_YYYYMMDD\_HHMMSS.log}），保存于 \texttt{logs/} 目录下。
-\item \textbf{链路追踪}：系统集成 OpenTelemetry 与 Phoenix 实现端到端链路追踪（如图\ref{fig:phoenix-trace}所示），追踪面板可通过 \texttt{http://localhost:6006} 访问，追踪项目名为 \texttt{echoesphere-debug}。通过 LangChainInstrumentor 对 LangChain 调用进行自动插桩，可以完整观察 VLM 的 Tool Calling 决策过程、上下文窗口变化以及各工具函数的执行时序，为智能体行为分析提供了可视化的调试手段。
+\item \textbf{分层日志系统}：系统采用 Python 标准库 \texttt{logging} 模块实现分层日志记录，按模块划分为 \texttt{Server} 与 \texttt{Agent} 两个独立的日志命名空间。日志同时输出至控制台与文件，采用时间戳 + 模块名 + 级别的格式，便于事后分析与问题追溯。日志文件按启动时间自动命名（\texttt{echoagent\_YYYYMMDD\_HHMMSS.log}），保存于开发项目的 \texttt{logs/} 目录下。
+\item \textbf{链路追踪}：系统集成 OpenTelemetry 与 Phoenix 实现端到端链路追踪（如图\ref{fig:phoenix-trace}所示），追踪面板可在浏览器上通过本地端口访问。通过OpenTelemetry库中的Instrumentor 对 LangChain 调用进行自动插桩，可以完整观察 VLM 的 Tool Calling 决策过程、上下文窗口变化以及各工具函数的执行时序，为智能体行为分析提供了可视化的调试手段。
 \item \textbf{运行时调试日志}：在开发阶段可通过 \texttt{--log-level DEBUG} 参数开启调试级别日志，输出更详细的消息内容、队列状态与异常堆栈，帮助定位间歇性问题。
 \end{itemize}
 
@@ -521,7 +529,7 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 
 有时候我觉得大学生活十分漫长，却也有时候我发现这四年的时光转瞬即逝。这四年，整个世界都相当不平凡。记得刚走入大学的那会儿，疫情还欲止未止，我也像这《回声之境》中的旅人，既憧憬着未来又小心翼翼地在迷雾中前行。
 
-本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。
+本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
 
 \thesisloadbibliography[nocite]{reference}
 
