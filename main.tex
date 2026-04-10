@@ -17,13 +17,13 @@
 \makecover
 
 \begin{chineseabstract}
-随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity游戏引擎为核心交互平台，整合了手势识别、面部情绪识别、游戏状态感知等多源信息，并基于大语言模型智能体（Qwen3.5 + DeepAgent）构建中央决策模块，实现对虚拟场景与物理装置（LED灯阵、音效等）的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
+随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity游戏引擎为核心交互平台，整合了手势识别、面部情绪识别、交互应用状态感知等多源信息，并基于大语言模型智能体（Qwen3.5 + DeepAgent）构建中央决策模块，实现对虚拟场景与物理装置（LED灯阵、音效等）的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
 
 \chinesekeyword{多模态交互；沉浸式体验；游戏引擎；智能体；情感计算；实体展览}
 \end{chineseabstract}
 
 \begin{englishabstract}
-With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity game engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and game state perception, and constructs a central decision-making module based on large language model agents (Qwen3.5 + DeepAgent) to achieve coordinated control of virtual scenes and physical devices (LED arrays, sound effects, etc.). This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
+With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity game engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and application state perception, and constructs a central decision-making module based on large language model agents (Qwen3.5 + DeepAgent) to achieve coordinated control of virtual scenes and physical devices (LED arrays, sound effects, etc.). This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
 
 \englishkeyword{Multimodal Interaction; Immersive Experience; Game Engine; Agent; Affective Computing; Physical Exhibition}
 \end{englishabstract}
@@ -44,7 +44,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{研究意义}
 
-针对上述问题，本课题引入游戏引擎技术作为核心开发平台。Unity等现代游戏引擎凭借其卓越的实时渲染、场景管理与图形处理能力，使高性能、高复杂度的三维空间表现和实时反馈成为可能，为交互式视觉内容的构建提供了强大的平台支持。通过借鉴成熟的电子游戏交互机制与空间叙事方法，可以有效反哺现实展览系统，增强其趣味性与体验深度。
+针对上述问题，本课题引入游戏引擎技术作为核心开发平台。Unity等现代游戏引擎凭借其卓越的实时渲染、场景管理与图形处理能力，使高性能、高复杂度的三维空间表现和实时反馈成为可能，为交互式视觉内容的构建提供了强大的平台支持。通过借鉴成熟的交互应用机制与空间叙事方法，可以有效反哺现实展览系统，增强其趣味性与体验深度。
 
 在多模态情感识别技术方面，随着深度学习在计算机视觉与运动捕捉领域的广泛应用，系统能够精准捕捉用户的身体姿态、手势及面部表情。相较于传统控制器，这种具身化的交互方式能更自然地映射用户的心理状态，从而实现更高维度的情感化沉浸体验。与此同时，人类对计算机情感理解与交互的需求愈加广泛。根据中国科学院科技战略咨询研究院发布的《2021年研究前沿热度指数》报告，“多模态情感计算”相关研究热度指数位居前列。
 
@@ -111,9 +111,23 @@ With the rapid development of digital technologies such as virtual reality and a
 
 视觉生成的历史可追溯至20世纪70年代 J. B. Mitroo 等人的音乐可视化研究，采用彩色光栅图形显示器生成音符、和弦及和弦进行的可视化图像，如图2所示\citing{mitroo1979music}。
 
-而在当今，游戏引擎已成为构建沉浸式虚拟环境与交互系统的核心工具。程序化视觉生成技术利用算法动态创建视觉内容，在现代游戏设计与计算机图形学中常用于高效生成地形、纹理或动态效果。该技术能够根据实时输入参数驱动视觉元素的形态、颜色与运动规律变化，从而实现内容表现的无限多样性与自适应特性，非常适合用于创造个性化、响应式的展览视觉体验。Unity与Unreal Engine等引擎提供了强大的图形渲染、物理模拟、音频处理与脚本逻辑支持，极大地降低了复杂交互应用的开发门槛，并已广泛应用于数字展览和互动艺术领域\citing{kruger2024gameengines}。
+而在当今，游戏引擎已成为构建沉浸式虚拟环境与交互系统的核心工具。程序化视觉生成技术利用算法动态创建视觉内容，在现代交互应用设计与计算机图形学中常用于高效生成地形、纹理或动态效果。该技术能够根据实时输入参数驱动视觉元素的形态、颜色与运动规律变化，从而实现内容表现的无限多样性与自适应特性，非常适合用于创造个性化、响应式的展览视觉体验。Unity与Unreal Engine等引擎提供了强大的图形渲染、物理模拟、音频处理与脚本逻辑支持，极大地降低了复杂交互应用的开发门槛，并已广泛应用于数字展览和互动艺术领域\citing{kruger2024gameengines}。
 
-如图3展示了Epic Games公司在旗下《堡垒之夜》游戏中举办的虚拟演唱会中，通过根据演出内容实时改变场景、角色Shader和后期处理参数，实现了华丽且富有感染力的演出效果，取得了良好口碑和极为可观的传播效果。
+如图3展示了Epic Games公司在旗下交互应用中举办的虚拟演唱会中，通过根据演出内容实时改变场景、角色Shader和后期处理参数，实现了华丽且富有感染力的演出效果，取得了良好口碑和极为可观的传播效果。
+
+\section{目标导向交互与状态追踪研究进展}
+
+在交互系统设计中，如何平衡参展者自主性与叙事连贯性一直是核心挑战。传统基于选项的对话系统将参展者选择限制在预设菜单中，虽然确保了叙事的可控性，但严重削弱了参展者的能动性（agency）。近年来，随着大语言模型（LLM）技术的发展，研究者开始探索如何利用LLM的灵活性来提升交互系统的自主性，同时通过结构化框架保持设计的可控性。
+
+目标导向交互（Goal-Oriented Interaction）是一种将交互构建为状态驱动谜题的方法，其中各状态代表基于目标的里程碑。这种方法通过图结构（谜题图）组织交互进程，节点表示关键目标，边表示合法的状态转移。设计者通过定义状态转换条件来控制交互进程，同时允许参展者在达成目标的过程中进行自由形式的选择。这种框架既提供了结构化的叙事引导，又保留了参展者创造解决方案的空间。
+
+状态追踪（State Tracking）是目标导向交互中的关键技术，用于监控参展者进度并管理交互状态转换。传统对话状态追踪（DST）技术主要适用于结构化任务导向型对话，通过解析用户话语更新槽位值。然而，在开放式的交互应用场景中，状态追踪需要处理更复杂的叙事发展和战略交互。近期研究提出使用问答型大语言模型（QALM）结合对话历史分析来实现状态追踪，通过评估自然语言问题来判断目标达成情况，从而驱动状态转换。
+
+双LLM架构是目标导向交互系统的典型实现方案。该架构使用两个独立的LLM实例：对话语言模型（DLM）负责生成角色对话，保持交互的自然性和灵活性；问答语言模型（QALM）则负责状态追踪和决策，确保交互进程符合设计者意图。这种解耦设计既利用了LLM的生成能力，又通过监督结构弥补了其在长期连贯性方面的不足。
+
+在实体展览场景中，目标导向交互框架具有重要应用价值。展览交互系统需要引导参展者完成特定的体验流程，同时允许参展者以个性化方式探索内容。通过将展览体验构建为目标导向的交互流程，系统可以在保持整体叙事连贯性的前提下，支持参展者的自主探索和创造性参与。状态追踪技术则可用于监控参展者的情绪状态、交互进度和认知负荷，实现自适应的反馈调整。
+
+本课题《回声之境》系统在架构设计上借鉴了目标导向交互的思想，通过智能体决策模块实现状态感知和动态响应。系统将展览体验分解为多个情感状态节点（如迷茫、探索、共鸣、自由），通过多模态感知输入判断参展者当前状态，并基于状态转换规则生成相应的视觉、听觉和物理反馈。这种设计在保持情感叙事连贯性的同时，为参展者提供了丰富的交互可能性。
 
 \chapter{系统总体设计}
 
@@ -122,7 +136,7 @@ With the rapid development of digital technologies such as virtual reality and a
 本系统面向实体展览场景，旨在构建一套沉浸式多模态交互系统。主要需求包括：
 
 \begin{enumerate}
-\item \textbf{多模态感知能力}：能够实时捕捉用户的手势、面部情绪，并同步游戏内部状态。
+\item \textbf{多模态感知能力}：能够实时捕捉用户的手势、面部情绪，并同步交互应用内部状态。
 \item \textbf{智能决策能力}：基于多源信息，实现情感驱动的动态反馈决策。
 \item \textbf{虚实融合执行能力}：能够同时控制虚拟场景中的视觉、音效表现，以及实体空间中的灯光等物理装置。
 \item \textbf{模块化与可扩展性}：各模块松耦合，便于独立开发、调试与后续扩展。
@@ -149,7 +163,139 @@ With the rapid development of digital technologies such as virtual reality and a
   \label{fig:system-arch}
 \end{figure}
 
-如图\ref{fig:system-arch}所示，本系统采用”感知层—决策层—执行层”的三层星型拓扑架构。感知层由摄像头、MediaPipe手势识别、面部情绪识别及Unity游戏状态同步四个模块构成，各模块均以TCP Client方式将数据上报至决策层；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源信息并生成控制指令；执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务，形成完整的”感知—决策—执行”闭环。
+ 如图\ref{fig:system-arch}所示，本系统采用”感知层—决策层—执行层”的三层星型拓扑架构。感知层由摄像头、MediaPipe手势识别、面部情绪识别及Unity交互应用状态同步四个模块构成，各模块均以TCP Client方式将数据上报至决策层；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源信息并生成控制指令；执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务，形成完整的”感知—决策—执行”闭环。
+
+\section{目标导向交互框架设计}
+
+基于目标导向交互理论，本系统设计了专门的状态追踪与决策框架，以平衡展览体验的叙事连贯性与观众自主性。该框架借鉴了双LLM架构思想，将智能体决策模块的功能分解为状态感知、目标评估和反馈生成三个核心环节。
+
+\subsection*{状态图设计与情感里程碑}
+
+系统将《回声之境》的展览体验建模为一个三层递进的状态图，对应故事中的三个核心章节和四个音符的解锁过程。状态图包含三个主要章节状态和四个音符解锁子状态，形成完整的成长路径：
+
+\begin{itemize}
+    \item \textbf{第一章：初域・未定之原（自我迷茫与锚定）}
+    \begin{itemize}
+        \item \textbf{初始状态：迷茫（Confusion）}：对应旅人初入回声之境的迷茫与方向未定，世界处于半透明流动状态
+        \item \textbf{目标状态：锚定（Anchoring）}：通过解锁水滴音符，学会在未定中锚定自我，固化世界元素
+        \item \textbf{情感隐喻}：从对外部世界的迷茫转向对自我内在力量的认知
+    \end{itemize}
+    
+    \item \textbf{第二章：聚落群・彼方的光影之城（关系探索与边界）}
+    \begin{itemize}
+        \item \textbf{初始状态：碰撞（Collision）}：进入社交环境，面对他人情绪的影响和关系的复杂性
+        \item \textbf{目标状态：边界（Boundary）}：通过解锁道路交错音符，学会在共鸣中保持自我边界
+        \item \textbf{情感隐喻}：从自我中心的探索转向理解自我与他人的关系平衡
+    \end{itemize}
+    
+    \item \textbf{第三章：深流之径・未被触及的知识海（知识接纳与自由）}
+    \begin{itemize}
+        \item \textbf{初始状态：敬畏（Awe）}：面对知识的无限性和未知的浩瀚，产生敬畏与谦卑
+        \item \textbf{中间状态：驾驭（Mastery）}：通过解锁海浪音符，学会在知识的潮水中保持稳定
+        \item \textbf{最终状态：自由（Freedom）}：通过解锁风音符，获得完全的表达自由和探索自由
+        \item \textbf{情感隐喻}：从对未知的恐惧转向对无限可能的接纳和创造
+    \end{itemize}
+\end{itemize}
+
+\subsection*{状态转换条件与音符解锁机制}
+
+状态转换与音符解锁紧密绑定，每个状态转换都对应特定情感里程碑的达成：
+
+\begin{table}[h]
+\centering
+\caption{状态转换与音符解锁对应关系}
+\begin{tabularx}{\linewidth}{|c|c|c|c|}
+\hline
+\textbf{章节} & \textbf{状态转换} & \textbf{解锁音符} & \textbf{情感里程碑} \\
+\hline
+第一章 & 迷茫 → 锚定 & 水滴音符 & 学会在未定中锚定自我 \\
+\hline
+第二章 & 碰撞 → 边界 & 道路交错音符 & 学会在关系中保持边界 \\
+\hline
+第三章 & 敬畏 → 驾驭 & 海浪音符 & 学会在未知中保持稳定 \\
+\hline
+第三章 & 驾驭 → 自由 & 风音符 & 获得完全的表达自由 \\
+\hline
+\end{tabularx}
+\label{tbl:state-transition}
+\end{table}
+
+状态转换条件基于多模态感知数据综合评估，包括：
+\begin{itemize}
+    \item \textbf{交互应用进度指标}：章节完成度、谜题解决数量、收集品获取情况
+    \item \textbf{交互行为特征}：手势识别结果、交互频率、尝试次数
+    \item \textbf{情感状态识别}：面部情绪特征、情绪稳定性、情感变化趋势
+    \item \textbf{认知负荷评估}：交互复杂度接受度、注意力集中程度
+\end{itemize}
+
+\subsection*{章节递进与情感成长曲线}
+
+三个章节的设计遵循情感成长的递进规律，形成完整的情感弧线：
+
+\begin{enumerate}
+    \item \textbf{第一章：自我认知阶段}（低点→上升）
+    \begin{itemize}
+        \item 情感起点：迷茫、不确定、缺乏方向感
+        \item 成长目标：建立自我认知，获得基础能力（水滴音符）
+        \item 情感变化：从被动接受转向主动塑造
+    \end{itemize}
+    
+    \item \textbf{第二章：关系探索阶段}（波动→平衡）
+    \begin{itemize}
+        \item 情感起点：兴奋、困惑、边界模糊
+        \item 成长目标：理解自我与他人的关系，建立健康边界（道路交错音符）
+        \item 情感变化：从情绪波动转向情感平衡
+    \end{itemize}
+    
+    \item \textbf{第三章：世界接纳阶段}（敬畏→自由）
+    \begin{itemize}
+        \item 情感起点：敬畏、谦卑、有限感
+        \item 成长目标：接纳未知，获得创造自由（海浪音符、风音符）
+        \item 情感变化：从有限认知转向无限可能
+    \end{itemize}
+\end{enumerate}
+
+\subsection*{音符特征与情感能力的映射}
+
+四个音符不仅是交互机制，更是情感能力的具象化表达：
+
+\begin{itemize}
+    \item \textbf{水滴音符}：对应\textbf{自我锚定能力}，象征在流动变化中保持核心稳定的能力
+    \item \textbf{道路交错音符}：对应\textbf{关系平衡能力}，象征在连接他人时保持自我边界的能力
+    \item \textbf{海浪音符}：对应\textbf{知识驾驭能力}，象征在未知洪流中保持方向稳定的能力
+    \item \textbf{风音符}：对应\textbf{创造自由能力}，象征超越限制、自由表达的能力
+\end{itemize}
+
+ 这种设计使交互机制与情感成长深度绑定，参展者在解锁音符的同时，也在解锁相应的情感能力，实现了机制与叙事的完美融合。
+
+\subsection*{状态追踪机制}
+
+状态追踪模块负责监控观众进度并管理状态转换。与传统的对话状态追踪不同，本系统的状态追踪需要处理更复杂的多模态输入和情感语义。系统采用基于规则的启发式方法与机器学习相结合的方式实现状态追踪：
+
+\begin{enumerate}
+    \item \textbf{多模态特征提取}：从手势识别、面部情绪识别和交互应用状态同步模块提取关键特征，包括手势类型、情绪强度、交互频率等
+    \item \textbf{状态概率计算}：使用加权融合算法计算观众处于各个状态的概率，权重根据特征重要性动态调整
+    \item \textbf{转换条件评估}：评估状态转换条件是否满足，包括时间阈值、交互次数阈值和情感变化趋势
+    \item \textbf{状态确认与转换}：当转换条件持续满足一定时间后，确认状态转换并更新系统状态
+\end{enumerate}
+
+\subsection*{决策生成与反馈协调}
+
+决策模块基于当前状态和感知输入生成协调的反馈策略。系统采用分层决策机制：
+
+\begin{itemize}
+    \item \textbf{底层反应}：对即时交互（如手势识别）生成快速反馈，延迟控制在100ms以内
+    \item \textbf{中层策略}：基于当前状态和短期交互历史生成策略性反馈，如调整音乐节奏或灯光模式
+    \item \textbf{高层叙事}：管理长期的情感叙事发展，控制状态转换和章节推进
+\end{itemize}
+
+反馈协调机制确保虚拟场景、音频系统和物理装置的输出在时序和语义上保持一致。例如，当系统检测到观众情绪转为积极时，会同时调整虚拟场景的色调（暖色化）、音乐节奏（加快）和实体灯光（亮度提升），形成协调的多感官反馈。
+
+\subsection*{自适应性与个性化}
+
+系统支持一定程度的自适应调整和个性化体验。基于观众的交互模式和情绪反应，系统可以微调状态转换阈值和反馈强度。例如，对于交互频率较低的观众，系统会降低状态转换的时间要求，提供更积极的引导反馈；对于情绪反应强烈的观众，系统会调整反馈的强度，避免过度刺激。
+
+这种目标导向交互框架使《回声之境》系统能够在保持整体情感叙事连贯性的前提下，支持观众的自主探索和创造性表达，实现了结构化引导与自由交互的平衡。
 
 \section{系统实现方案}
 
@@ -173,7 +319,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 实体装置旨在将虚拟世界的交互状态延伸至物理空间，增强观展者的沉浸感与具身参与体验。
 
-\textbf{技能图标实体化}：将游戏中的四个音符图标实体化，使用椴木板制作展览实物。图标图案采用矢量绘图工具（Affinity Designer）绘制四次贝塞尔曲线构建流畅的音符轮廓线条，经雕刻、镂空处理后配合装饰性麻绳串联固定于展台。实体图标与游戏内的点亮状态保持同步，当玩家在游戏中演奏音符时，对应图标同步亮起LED灯效。
+\textbf{技能图标实体化}：将交互应用中的四个音符图标实体化，使用椴木板制作展览实物。图标图案采用矢量绘图工具（Affinity Designer）绘制四次贝塞尔曲线构建流畅的音符轮廓线条，经雕刻、镂空处理后配合装饰性麻绳串联固定于展台。实体图标与交互应用内的点亮状态保持同步，当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效。
 
 \textbf{灯光控制系统}：灯条采用WS2812可编程RGB LED灯带，具有单点可控、色彩丰富、响应速度快的特点。灯带由树莓派通过PWM（脉冲宽度调制）信号控制，树莓派作为TCP Client连接至智能体服务端，接收来自Agent的灯光控制指令（颜色、亮度、闪烁模式），实时驱动灯带产生与虚拟场景同步的动态光影效果。
 
@@ -181,13 +327,13 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \chapter{情绪与艺术表达}
 
-恰如未来人们与虚拟世界的交互方式将超越传统的键盘鼠标输入，本项目探索一种由人工智能驱动的、富有趣味性的新型展览交互方式。结合实体的按钮装置和玩家情绪，在游戏中做出相应的图形图像变化，并以此作为核心游戏交互手段设计类游戏化关卡。
+恰如未来人们与虚拟世界的交互方式将超越传统的键盘鼠标输入，本项目探索一种由人工智能驱动的、富有趣味性的新型展览交互方式。结合实体的按钮装置和参展者情绪，在交互应用中做出相应的图形图像变化，并以此作为核心交互手段设计类游戏化关卡。
 
 交互应用《回声之境》遵循情感化设计理念，交互设计以情绪变化为导向。以下为核心设计要点：
 
 \section{场景情绪基调}
 
-《回声之境》交互应用具有叙事性质，伴随着玩家情绪变化和游戏节奏的推进，在不同阶段设计了不同情绪基调的场景。在每个场景内，旅人的音符音色和音阶会适应场景而变化，力求营造富有诗意的参观体验。
+《回声之境》交互应用具有叙事性质，伴随着参展者情绪变化和交互应用节奏的推进，在不同阶段设计了不同情绪基调的场景。在每个场景内，旅人的音符音色和音阶会适应场景而变化，力求营造富有诗意的参观体验。
 
 
 
@@ -207,7 +353,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{音乐交互设计}
 
-从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动游戏，即 \textit{an experimental interactive game where sound shapes the world}。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个游戏场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
+从应用名称《回声之境》可以看出，本设计初衷是做一个音乐驱动的互动交互应用，即 \textit{an experimental interactive application where sound shapes the world}。基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景运用不同调式和曲速的背景音乐，人物发出的音符若不在背景音乐的调式上会造成不协和。因此，每个交互应用场景带有固有的调式和曲速标识，参考游戏《Songbird Symphony》的设置。
 
 旅人在旅程中一共可获得四个音符。音符不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式。每个音符都承载着隐喻性的象征意义，其演奏效果对应着精神层面的某种能力，如表\ref{tbl:note-design}所示。
 
@@ -230,11 +376,126 @@ With the rapid development of digital technologies such as virtual reality and a
 \label{tbl:note-design}
 \end{table}
 
-上述四个音符的设计层层递进，映射了旅人从认识自我、到处理与他人关系、再到汲取知识、最终获得自由的成长路径。在游戏进程中，四个音符通过指引依次获得——这既是叙事节奏的安排，也隐喻着人生中认知与能力逐步展开的顺序。音符的演奏将触发不同的视觉与音效反馈，同时驱动场景元素的动态变化，使音乐真正成为塑造游戏世界面貌的核心力量。
+上述四个音符的设计层层递进，映射了旅人从认识自我、到处理与他人关系、再到汲取知识、最终获得自由的成长路径。在交互应用进程中，四个音符通过指引依次获得——这既是叙事节奏的安排，也隐喻着人生中认知与能力逐步展开的顺序。音符的演奏将触发不同的视觉与音效反馈，同时驱动场景元素的动态变化，使音乐真正成为塑造交互应用世界面貌的核心力量。
 
 \section{交互场景与关卡设计}
 
-在定下场景情绪基调与叙事结构后，进一步设计了具体的交互场景与关卡流程，确保情绪变化与游戏机制的有机结合。
+基于故事流程中的三个核心章节，本系统设计了完整的交互场景与关卡流程，确保情感叙事与交互机制的深度结合。以下详细阐述三个章节的设计理念、关卡结构和交互机制。
+
+\subsection*{第一章：初域・未定之原——自我迷茫与锚定}
+
+本章对应情感状态从“迷茫”到“锚定”的转换，核心目标是解锁水滴音符，学会在未定中锚定自我。
+
+\textbf{设计理念}：借鉴《最后的篝火》的温柔引导机制，全程无惩罚，通过渐进式教学让参展者理解“我的声音可以塑造世界”的核心逻辑。
+
+\textbf{关卡结构}：
+\begin{enumerate}
+    \item \textbf{开场引导}：参展者从迷雾中显现，面对半透明流动的山峦和旷野。旁白引导参展者尝试与世界互动。
+    \item \textbf{水滴音符唤醒}：Omni引导参展者按下水滴音符，山峦短暂抖动后恢复流动，仅留下水波纹光痕。参展者需持续奏响音符才能固化山体。
+    \item \textbf{三个方向锚点谜题}：
+    \begin{itemize}
+        \item \textbf{落定的石阶（过去的锚点）}：在断裂峡谷中，观察漂浮石块的流动规律，在合适时机奏响水滴音符将其固化，形成连续跳台。
+        \item \textbf{无风的山谷（当下的锚点）}：在乱流包裹的山谷中，依次固化4个乱流核心，每固化一个核心，乱流减弱一分，地面起伏变小。
+        \item \textbf{迷雾的边界（未来的锚点）}：在厚密迷雾中，参展者自主判断哪里需要固化成山体、哪里需要铺成台阶，完全靠自己的选择开辟道路。
+    \end{itemize}
+    \item \textbf{章节收尾}：三个锚点全部激活后，迷雾散去，未定之原大多固化为稳定地貌，一条宽阔光路延伸向光影之城。
+\end{enumerate}
+
+\textbf{多模态交互设计}：
+\begin{itemize}
+    \item \textbf{手势交互}：持续捏合手势对应持续奏响音符
+    \item \textbf{声音交互}：发声音量对应固化范围，声音越大，单次固化区域越广
+    \item \textbf{视觉反馈}：山体从半透明流动态逐渐固化为坚实青青山体
+    \item \textbf{音频反馈}：水滴音符从单音变为完整短句，风声变得柔和
+\end{itemize}
+
+\subsection*{第二章：聚落群・彼方的光影之城——关系探索与边界}
+
+本章对应情感状态从“碰撞”到“边界”的转换，核心目标是解锁道路交错音符，学会在关系中保持自我边界。
+
+\textbf{设计理念}：参考《最后的篝火》“中心枢纽+多分支NPC故事线”结构，每个分支对应一段社交与情感的隐喻。
+
+\textbf{关卡结构}：
+\begin{enumerate}
+    \item \textbf{规则引入}：旅人进入城市，人声嘈杂导致街道挤压变窄，尝试用水滴音符无效，明确告知需要新规则。
+    \item \textbf{四个分支区域}：
+    \begin{itemize}
+        \item \textbf{回声交汇所（相遇与连接）}：帮助影子旅者连接断裂的光路，通过动作同步建立共鸣，再用水滴音符连接彼此道路。
+        \item \textbf{情绪风塔（共鸣与分寸）}：逐层应对欢喜、悲伤、愤怒、恐惧四种情绪，学会既共情又不被吞噬。
+        \item \textbf{镜影回廊（他人评价与自我认知）}：在布满镜面的回廊中，忽略外界评价，锚定真实的自我。
+        \item \textbf{离别的岔路口（相遇与放下）}：帮助影子旅者明白离别不是结束，各自走向自己的方向。
+    \end{itemize}
+    \item \textbf{道路交错音符解锁}：集齐四个碎片后，解锁道路交错音符，城市建筑停止挤压变形，旅人脚下的路始终保持宽阔平稳。
+\end{enumerate}
+
+\textbf{核心机制}：
+\begin{itemize}
+    \item \textbf{情绪折射}：建筑随旅人情绪强度变化，情绪平静→建筑舒展，情绪波动→建筑扭曲
+    \item \textbf{共鸣系统}：与影子旅者动作同步达到80\%以上触发共鸣效果
+    \item \textbf{边界保护}：道路交错音符可划定自我边界，不受他人情绪影响
+\end{itemize}
+
+\subsection*{第三章：深流之径・未被触及的知识海——知识接纳与自由}
+
+本章对应情感状态从“敬畏”到“驾驭”再到“自由”的转换，核心目标是解锁海浪音符和风音符，获得完全的表达自由。
+
+\textbf{设计理念}：体现“学得越多，未知越多”的核心命题，通过知识潮机制实现渐进式难度提升。
+
+\textbf{关卡结构}：
+\begin{enumerate}
+    \item \textbf{浅滩区・解锁海浪音符}：
+    \begin{itemize}
+        \item \textbf{知识潮机制}：参展者每获取一个知识碎片，潮水上涨，露出的礁石减少，但深渊光点变多更亮。
+        \item \textbf{六个知识碎片}：对应观察、耐心、试错、联结、放下、接纳六个学习特质。
+        \item \textbf{海浪音符解锁}：集齐碎片后解锁海浪音符，学会在知识的潮水中保持稳定。
+    \end{itemize}
+    
+    \item \textbf{深潮区・最终谜题与风音符解锁}：
+    \begin{itemize}
+        \item \textbf{三道情感浪潮}：分别对应迷茫、遗憾、无知三种成长困境，旅人需用已解锁的音符化解。
+        \item \textbf{风音符解锁}：触碰海心之核，四个音符旋律合为一首完整曲子，获得完全的表达自由。
+        \item \textbf{伏笔回收}：开篇的晴天娃娃回归，旅人明白它从未抛下自己，只是在前方等待。
+    \end{itemize}
+    
+    \item \textbf{自由探索阶段}：参展者可自由奏响四个音符，每个音符都会改变整个世界形态，实现无限探索可能。
+\end{enumerate}
+
+\textbf{情感成长闭环}：
+\begin{itemize}
+    \item \textbf{自我认知}：未定之原是对自我迷茫的具象化
+    \item \textbf{关系探索}：光影之城是对关系探索的具象化
+    \item \textbf{世界接纳}：深流之径是对世界好奇的具象化
+    \item \textbf{完全自由}：四个音符是定形自我、连接他人、接纳未知、去往未来的能力
+\end{itemize}
+
+\subsection*{多模态展览适配设计}
+
+为适配实体展览场景，所有交互机制均设计为多模态兼容：
+
+\begin{table}[h]
+\centering
+\caption{多模态交互适配表}
+\begin{tabularx}{\linewidth}{|c|c|c|c|}
+\hline
+\textbf{交互类型} & \textbf{虚拟交互} & \textbf{实体展览交互} & \textbf{反馈协调} \\
+\hline
+音符演奏 & 按键/触摸屏 & 体感手势/麦克风发声 & 视觉+音频+灯光同步 \\
+\hline
+移动控制 & 键盘/手柄 & 体感移动/地面投影 & 摄像机跟随+场景变化 \\
+\hline
+情绪感知 & 应用内情绪值 & 面部识别/心率传感 & 自适应难度调整 \\
+\hline
+环境交互 & 鼠标点击 & 触摸大屏/实体按钮 & 多感官协调反馈 \\
+\hline
+\end{tabularx}
+\label{tbl:multimodal-adaptation}
+\end{table}
+
+\textbf{无惩罚机制设计}：全程无失败、无进度回滚，仅会回到谜题入口重新尝试，系统不会惩罚参展者，只会等待参展者找到解法，给足安全感。
+
+\textbf{轻量化操作设计}：核心操作仅为移动+奏响4个音符，无复杂连招，适配全年龄段参展者，完美适配实体展览的交互场景。
+
+ 这种章节递进的设计使《回声之境》不仅是一个交互应用，更是一段完整的情感成长旅程，参展者在解锁音符、解决谜题的同时，也在经历从自我迷茫到完全自由的情感蜕变。
 
 \chapter{制作流程与实现}
 
@@ -282,7 +543,7 @@ With the rapid development of digital technologies such as virtual reality and a
 \hline
 智能体请求截图 & \texttt{\{"type": "command", "client\_type": "echoagent", "data": "request\_screenshot", "request\_id": "uuid-xxx"\}} \\
 \hline
-Unity上报游戏状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
+Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
 \hline
 Unity发送截图响应 & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
 \hline
@@ -296,7 +557,7 @@ Unity引擎基于单线程执行模型，其生命周期方法（如 \texttt{Upd
 
 具体实现上，\texttt{SendRawAsync} 方法采用 \texttt{SemaphoreSlim} 作为发送锁，确保在同一时刻仅有一个发送任务持有网络流的使用权。当多个协程或异步任务同时发起发送请求时，发送锁保证这些请求被串化执行，避免TCP粘包或数据交错问题。锁的获取与释放位于 \texttt{try-finally} 块中，确保即使在网络异常情况下也能正确释放资源，防止死锁发生。
 
-此外，\texttt{AgentCommunicator} 通过 \texttt{SynchronizationContext} 将接收到的网络消息投递回Unity主线程执行回调，从而在不影响游戏帧率的前提下完成消息的解析与分发。这种设计在保持网络通信高效性的同时，确保了所有游戏逻辑均在主线程中执行，符合Unity的线程安全要求。
+ 此外，\texttt{AgentCommunicator} 通过 \texttt{SynchronizationContext} 将接收到的网络消息投递回Unity主线程执行回调，从而在不影响应用帧率的前提下完成消息的解析与分发。这种设计在保持网络通信高效性的同时，确保了所有应用逻辑均在主线程中执行，符合Unity的线程安全要求。
 
 \section{智能体EchoAgent实现}
 
@@ -312,7 +573,7 @@ Unity引擎基于单线程执行模型，其生命周期方法（如 \texttt{Upd
 
 本系统采用 \textbf{DeepAgent} 框架，基座模型采用 \textbf{Qwen3.5-Plus}。DeepAgent基于LangGraph和LangChain构建，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制，可通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划；自动记忆压缩有效解决超长任务带来的上下文溢出问题；支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效；无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
 
-下面的时序图\ref{fig:agent-trace}展示了一个智能体的完整决策流程。（图片描述：玩家触发交互事件 如MediaPipe模块检测到玩家做了挥手动作->挥手事件通过TCP Socket发送到智能体->智能体根据当前正在游玩的章节、玩家进度、情绪等信息决策->智能体认为需要查看游戏现状以判断下一步动作->智能体调用工具截图->截图请求通过TCP发送到Unity客户端->Unity做截图操作->截图通过TCP发送到智能体->智能体理解收到的截图->智能体发起下一步的交互应用内事件）
+ 下面的时序图\ref{fig:agent-trace}展示了一个智能体的完整决策流程。（图片描述：参展者触发交互事件 如MediaPipe模块检测到参展者做了挥手动作->挥手事件通过TCP Socket发送到智能体->智能体根据当前正在体验的章节、参展者进度、情绪等信息决策->智能体认为需要查看应用现状以判断下一步动作->智能体调用工具截图->截图请求通过TCP发送到Unity客户端->Unity做截图操作->截图通过TCP发送到智能体->智能体理解收到的截图->智能体发起下一步的交互应用内事件）
 
 \begin{figure}[htbp]
 \centering
@@ -329,7 +590,7 @@ Unity引擎基于单线程执行模型，其生命周期方法（如 \texttt{Upd
 
 \textbf{（1）系统架构描述模型}
 
-SKILL体系首先定义了系统的层次化架构模型。本系统采用“感知层—决策层—执行层”的三层星型拓扑结构，其中感知层包含手势识别、面部情绪识别与游戏状态同步三个独立模块，各模块均以TCP Client方式向决策层上报数据；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力；执行层则由Unity客户端与树莓派物理装置组成。SKILL中通过结构化字段明确各层的职责边界与数据流向，使智能体能够理解其在系统中的定位与作用。
+ SKILL体系首先定义了系统的层次化架构模型。本系统采用“感知层—决策层—执行层”的三层星型拓扑结构，其中感知层包含手势识别、面部情绪识别与交互应用状态同步三个独立模块，各模块均以TCP Client方式向决策层上报数据；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力；执行层则由Unity客户端与树莓派物理装置组成。SKILL中通过结构化字段明确各层的职责边界与数据流向，使智能体能够理解其在系统中的定位与作用。
 
 \textbf{（2）标准化通信协议抽象}
 
@@ -343,11 +604,11 @@ SKILL体系首先定义了系统的层次化架构模型。本系统采用“感
 
 \textbf{（4）工具函数接口规范}
 
-Tool Calling是智能体控制外部设备的唯一途径。SKILL定义了六个核心工具函数，每个函数包含功能描述、参数列表与返回值约定。工具函数的设计遵循“单一职责”原则：\texttt{control\_lights}负责灯光控制（颜色、亮度、模式三个参数）；\texttt{send\_to\_client}负责向指定客户端转发消息；\texttt{advance\_game\_chapter}与\texttt{trigger\_game\_event}分别用于游戏叙事控制；\texttt{play\_music}与\texttt{set\_environment}则分别控制音频与视觉环境。参数类型均采用简单字符串或数值，避免复杂嵌套结构，降低VLM解析出错概率。
+Tool Calling是智能体控制外部设备的唯一途径。SKILL定义了六个核心工具函数，每个函数包含功能描述、参数列表与返回值约定。工具函数的设计遵循“单一职责”原则：\texttt{control\_lights}负责灯光控制（颜色、亮度、模式三个参数）；\texttt{send\_to\_client}负责向指定客户端转发消息；\texttt{advance\_application\_chapter}与\texttt{trigger\_application\_event}分别用于交互应用叙事控制；\texttt{play\_music}与\texttt{set\_environment}则分别控制音频与视觉环境。参数类型均采用简单字符串或数值，避免复杂嵌套结构，降低VLM解析出错概率。
 
 \textbf{（5）上下文感知与交互策略}
 
-单纯的实时响应不足以构建连贯的交互体验，智能体还需理解游戏叙事上下文与用户情感趋势。SKILL定义了上下文记忆的管理规范：智能体应维护最近五轮交互历史、当前游戏章节与场景信息、玩家已获音符列表、以及情绪变化趋势。这些信息共同构成了决策的上下文基础。
+单纯的实时响应不足以构建连贯的交互体验，智能体还需理解交互应用叙事上下文与用户情感趋势。SKILL定义了上下文记忆的管理规范：智能体应维护最近五轮交互历史、当前交互应用章节与场景信息、参展者已获音符列表、以及情绪变化趋势。这些信息共同构成了决策的上下文基础。
 
 在交互策略层面，SKILL定义了触发—响应的映射规则。当检测到手势捏合时，智能体根据当前场景决定触发音符演奏或场景交互；当情绪检测为正向时，灯光采用暖色调并提升亮度，音乐节奏加快；当情绪检测为负向时，则采用冷色调并降低亮度。这种规则化的策略描述使得智能体的决策行为具有可预测性与可解释性。
 
@@ -362,8 +623,351 @@ Tool Calling是智能体控制外部设备的唯一途径。SKILL定义了六个
 \begin{itemize}
 \item \textbf{分层日志系统}：系统采用 Python 标准库 \texttt{logging} 模块实现分层日志记录，按模块划分为 \texttt{Server} 与 \texttt{Agent} 两个独立的日志命名空间。日志同时输出至控制台与文件，采用时间戳 + 模块名 + 级别的格式，便于事后分析与问题追溯。日志文件按启动时间自动命名（\texttt{echoagent\_YYYYMMDD\_HHMMSS.log}），保存于开发项目的 \texttt{logs/} 目录下。
 \item \textbf{链路追踪}：系统集成 OpenTelemetry 与 Phoenix 实现端到端链路追踪（如图\ref{fig:phoenix-trace}所示），追踪面板可在浏览器上通过本地端口访问。通过OpenTelemetry库中的Instrumentor 对 LangChain 调用进行自动插桩，可以完整观察 VLM 的 Tool Calling 决策过程、上下文窗口变化以及各工具函数的执行时序，为智能体行为分析提供了可视化的调试手段。
-\item \textbf{运行时调试日志}：在开发阶段可通过 \texttt{--log-level DEBUG} 参数开启调试级别日志，输出更详细的消息内容、队列状态与异常堆栈，帮助定位间歇性问题。
+ \item \textbf{运行时调试日志}：在开发阶段可通过 \texttt{--log-level DEBUG} 参数开启调试级别日志，输出更详细的消息内容、队列状态与异常堆栈，帮助定位间歇性问题。
 \end{itemize}
+
+\section{状态追踪与决策机制实现}
+
+基于第三章提出的三章节目标导向交互框架，本系统实现了专门的状态追踪与决策机制。该机制根据故事流程中的章节递进和音符解锁顺序，设计了分层状态追踪和决策生成系统。
+
+\subsection*{章节状态追踪实现}
+
+状态追踪模块负责监控参展者在三个章节中的进度和情感状态，其核心算法基于多模态特征融合和章节特定的转换条件。
+
+\textbf{（1）多模态特征提取与章节特征映射}
+
+系统从四个维度提取特征向量，并映射到三个章节的特定特征：
+\begin{itemize}
+    \item \textbf{第一章特征}：手势稳定性（捏合持续时间）、探索频率、方向选择犹豫度
+    \item \textbf{第二章特征}：情绪波动性、社交互动频率、边界维护成功率
+    \item \textbf{第三章特征}：知识吸收速度、未知耐受度、创造表达频率
+    \item \textbf{通用特征}：交互频率、注意力集中度、情感强度
+\end{itemize}
+
+特征融合采用章节特定的加权算法：
+$$S_t^{(c)} = \sum_{i=1}^{n} w_i^{(c)} \cdot f_i^{(c)}$$
+其中$S_t^{(c)}$为章节$c$在时刻$t$的状态评分，$f_i^{(c)}$为章节$c$的第$i$个特征，$w_i^{(c)}$为章节特定的权重。
+
+\textbf{（2）章节状态概率计算}
+
+系统维护三个章节状态的概率分布$P(c|S_t^{(c)})$，其中$c \in \{\text{第一章}, \text{第二章}, \text{第三章}\}$。章节状态概率通过softmax函数计算：
+$$P(c|S_t^{(c)}) = \frac{\exp(v_c \cdot S_t^{(c)} + d_c)}{\sum_{c'}\exp(v_{c'} \cdot S_t^{(c')} + d_{c'})}$$
+权重向量$v_c$和偏置$d_c$通过监督学习训练得到。
+
+\textbf{（3）章节内子状态追踪}
+
+每个章节内部包含多个子状态，对应情感里程碑和音符解锁节点：
+
+\begin{table}[h]
+\centering
+\caption{章节子状态追踪表}
+\begin{tabularx}{\linewidth}{|c|c|c|c|}
+\hline
+\textbf{章节} & \textbf{子状态} & \textbf{解锁条件} & \textbf{情感里程碑} \\
+\hline
+第一章 & 迷茫 → 锚定 & 完成三个方向锚点谜题 & 获得自我锚定能力 \\
+\hline
+第二章 & 碰撞 → 边界 & 完成四个分支区域解谜 & 获得关系平衡能力 \\
+\hline
+第三章 & 敬畏 → 驾驭 & 获取六个知识碎片 & 获得知识驾驭能力 \\
+\hline
+第三章 & 驾驭 → 自由 & 化解三道情感浪潮 & 获得创造自由能力 \\
+\hline
+\end{tabularx}
+\label{tbl:chapter-substates}
+\end{table}
+
+子状态转换条件基于章节特定的成就系统：
+\begin{enumerate}
+    \item \textbf{谜题完成度}：章节内核心谜题的解决进度
+    \item \textbf{收集品获取}：碎片、印记等收集品的获取情况
+    \item \textbf{情感一致性}：参展者情绪与章节主题的匹配程度
+    \item \textbf{时间进度}：在章节内的停留时间与预期进度的对比
+\end{enumerate}
+
+\textbf{（4）音符解锁状态机}
+
+四个音符的解锁遵循严格的状态机逻辑，确保情感成长的递进性：
+
+\begin{verbatim}
+state_machine = {
+    "initial": {"水滴音符": False, "道路交错音符": False, 
+                "海浪音符": False, "风音符": False},
+    "transitions": [
+        {"from": "第一章完成", "to": "水滴解锁", 
+         "condition": "三个锚点激活"},
+        {"from": "第二章完成", "to": "道路交错解锁", 
+         "condition": "四个碎片集齐"},
+        {"from": "第三章浅滩完成", "to": "海浪解锁", 
+         "condition": "六个知识碎片获取"},
+        {"from": "第三章深潮完成", "to": "风解锁", 
+         "condition": "三道浪潮化解"}
+    ]
+}
+\end{verbatim}
+
+状态转换阈值根据参展者特征动态调整：
+\begin{itemize}
+    \item \textbf{新手参展者}：降低转换阈值，提供更多引导
+    \item \textbf{熟练参展者}：提高转换阈值，增加挑战性
+    \item \textbf{情感敏感参展者}：关注情绪变化，调整反馈强度
+    \item \textbf{认知负荷高参展者}：简化交互，降低复杂度
+\end{itemize}
+
+\subsection*{章节化决策生成机制}
+
+决策模块基于当前章节、子状态和感知输入生成协调的多模态反馈。系统采用三层决策结构，对应三个章节的情感叙事需求：
+
+\textbf{（1）反应层决策：即时交互反馈}
+
+对即时交互生成快速反馈，决策逻辑基于章节特定的规则匹配：
+
+\begin{verbatim}
+# 第一章：自我锚定反馈
+if gesture == "pinch" and chapter == 1:
+    if current_substate == "迷茫":
+        trigger_guidance("尝试持续奏响音符")
+        visual_feedback = "山峦轻微抖动"
+    elif current_substate == "锚定中":
+        trigger_note_playback("waterdrop")
+        adjust_lighting(color="blue", intensity=0.6)
+        visual_feedback = "山体局部固化"
+
+# 第二章：关系边界反馈  
+if emotion == "overwhelmed" and chapter == 2:
+    trigger_boundary_protection()
+    adjust_lighting(color="purple", mode="pulse")
+    visual_feedback = "建筑停止挤压"
+
+# 第三章：知识驾驭反馈
+if cognitive_load == "high" and chapter == 3:
+    simplify_feedback()
+    adjust_music(tempo="slow")
+    visual_feedback = "潮水波动减缓"
+\end{verbatim}
+
+反应层决策延迟控制在50-100ms，确保交互的即时性。
+
+\textbf{（2）策略层决策：章节进度管理}
+
+基于章节进度和短期交互历史生成策略性反馈。策略层维护章节特定的有限状态机：
+
+\begin{itemize}
+    \item \textbf{第一章策略}：关注自我认知进度，调整引导强度和谜题难度
+    \item \textbf{第二章策略}：关注关系平衡状态，调整社交互动密度和边界保护
+    \item \textbf{第三章策略}：关注知识吸收节奏，调整未知暴露程度和创造空间
+\end{itemize}
+
+策略层根据章节目标动态调整：
+\begin{enumerate}
+    \item \textbf{进度落后时}：增加引导提示，降低谜题难度
+    \item \textbf{进度超前时}：增加隐藏内容，提升挑战性
+    \item \textbf{情感偏离时}：调整环境氛围，引导回归主题
+    \item \textbf{认知超载时}：简化交互，提供休息机会
+\end{enumerate}
+
+\textbf{（3）叙事层决策：情感成长引导}
+
+管理三个章节的情感叙事发展，控制整体成长弧线。叙事层决策基于多目标强化学习框架，奖励函数设计为：
+$$R = \alpha \cdot E_{\text{self}} + \beta \cdot E_{\text{relation}} + \gamma \cdot E_{\text{world}} + \delta \cdot E_{\text{flow}}$$
+其中：
+\begin{itemize}
+    \item $E_{\text{self}}$：自我认知奖励（基于第一章进度）
+    \item $E_{\text{relation}}$：关系探索奖励（基于第二章进度）
+    \item $E_{\text{world}}$：世界接纳奖励（基于第三章进度）
+    \item $E_{\text{flow}}$：心流体验奖励（基于注意力集中度）
+\end{itemize}
+
+叙事层决策确保三个章节的情感成长形成完整弧线：
+\begin{enumerate}
+    \item \textbf{第一章终点}：参展者应建立基本的自我认知和锚定能力
+    \item \textbf{第二章终点}：参展者应理解关系平衡和边界维护
+    \item \textbf{第三章终点}：参展者应获得知识驾驭和创造自由
+    \item \textbf{整体弧线}：从迷茫被动到主动创造的情感蜕变
+\end{enumerate}
+
+\subsection*{章节化反馈协调机制}
+
+为确保三个章节的多模态反馈协调一致，系统实现了章节特定的反馈协调器。协调器基于章节状态和子状态生成同步的反馈指令：
+
+\begin{table}[h]
+\centering
+\caption{章节反馈映射表}
+\begin{tabularx}{\linewidth}{|c|c|c|c|c|}
+\hline
+\textbf{章节} & \textbf{子状态} & \textbf{视觉反馈} & \textbf{听觉反馈} & \textbf{物理反馈} \\
+\hline
+第一章 & 迷茫 & 半透明山峦、流动地貌 & 不确定调式、缓慢节奏 & 冷白光、低频呼吸 \\
+\hline
+第一章 & 锚定中 & 山体局部固化、路径显现 & 调式确立、节奏稳定 & 暖黄光、中频脉动 \\
+\hline
+第一章 & 锚定完成 & 地貌稳定、光路延伸 & 完整旋律、明确节奏 & 金色光、同步闪烁 \\
+\hline
+第二章 & 碰撞 & 建筑挤压、阴影拉长 & 嘈杂人声、不和谐音 & 红色光、快速闪烁 \\
+\hline
+第二章 & 边界建立 & 建筑舒展、道路开阔 & 和谐和声、清晰旋律 & 紫色光、稳定脉动 \\
+\hline
+第三章 & 敬畏 & 透明地面、深渊微光 & 空灵回声、缓慢展开 & 深蓝光、缓慢波动 \\
+\hline
+第三章 & 驾驭 & 潮水分开、稳定通路 & 丰富和声、明确主题 & 蔚蓝光、规律波动 \\
+\hline
+第三章 & 自由 & 全场景响应、动态变化 & 自由即兴、多声部交织 & 全彩光、随机模式 \\
+\hline
+\end{tabularx}
+\label{tbl:chapter-feedback}
+\end{table}
+
+\textbf{音符反馈协调}：每个音符解锁时触发特定的多模态反馈序列：
+
+\begin{table}[h]
+\centering
+\caption{音符解锁反馈序列}
+\begin{tabularx}{\linewidth}{|c|c|c|c|}
+\hline
+\textbf{音符} & \textbf{视觉序列} & \textbf{听觉序列} & \textbf{物理序列} \\
+\hline
+水滴音符 & 山体固化→光路形成 & 单音→短句→完整旋律 & 蓝光脉动→金光稳定 \\
+\hline
+道路交错 & 建筑舒展→道路连接 & 嘈杂→和谐→清晰旋律 & 红光→紫光→稳定脉动 \\
+\hline
+海浪音符 & 潮水分开→稳定通路 & 空灵→丰富→明确主题 & 深蓝→蔚蓝→规律波动 \\
+\hline
+风音符 & 全场景响应→动态变化 & 即兴→多声部→完整交响 & 全彩随机→协调变化 \\
+\hline
+\end{tabularx}
+\label{tbl:note-feedback}
+\end{table}
+
+反馈协调器确保所有输出通道在时序上同步（误差小于50ms），在语义上一致（基于同一章节状态解释）。协调机制包括：
+
+\begin{enumerate}
+    \item \textbf{时序同步}：使用统一的时间戳管理所有反馈触发时间
+    \item \textbf{语义一致性}：基于章节主题和情感状态生成协调的反馈内容
+    \item \textbf{强度匹配}：根据情感强度调整反馈强度，避免过度刺激
+    \item \textbf{渐进过渡}：状态转换时使用渐变效果，避免突兀变化
+\end{enumerate}
+
+\textbf{示例：第二章从碰撞到边界的反馈协调}
+\begin{verbatim}
+# 检测到边界建立
+if chapter == 2 and substate_transition("碰撞", "边界"):
+    # 视觉反馈序列（0-2000ms）
+    visual_sequence = [
+        (0, "建筑停止挤压", duration=500),
+        (500, "阴影缩短", duration=500),
+        (1000, "道路拓宽", duration=500),
+        (1500, "光带舒展", duration=500)
+    ]
+    
+    # 听觉反馈序列
+    audio_sequence = [
+        (0, "降低人声音量", target=0.3),
+        (500, "加入和谐和声", intensity=0.7),
+        (1000, "清晰旋律浮现", volume=0.8),
+        (1500, "完整主题确立", volume=1.0)
+    ]
+    
+    # 物理反馈序列
+    physical_sequence = [
+        (0, "红光减弱", intensity=0.5),
+        (500, "加入紫光", intensity=0.7),
+        (1000, "稳定脉动模式", frequency=1.0),
+        (1500, "同步所有灯光", phase=0)
+    ]
+    
+    # 执行协调反馈
+    execute_coordinated_feedback(visual_sequence, audio_sequence, physical_sequence)
+\end{verbatim}
+
+\subsection*{章节化自适应调整机制}
+
+系统支持基于观众特征和章节进度的个性化调整。通过分析交互数据，系统建立观众特征模型，并针对三个章节进行差异化调整：
+
+\textbf{观众特征模型}：
+\begin{itemize}
+    \item \textbf{交互风格}：激进型（高频尝试）vs 谨慎型（深思熟虑）
+    \item \textbf{情感模式}：外倾型（情绪外露）vs 内倾型（情绪内敛）
+    \item \textbf{认知风格}：直觉型（整体把握）vs 分析型（细节关注）
+    \item \textbf{学习节奏}：快速型（迅速掌握）vs 渐进型（需要重复）
+\end{itemize}
+
+\textbf{章节特定调整策略}：
+
+\begin{table}[h]
+\centering
+\caption{章节自适应调整策略}
+\begin{tabularx}{\linewidth}{|c|c|c|c|}
+\hline
+\textbf{特征类型} & \textbf{第一章调整} & \textbf{第二章调整} & \textbf{第三章调整} \\
+\hline
+激进型 & 增加谜题变体 & 提高社交密度 & 增加知识深度 \\
+\hline
+谨慎型 & 延长引导时间 & 降低社交压力 & 放缓知识节奏 \\
+\hline
+外倾型 & 强化视觉反馈 & 增强社交反馈 & 丰富表达方式 \\
+\hline
+内倾型 & 简化视觉刺激 & 减少社交刺激 & 提供安静空间 \\
+\hline
+直觉型 & 提供整体提示 & 关注关系模式 & 强调知识联系 \\
+\hline
+分析型 & 提供细节指导 & 关注边界细节 & 强调知识结构 \\
+\hline
+快速型 & 提前解锁内容 & 加速章节进度 & 增加挑战难度 \\
+\hline
+渐进型 & 重复核心机制 & 延长练习时间 & 分段学习内容 \\
+\hline
+\end{tabularx}
+\label{tbl:chapter-adaptation}
+\end{table}
+
+\textbf{动态难度调整算法}：
+
+系统根据参展者表现动态调整章节难度：
+$$D_c = D_{\text{base}} + \alpha \cdot P_{\text{success}} - \beta \cdot T_{\text{struggle}} + \gamma \cdot E_{\text{engagement}}$$
+其中：
+\begin{itemize}
+    \item $D_c$：章节$c$的当前难度
+    \item $D_{\text{base}}$：基础难度
+    \item $P_{\text{success}}$：成功率调整因子
+    \item $T_{\text{struggle}}$：挣扎时间调整因子
+    \item $E_{\text{engagement}}$：参与度调整因子
+\end{itemize}
+
+\textbf{个性化叙事节奏控制}：
+
+系统根据观众特征调整三个章节的时间分配：
+\begin{verbatim}
+def adjust_chapter_timing(player_profile):
+    # 基础时间分配（分钟）
+    base_timing = {"chapter1": 15, "chapter2": 20, "chapter3": 25}
+    
+    # 根据特征调整
+    if player_profile["style"] == "激进型":
+        base_timing["chapter1"] *= 0.8  # 缩短第一章
+        base_timing["chapter3"] *= 1.2  # 延长第三章
+    elif player_profile["style"] == "谨慎型":
+        base_timing["chapter1"] *= 1.3  # 延长第一章
+        base_timing["chapter2"] *= 0.9  # 缩短第二章
+        
+    if player_profile["emotion"] == "外倾型":
+        base_timing["chapter2"] *= 1.2  # 延长社交章节
+    elif player_profile["emotion"] == "内倾型":
+        base_timing["chapter2"] *= 0.8  # 缩短社交章节
+        
+    return base_timing
+\end{verbatim}
+
+\textbf{情感支持机制}：
+
+当系统检测到参展者情感困扰时，提供章节特定的支持：
+\begin{itemize}
+    \item \textbf{第一章困扰}：提供更明确的自我锚定引导，简化谜题
+    \item \textbf{第二章困扰}：降低社交压力，提供边界保护提示
+    \item \textbf{第三章困扰}：减少未知暴露，提供知识结构框架
+    \item \textbf{整体困扰}：调整叙事节奏，提供情感共鸣内容
+\end{itemize}
+
+这种章节化的自适应调整机制确保《回声之境》能为不同特征的观众提供个性化的情感成长体验，在保持核心叙事完整性的同时，适应多样化的交互需求和情感状态。
 
 \begin{figure}[htbp]
   \centering
@@ -474,7 +1078,7 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 
 \subsection*{系统架构层面}
 
-本系统采用”感知层—决策层—执行层”的三层星型拓扑架构，实现了多源数据的统一汇聚与分发。感知层由手势识别、面部情绪识别与游戏状态同步三大模块构成，各模块通过TCP协议以独立客户端身份连接至决策中枢，实现了模块间的松耦合设计。决策层以Qwen3.5 VLM为基座模型，结合LangChain/DeepAgent框架实现Tool Calling能力，使模型能够根据玩家当前的手势、情绪与游戏状态自主调用外部工具函数，完成从感知到决策的闭环。执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制的任务。这种架构设计使得整个系统的扩展性与可维护性得到了保障，新增感知模块或执行设备仅需实现标准的TCP Client接口即可无缝接入。
+本系统采用”感知层—决策层—执行层”的三层星型拓扑架构，实现了多源数据的统一汇聚与分发。感知层由手势识别、面部情绪识别与交互应用状态同步三大模块构成，各模块通过TCP协议以独立客户端身份连接至决策中枢，实现了模块间的松耦合设计。决策层以Qwen3.5 VLM为基座模型，结合LangChain/DeepAgent框架实现Tool Calling能力，使模型能够根据参展者当前的手势、情绪与交互应用状态自主调用外部工具函数，完成从感知到决策的闭环。执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制的任务。这种架构设计使得整个系统的扩展性与可维护性得到了保障，新增感知模块或执行设备仅需实现标准的TCP Client接口即可无缝接入。
 
 \subsection*{网络通信层面}
 
@@ -497,19 +1101,101 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 综合上述工作，本系统的主要贡献与创新点可以归纳为以下三个方面：
 
 \begin{enumerate}
-\item \textbf{轻量化数据需求}：不同于Lumine等研究需要数千小时的标注游戏数据，本系统基于现成VLM的零样本能力，仅需少量场景-决策对应关系即可运行，大幅降低了数据收集与标注成本，使系统在有限资源下仍具备快速部署的能力。
-\item \textbf{多模态融合决策}：系统同时整合视觉（手势、面部情绪）、游戏内部状态以及上下文记忆，通过VLM做出综合决策，而非传统系统的单一模态简单映射。这种融合决策机制使系统能够更准确地理解玩家的整体状态，输出更贴合情境的响应。
-\item \textbf{物理世界交互}：系统不仅控制游戏剧情的推进与虚拟场景的视觉变化，还能实时影响展厅内的物理设备（LED灯阵等），通过TCP通信驱动树莓派PWM控制器实现灯光的动态变化，真正实现了虚拟世界与现实空间的无缝融合，使展览交互体验从屏幕内延伸至实体空间。
+\item \textbf{轻量化数据需求}：不同于Lumine等研究需要数千小时的标注交互数据，本系统基于现成VLM的零样本能力，仅需少量场景-决策对应关系即可运行，大幅降低了数据收集与标注成本，使系统在有限资源下仍具备快速部署的能力。
+\item \textbf{多模态融合决策}：系统同时整合视觉（手势、面部情绪）、交互应用内部状态以及上下文记忆，通过VLM做出综合决策，而非传统系统的单一模态简单映射。这种融合决策机制使系统能够更准确地理解参展者的整体状态，输出更贴合情境的响应。
+  \item \textbf{物理世界交互}：系统不仅控制交互叙事的推进与虚拟场景的视觉变化，还能实时影响展厅内的物理设备（LED灯阵等），通过TCP通信驱动树莓派PWM控制器实现灯光的动态变化，真正实现了虚拟世界与现实空间的无缝融合，使展览交互体验从屏幕内延伸至实体空间。
 \end{enumerate}
+
+\section{与目标导向交互方法的对比分析}
+
+本系统在设计理念和技术实现上与《基于大语言模型的游戏目标导向交互》论文提出的方法存在诸多相似之处，同时也根据展览交互的特点进行了适应性调整。以下从几个维度进行对比分析：
+
+\subsection*{架构设计对比}
+
+论文提出的双LLM架构使用DLM（对话语言模型）和QALM（问答语言模型）分别负责对话生成和状态追踪，实现了生成能力与决策能力的解耦。本系统采用了类似的解耦思想，但实现方式有所不同：
+
+\begin{itemize}
+    \item \textbf{论文方法}：严格的双模型架构，DLM专注于自然语言对话生成，QALM专注于状态评估和决策
+    \item \textbf{本系统方法}：单VLM（视觉语言模型）结合结构化技能（SKILL）体系，通过Tool Calling机制实现多功能集成
+    \item \textbf{优势对比}：论文方法在对话生成质量上有优势，本系统方法在跨模态理解和工具调用灵活性上有优势
+\end{itemize}
+
+\subsection*{状态追踪机制对比}
+
+状态追踪是目标导向交互的核心技术，两种方法在状态追踪的实现上各有特点：
+
+\begin{itemize}
+    \item \textbf{论文方法}：基于谜题图（Puzzle Graph）的显式状态建模，状态转换通过自然语言问题评估实现
+    \item \textbf{本系统方法}：基于情感状态图的隐式状态建模，状态转换通过多模态特征融合和概率计算实现
+    \item \textbf{适用场景}：论文方法更适合任务导向的对话交互，本系统方法更适合情感导向的展览体验
+\end{itemize}
+
+\subsection*{交互自主性与叙事连贯性平衡}
+
+两种方法都致力于平衡交互自主性与叙事连贯性，但侧重点不同：
+
+\begin{itemize}
+    \item \textbf{论文方法}：通过状态图提供结构化框架，在框架内允许自由对话，强调“强自主性”
+    \item \textbf{本系统方法}：通过情感状态引导和自适应反馈，在保持情感叙事连贯性的前提下支持个性化探索
+    \item \textbf{设计哲学}：论文方法更接近游戏设计中的“涌现式玩法”，本系统方法更接近展览设计中的“情感化体验”
+\end{itemize}
+
+\subsection*{技术实现复杂度}
+
+在技术实现层面，两种方法面临不同的挑战：
+
+\begin{table}[h]
+\centering
+\caption{技术实现对比}
+\begin{tabularx}{\linewidth}{|l|X|X|}
+\hline
+维度 & 论文方法 & 本系统方法 \\
+\hline
+模型需求 & 需要两个独立的LLM实例 & 单个VLM结合工具调用 \\
+\hline
+状态表示 & 离散的图节点状态 & 连续的情感状态空间 \\
+\hline
+交互类型 & 主要基于文本对话 & 多模态（手势、情绪、交互应用状态） \\
+\hline
+反馈形式 & 文本回复为主 & 多感官协调反馈（视觉、听觉、物理） \\
+\hline
+部署复杂度 & 较高（需要管理两个模型） & 中等（单模型但需要工具集成） \\
+\hline
+\end{tabularx}
+\label{tbl:method-comparison}
+\end{table}
+
+\subsection*{在展览场景中的适用性}
+
+对于实体展览场景，本系统的方法具有更好的适用性：
+
+\begin{enumerate}
+    \item \textbf{多模态交互支持}：展览交互需要支持手势、表情等多种输入方式，而不仅仅是文本对话
+    \item \textbf{情感体验导向}：展览更注重情感共鸣和沉浸感，而非任务完成度
+    \item \textbf{实时性要求}：展览交互需要低延迟的实时反馈，本系统的分层决策机制更适合这一需求
+    \item \textbf{物理空间整合}：展览需要虚拟内容与实体装置的协调，本系统的反馈协调机制专门为此设计
+\end{enumerate}
+
+\subsection*{相互借鉴与融合可能性}
+
+两种方法各有优势，未来可以相互借鉴和融合：
+
+\begin{itemize}
+    \item \textbf{从论文方法借鉴}：引入更精细的状态追踪机制，提升叙事引导的精确性
+    \item \textbf{从本系统方法借鉴}：论文方法可以扩展多模态感知能力，支持更丰富的交互形式
+    \item \textbf{融合方向}：结合双LLM架构的对话生成优势与本系统的多模态协调能力，构建更强大的交互系统
+\end{itemize}
+
+总体而言，本系统在目标导向交互框架的基础上，根据展览交互的特点进行了创新性调整，实现了更适合实体展览场景的沉浸式多模态交互方案。
 
 \section{不足与反思}
 
 尽管本次毕业设计基本完成了预定目标，但在实际开发过程中也暴露出若干不足之处，值得在后续工作中加以改进。
 
 \begin{enumerate}
-\item \textbf{游戏内容深度不足}：由于开发时间与个人精力有限，《回声之境》在叙事内容、关卡设计与情感表达等方面仍有较大的打磨空间。四个音符的象征意义与游戏机制的结合尚不够紧密，部分场景的情绪基调与交互反馈之间的关联度可以进一步提升。
+\item \textbf{交互应用内容深度不足}：由于开发时间与个人精力有限，《回声之境》在叙事内容、关卡设计与情感表达等方面仍有较大的打磨空间。四个音符的象征意义与交互机制的结合尚不够紧密，部分场景的情绪基调与交互反馈之间的关联度可以进一步提升。
 \item \textbf{情绪识别精度有限}：当前系统采用现成的MediaPipe方案进行手势与面部关键点检测，情绪状态的量化维度较为单一，尚未充分利用面部关键点的时序变化实现更细腻的情感推断。
-\item \textbf{实体装置与虚拟场景的同步精度}：目前灯条控制与游戏内事件之间存在一定的响应延迟，实体装置的物理反馈与虚拟画面的时间一致性尚有优化空间。如需提升至展览级别的用户体验，需在通信延迟优化与同步策略设计上做更多工作。
+\item \textbf{实体装置与虚拟场景的同步精度}：目前灯条控制与交互应用内事件之间存在一定的响应延迟，实体装置的物理反馈与虚拟画面的时间一致性尚有优化空间。如需提升至展览级别的用户体验，需在通信延迟优化与同步策略设计上做更多工作。
 \item \textbf{智能体的决策可解释性}：尽管系统集成了Phoenix链路追踪工具，但VLM在Tool Calling决策过程中的推理逻辑仍像一个”黑箱”，难以向非技术用户解释为何在某一时刻选择了特定的工具调用。在面向普通观众的展览场景中，增加决策的可解释性将有助于提升用户对系统的信任感。
 \end{enumerate}
 
@@ -519,9 +1205,9 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 
 在模型层面，尽管本系统使用了通用的视觉语言模型作为决策智能体的基座模型，但具身智能、智能眼镜等前沿领域已涌现出许多更适合空间推理的模型架构，例如腾讯混元实验室推出的Spatial-TTT，解决了长时序视频输入的空间理解问题。将其应用于实体展览，有望进一步提高交互系统的模型决策精度，使系统能够更好地理解用户在实体空间中的行为意图。
 
-在交互模态层面，当前系统的感知通道主要包括手势、面部情绪与游戏状态。未来可进一步引入语音交互、目光注视追踪或心率传感等更多模态，实现更丰富的多模态融合决策，使系统能够更全面地感知观众的心理状态与交互需求。
+在交互模态层面，当前系统的感知通道主要包括手势、面部情绪与交互应用状态。未来可进一步引入语音交互、目光注视追踪或心率传感等更多模态，实现更丰富的多模态融合决策，使系统能够更全面地感知观众的心理状态与交互需求。
 
-在内容层面，游戏的叙事深度与关卡设计仍有较大的拓展空间。未来的版本可以进一步挖掘四个音符的象征意义，设计更丰富的演奏组合与场景变化，使音乐真正成为塑造游戏世界面貌的核心力量，同时为观众带来更具情感深度与艺术感染力的沉浸式体验。
+在内容层面，交互应用的叙事深度与关卡设计仍有较大的拓展空间。未来的版本可以进一步挖掘四个音符的象征意义，设计更丰富的演奏组合与场景变化，使音乐真正成为塑造交互应用世界面貌的核心力量，同时为观众带来更具情感深度与艺术感染力的沉浸式体验。
 
 总之，本次毕业设计为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考，也为后续的持续优化与实际落地应用奠定了基础。
 
