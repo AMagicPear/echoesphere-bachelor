@@ -597,6 +597,19 @@ FUNCTION {digital}
     newline$
 }
 
+FUNCTION {misc}
+{
+    bibitem.begin
+    format.authors write$ add.period
+    format.title write$ add.period
+    format.url write$ add.comma
+    year missing$
+    'skip$
+    { year write$ }
+    if$
+    newline$
+}
+
 FUNCTION {onlynote}
 {
 	bibitem.begin
