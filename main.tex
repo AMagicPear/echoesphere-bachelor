@@ -56,7 +56,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 在实体展览交互装置领域，国际性跨域艺术团队teamLab以其基于自研引擎的实时视觉演算而著称，其展览作品能够根据观众互动实时改变花朵绽放、瀑布流淌等视觉效果\citing{teamlababout}，在世界各地设有大型常设美术馆，代表了沉浸式展览的技术前沿。Epic Games公司在《堡垒之夜》中举办的虚拟演唱会，通过根据演出内容实时改变场景Shader与后期处理参数，实现了富有感染力的视听体验\citing{epic2024niagara}。国内方面，良渚博物馆等机构已在展厅中部署虚实联动的交互装置，允许参观者通过操作实体装置与虚拟场景互动\citing{ogrizek2024vr}。然而，上述案例在交互智能性上仍有不足：teamLab的反馈规则是预设的、有限的；虚拟演唱会缺乏对观众个体状态的感知；博物馆交互装置多为触发-响应模式，欠缺基于观众状态的自适应决策能力。
 
-在多模态感知与智能体技术的前沿应用中，Anuttacon公司于2025年推出的《Whispers from the Star》\citing{whispersfromstar}采用了多模态AI技术，玩家以语音形式与AI角色实时互动，角色的对话、表情与动作均由AI根据对话内容动态生成，开创了一种全新的叙事交互范式。在学术研究层面，基于大语言模型的智能体被定义为能够感知视觉刺激、语言输入及其他环境数据并产生有意义动作的交互系统\citing{durante2024agent}，其”感知—决策—执行”的闭环架构为交互系统的智能化提供了清晰的技术路径。
+在多模态感知与智能体技术的前沿应用中，Anuttacon公司于2025年推出的《Whispers from the Star》\citing{whispersfromstar}采用了多模态AI技术，玩家以语音形式与AI角色实时互动，角色的对话、表情与动作均由AI根据对话内容动态生成，开创了一种全新的叙事交互范式。2026年，研究团队发布的LPM 1.0（Large Performance Model）\citing{lpm2026}将视频角色表演与全双工对话深度融合，能够以文本、音频和图像为多模态控制信号，实时生成在倾听、说话与静默三种状态下均保持身份一致性的角色视频，为对话式智能体提供了视觉表演引擎。在学术研究层面，基于大语言模型的智能体被定义为能够感知视觉刺激、语言输入及其他环境数据并产生有意义动作的交互系统\citing{durante2024agent}，其”感知—决策—执行”的闭环架构为交互系统的智能化提供了清晰的技术路径。
 
 综合来看，当前领域存在以下关键缺口：一是多数展览交互系统仍依赖预设规则，缺乏基于多源感知数据的实时综合决策能力；二是虚拟场景与物理装置的联动大多停留在简单的触发-响应层面，尚未实现情感驱动的协同控制；三是现有智能体方案在展览场景中的部署案例仍然稀缺，特别是将LLM Agent与实体装置（如LED灯阵）进行深度集成的实践探索尚属空白。本课题正是针对上述缺口，设计并实现了一套以游戏引擎为交互平台、以大语言模型智能体为决策中枢、以树莓派驱动物理灯光为虚实联动载体的沉浸式多模态交互系统，在展览交互的智能化决策与虚实深度融合方面进行了创新性探索。
 
@@ -311,6 +311,15 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{总体架构和通信协议}
 
+基于前文的系统需求分析，本系统在架构设计上确立了以下四项核心设计原则：
+
+\begin{enumerate}
+\item \textbf{全流程多模态}：系统实现了从多模态感知（手势、面部情绪、交互应用状态）到多模态理解（VLM综合推理）再到多模态反馈（视觉、听觉、灯光）的完整闭环，各环节均以多模态数据为驱动，避免了传统系统中各模态独立处理的割裂问题。
+\item \textbf{强可拓展性}：框架采用松耦合的星型拓扑结构，各感知与执行模块以统一的TCP协议接入决策中枢，能够方便地扩展更多模态信息（如心率、眼动追踪）和周围设备（如投影、音响），无需修改核心决策逻辑。
+\item \textbf{虚实结合的交互体验}：传统的沉浸式体验往往与虚拟现实紧密耦合，而本系统将这种体验延伸至实体展览场景，通过虚拟画面与物理灯光装置的实时联动，使展览交互从屏幕内延伸至实体空间，实现了虚拟世界与现实空间的无缝融合。
+\item \textbf{完善的调试与可观测性}：无论是智能体的Tool Calling过程还是自定义命令的收发，系统均设计了可追踪、可调试的工具链，涵盖分层日志、OpenTelemetry链路追踪及运行时调试输出，显著增强了系统的鲁棒性与开发维护效率。
+\end{enumerate}
+
 \subsection{系统总体架构}
 
 根据开题阶段的技术路线规划，本系统在实现过程中对架构进行了优化调整，最终形成了如图\ref{fig:system-arch}所示的三层星型拓扑架构。
@@ -343,14 +352,19 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \textbf{（1）二进制协议方案}：早期设计采用长度前缀+消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。该方案在理论上具有最高的解析效率，但在实际开发中暴露出若干问题：由于图片数据与文本数据采用完全不同的编码方式，智能体在处理混合类型消息时需要额外的类型判断与解码逻辑，增加了中间件的开发复杂度；此外，二进制协议的调试与维护也较为困难，难以在开发阶段进行直观的协议检查。
 
-\textbf{（2）JSON文本协议方案}：基于上述实践经验，本系统最终采用长度前缀+UTF-8编码的JSON协议格式。该协议将所有数据统一封装为JSON对象，包含以下四个核心字段：
+\textbf{（2）JSON文本协议方案}：基于上述实践经验，本系统最终采用长度前缀+UTF-8编码的JSON协议格式。该协议将所有数据统一封装为JSON对象，核心字段定义如下：
 
 \begin{itemize}
 \item \texttt{type}：消息类型，取值为 \texttt{text}（普通文本消息）、\texttt{image}（Base64编码的图片数据）、\texttt{command}（控制命令）、\texttt{register}（客户端注册）
-\item \texttt{data}：载荷内容，文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据
+\item \texttt{data}：载荷内容，文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据，command类型时为具体命令内容
 \item \texttt{client\_type}：发送者身份标识，取值包括 \texttt{echoagent}（智能体）、\texttt{unity}（Unity客户端）、\texttt{mediapipe}（感知模块）、\texttt{raspberry\_pi}（树莓派控制端）
-\item \texttt{request\_id}：请求追踪标识，采用UUID格式，用于关联请求与响应
+\item \texttt{request\_id}：请求追踪标识，采用UUID格式，仅在需要响应的请求中携带
+\item \texttt{relay\_to}：直接转发标识，若消息中包含此字段，则服务端直接将该消息转发至目标客户端，不经智能体处理
 \end{itemize}
+
+其中，\texttt{register}类型具有特定的语义约定：该类型仅由客户端向服务端发起。当客户端首次启动并连接到服务端时，须发送一条\texttt{register}类型消息，且必须携带\texttt{client\_type}字段标识自身类别，服务端据此维护已连接客户端的注册表。
+
+\texttt{command}类型遵循特定的命名约定。对于需要响应的命令，以\texttt{request:}为前缀、后接具体操作名，并须携带\texttt{request\_id}以关联响应，如\texttt{request:screenshot}表示请求截图。对于向其他客户端发送输入事件的命令，则以\texttt{input:}为前缀、后接具体输入类型，如\texttt{input:submit}表示向Unity客户端发送提交事件。
 
 该协议格式具有以下优势：JSON的文本形式便于开发阶段的调试与日志分析；统一的数据封装方式简化了智能体端的协议解析逻辑；Base64编码虽然增加了约33\%的数据体积，但换取了协议的一致性与可维护性。考虑到本系统运行于本机与局域网环境下，网络带宽充足且延迟极低（通常低于5ms），上述开销在实际使用中完全可以接受。协议使用实例如表\ref{tbl:protocol-examples}所示。
 
@@ -371,6 +385,45 @@ Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”:
 \hline
 \end{tabularx}
 \label{tbl:protocol-examples}
+\end{table}
+
+为完整定义各模块间的交互语义，表\ref{tbl:command-table}汇总了系统中全部控制命令的接收方、发起方与使用说明。
+
+\begin{table}[h]
+\centering
+\caption{系统控制命令汇总}
+\begin{tabularx}{\linewidth}{|l|c|c|X|}
+\hline
+命令名称 & 接收客户端 & 发起客户端 & 使用说明 \\
+\hline
+\texttt{hand\_direction} & mediapipe & unity & 开关手指方向识别与信息发送 \\
+\hline
+\texttt{input:submit} & unity & mediapipe & 演示中用于驱散标题文字 \\
+\hline
+\texttt{input:move} & unity & mediapipe & 识别食指指向，在Unity端映射为输入设备坐标 \\
+\hline
+\texttt{input:cancel} & unity & echoagent, mediapipe & 取消当前输入操作 \\
+\hline
+\texttt{input:navigate} & unity & echoagent & 智能体主动触发导航操作 \\
+\hline
+\texttt{request:screenshot} & unity, mediapipe & echoagent & 智能体主动请求客户端截图以查看当前状态 \\
+\hline
+\texttt{chase} & raspberry\_pi & debug & 控制灯光为循环点亮模式 \\
+\hline
+\texttt{solid} & raspberry\_pi & debug & 控制灯光为实色模式 \\
+\hline
+\texttt{rainbow} & raspberry\_pi & debug & 控制灯光为彩虹渐变模式 \\
+\hline
+\texttt{breathing} & raspberry\_pi & debug & 控制灯光为呼吸渐变模式 \\
+\hline
+\texttt{gain\_note} & raspberry\_pi & unity & Unity中触发事件时灯条同步反馈 \\
+\hline
+\texttt{drop\_note} & raspberry\_pi & debug & 调试用，模拟失去音符时的灯光反馈 \\
+\hline
+\texttt{play\_note} & raspberry\_pi & -- & 演奏音符时的灯光伴随效果 \\
+\hline
+\end{tabularx}
+\label{tbl:command-table}
 \end{table}
 
 \subsection{Unity引擎与交互应用}
