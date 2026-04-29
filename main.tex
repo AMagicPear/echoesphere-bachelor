@@ -17,13 +17,13 @@
 \makecover
 
 \begin{chineseabstract}
-随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity引擎为核心交互平台，整合了手势识别、面部情绪识别、交互应用状态感知等多源信息，并基于大语言模型智能体（Qwen3.5 + DeepAgent）构建中央决策模块，实现对虚拟场景与物理装置（LED灯阵、音效等）的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
+随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity引擎为核心交互平台，整合了手势识别、面部情绪识别、交互应用状态感知等多源信息，并基于大语言模型智能体（Qwen3.6 + DeepAgent）构建中央决策模块，实现对虚拟场景与物理装置（LED灯阵、音效等）的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
 
 \chinesekeyword{多模态交互；游戏引擎；智能体；情感计算；实体展览}
 \end{chineseabstract}
 
 \begin{englishabstract}
-With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and application state perception, and constructs a central decision-making module based on large language model agents (Qwen3.5 + DeepAgent) to achieve coordinated control of virtual scenes and physical devices (LED arrays, sound effects, etc.). This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
+With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and application state perception, and constructs a central decision-making module based on large language model agents (Qwen3.6 + DeepAgent) to achieve coordinated control of virtual scenes and physical devices (LED arrays, sound effects, etc.). This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
 
 \englishkeyword{Multimodal Interaction; Game Engine; Agent; Affective Computing; Physical Exhibition}
 \end{englishabstract}
@@ -36,21 +36,24 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \section{研究背景}
 
-随着虚拟现实、人工智能等数字技术的快速发展，现代人机交互方式正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。公共交互装置作为现代城市空间与博物展览中的新兴艺术表达媒介，致力于构建人与作品之间的深度对话\citing{wen2022huadong}，而上述技术进步为其体验深度与表现形式拓展了新的可能。
+在日常的数字交互中，无论是个人电脑上的电子游戏，还是移动设备上的各类应用，人们的交互方式长期依赖键盘、鼠标、手柄或触摸屏等传统输入设备，而系统的反馈也大多局限于屏幕内部的视觉变化与扬声器发出的音效；而另一方面，当谈及沉浸式体验时，公众的第一反应又往往将其与虚拟现实头戴设备联系在一起，似乎只有将用户从物理空间中完全剥离、置入一个由头显构建的虚拟环境，才称得上真正的沉浸。然而，这种将沉浸式体验与虚拟现实等同的认知恰恰忽略了实体空间本身所具有的不可替代价值。在博物展览与公共艺术装置等真实场景中，参观者身处物理空间，其身体在场性、空间感知能力与多感官协同体验是任何头戴式设备无法完全复现的。更重要的是，实体展览中的参观者无需佩戴额外设备即可自然移动、观察和感受，其社交行为不受遮挡，使得多人共享体验以及更深刻的情感联结成为可能。
 
-从当今实体展览的现状来看，实体展览逐渐从藏品陈列和静态信息呈现的展示模式，向强调观众参与和体验感受的方向演进。博物馆等机构持续致力于优化其与观众的互动方式，特别是在观众与文物、艺术品等展品的交互层面，当代博物馆与艺术展厅致力于打破”请勿触摸”的传统禁锢，转而追求更具实践性、叙事性与沉浸感的互动体验\citing{ogrizek2024vr}\citing{jiang2024dunhuang}。
+从当今实体展览的发展态势看，其也正亟待引入更具沉浸的交互方式。公共交互装置作为现代城市空间与博物展览中的新兴艺术表达媒介，致力于构建人与作品之间的深度对话\citing{wen2022huadong}。当今的展览模式正逐渐从藏品陈列和静态信息呈现，向强调观众参与和体验感受的方向演进，博物馆等机构也持续致力于打破“请勿触摸”的传统禁锢，转而追求更具实践性、叙事性与沉浸感的互动体验\citing{ogrizek2024vr}\citing{jiang2024dunhuang}。但遗憾的是，当前展览中的公共交互装置在交互体验上仍存在明显不足：一方面，部分系统仅简单引入数字屏幕与触控交互，参观者的体验与操作普通电子设备无异，未能充分发挥实体展览特有的现场感与空间优势；另一方面，由于设计范式趋同，许多装置的交互方式、反馈逻辑与视觉表现呈现同质化倾向，难以有效促进参与者的情感投入与持续探索，导致可互动但不耐体验的现象。这使得互动装置未能充分实现其作为展览媒介应有的情感沟通与意义建构价值，观众与作品之间难以建立稳定而深入的联系。
 
-然而，当前展览中的公共交互装置在交互体验上仍存在明显不足。一方面，部分系统仅简单引入数字屏幕与触控交互，参观者的体验与操作普通电子设备无异，未能充分发挥实体展览特有的现场感与空间优势。另一方面，由于设计范式趋同，许多装置的交互方式、反馈逻辑与视觉表现呈现同质化倾向，难以有效促进参与者的情感投入与持续探索，导致可互动但不耐体验的现象。这使得互动装置未能充分实现其作为展览媒介应有的情感沟通与意义建构价值，观众与作品之间难以建立稳定而深入的联系。
+事实上，在此前已有少数先锋艺术家与商业团体尝试将沉浸式体验带入真实物理空间，但这些探索大多发生在人工智能技术爆发式跃迁的前夜，其交互逻辑仍受限于预设规则与固定脚本。而近两年来，随着大语言模型与视觉语言模型的飞速发展，尤其是2026年初，以OpenClaw为代表的个人终端智能体火爆互联网的当下，这种根植于现实空间的沉浸式体验也被赋予了全新的可能。
+
 
 \section{研究目的和意义}
 
-针对上述问题，本课题引入游戏引擎技术作为核心开发平台。Unity等现代游戏引擎凭借其卓越的实时渲染、场景管理与高效图形渲染能力，使得高性能、高复杂度的三维空间表现和实时反馈成为可能，这为交互式视觉内容的构建提供了绝佳的平台支持。通过借鉴成熟的电子游戏交互机制与空间叙事方法，可以有效反哺现实展览系统，增强其趣味性与深度\citing{kruger2024gameengines}。
+本课题旨在借助人工智能与智能体技术，将游戏引擎与其所支撑的高品质沉浸式交互体验从虚拟现实的头盔中解放出来，带到实体展览空间之中。具体而言，本课题探索了一种将手势与面部表情纳入输入模态、将多模态智能体作为核心处理模块、将现实三维空间中的LED灯阵变化与屏幕空间内的动态视觉生成共同作为输出反馈的新型交互范式。参展者的手势动作与情绪状态被实时感知，驱动虚拟场景内的角色移动和视觉演变，同时通过物理灯光装置将这种变化延伸至整个展览空间，使沉浸感从屏幕内部扩散至物理世界。
+
+在核心开发平台方面，本课题引入Unity引擎。Unity凭借其卓越的实时渲染、场景管理与图形处理能力，为高性能、高复杂度的三维空间表现和实时反馈提供了坚实支撑。通过借鉴成熟的电子游戏交互机制与空间叙事方法，可以有效反哺现实展览系统，增强其趣味性与深度\citing{kruger2024gameengines}。
 
 在多模态情感识别技术方面，随着深度学习在计算机视觉与运动捕捉领域的广泛应用，系统能够精准捕捉用户的身体姿态、手势及面部表情。与此同时，人类对计算机情感理解与交互的需求愈加广泛\citing{tao2024multimodal}。相较于传统控制器，这种具身化的交互方式能更自然地映射用户的心理状态，从而实现更高维度的情感化沉浸体验。
 
-在智能体技术层面，随着大语言模型（LLM）与视觉语言模型（VLM）的迅速发展，基于基础模型的智能体已成为人工智能领域的重要研究方向。智能体被定义为一类交互系统，能够感知视觉刺激、语言输入及其他环境数据，并产生有意义的具身化动作\citing{durante2024agent}。在展览交互场景中，智能体可以充当感知层与执行层之间的决策中枢：根据多模态感知输入理解用户意图，结合任务规划与常识推理生成控制指令，并通过工具调用实现对虚拟场景与物理设备的协同控制。这种”感知—决策—执行”的闭环架构为构建更具智能性的沉浸式交互系统提供了技术基础。
+在智能体技术层面，随着大语言模型与视觉语言模型的迅速发展，基于基础模型的智能体已成为人工智能领域的重要研究方向。智能体被定义为一类交互系统，能够感知视觉刺激、语言输入及其他环境数据，并产生有意义的具身化动作\citing{durante2024agent}。在展览交互场景中，智能体可以充当感知层与执行层之间的决策中枢：根据多模态感知输入理解用户意图，结合任务规划与常识推理生成控制指令，并通过工具调用实现对虚拟场景与物理设备的协同控制。这种”感知—决策—执行”的闭环架构为构建更具智能性的沉浸式交互系统提供了技术基础。
 
-在此背景下，围绕实体展览场景，开展多模态沉浸式交互系统的设计研究，对于重构用户体验、创新情感反馈机制、探索技术融合应用具有重要的现实意义。
+围绕实体展览场景，开展多模态沉浸式交互系统的设计研究，对于重构用户体验、创新情感反馈机制、探索技术融合应用具有重要的现实意义。
 
 \section{国内外研究现状}
 
@@ -158,7 +161,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 在智能体的学习方法方面，上下文学习作为大语言模型时代的新兴方法展现出有效性，少样本提示成为跨任务泛化模型输出的有效方式\citing{durante2024agent}。对于展览交互系统而言，上下文学习是最为适用的方法——通过精心设计的提示词即可实现不同展览场景的任务适配，无需大规模重新训练或收集专家演示数据。
 
-将智能体置于展览交互的具体语境中，目标导向交互框架提供了一种将智能体推理能力与结构化叙事引导相结合的设计范式。该框架将交互过程构建为状态驱动的图结构：节点表示关键目标，边表示合法的状态转移，设计者通过定义状态转换条件控制交互进程，同时允许参展者在达成目标的过程中进行自由形式的探索。状态追踪是实现这一框架的关键技术——通过评估自然语言问题判断目标达成情况，驱动状态转换。双LLM架构是典型实现方案：对话语言模型负责生成自然灵活的交互回应，问答语言模型负责状态追踪与决策，确保交互进程符合设计意图。这种生成与决策的解耦设计，与本课题将多模态感知与VLM推理相分离的架构思路高度一致——在《回声之境》中，MediaPipe承担感知任务，Qwen3.5 VLM专注于综合推理与决策，情感状态图（迷茫→锚定、碰撞→边界、敬畏→自由）则提供了结构化的叙事引导框架。
+将智能体置于展览交互的具体语境中，目标导向交互框架提供了一种将智能体推理能力与结构化叙事引导相结合的设计范式。该框架将交互过程构建为状态驱动的图结构：节点表示关键目标，边表示合法的状态转移，设计者通过定义状态转换条件控制交互进程，同时允许参展者在达成目标的过程中进行自由形式的探索。状态追踪是实现这一框架的关键技术——通过评估自然语言问题判断目标达成情况，驱动状态转换。双LLM架构是典型实现方案：对话语言模型负责生成自然灵活的交互回应，问答语言模型负责状态追踪与决策，确保交互进程符合设计意图。这种生成与决策的解耦设计，与本课题将多模态感知与VLM推理相分离的架构思路高度一致——在《回声之境》中，MediaPipe承担感知任务，Qwen3.6 VLM专注于综合推理与决策，情感状态图（迷茫→锚定、碰撞→边界、敬畏→自由）则提供了结构化的叙事引导框架。
 
 \subsection{多模态情感计算与社交反馈}
 
@@ -339,7 +342,7 @@ Sim2Real鸿沟是另一关键挑战。在模拟环境中学习的交互策略部
   \label{fig:system-arch}
 \end{figure}
 
-如图\ref{fig:system-arch}所示，本系统采用”感知层—决策层—执行层”的三层星型拓扑架构。感知层由摄像头、MediaPipe手势识别、面部情绪识别及Unity交互应用状态同步四个模块构成，各模块均以TCP Client方式将数据上报至决策层；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源信息并生成控制指令；执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务，形成完整的”感知—决策—执行”闭环。
+如图\ref{fig:system-arch}所示，本系统采用”感知层—决策层—执行层”的三层星型拓扑架构。感知层由摄像头、MediaPipe手势识别、面部情绪识别及Unity交互应用状态同步四个模块构成，各模块均以TCP Client方式将数据上报至决策层；决策层以Qwen3.6 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源信息并生成控制指令；执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务，形成完整的”感知—决策—执行”闭环。
 
 \subsection{通信架构设计}
 
@@ -474,7 +477,7 @@ Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”:
 
 \subsection{DeepAgent}
 
-本系统采用 \textbf{DeepAgent} 框架，基座模型采用 \textbf{Qwen3.5-Plus}。DeepAgent是一个基于LangGraph和LangChain构建的智能体框架，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制，可通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划；自动记忆压缩有效解决超长任务带来的上下文溢出问题；支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效；无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
+本系统采用 \textbf{DeepAgent} 框架，基座模型采用 \textbf{Qwen3.6-Plus}。DeepAgent是一个基于LangGraph和LangChain构建的智能体框架，具备深度的规划能力、高效的上下文管理及灵活的子代理委派机制，可通过\texttt{write\_todos}工具自动拆解复杂任务并动态调整执行计划；自动记忆压缩有效解决超长任务带来的上下文溢出问题；支持通过\texttt{task}工具实时创建子代理，在实现复杂功能的同时保持主代理上下文的简洁高效；无缝对接LangGraph的状态管理与LangSmith的监控、评估与部署能力。
 
 \subsection{技能（SKILL）设计}
 
@@ -484,7 +487,7 @@ Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”:
 
 \textbf{（1）系统架构描述模型}
 
- SKILL体系首先定义了系统的层次化架构模型。本系统采用“感知层—决策层—执行层”的三层星型拓扑结构，其中感知层包含手势识别、面部情绪识别与交互应用状态同步三个独立模块，各模块均以TCP Client方式向决策层上报数据；决策层以Qwen3.5 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力；执行层则由Unity客户端与树莓派物理装置组成。SKILL中通过结构化字段明确各层的职责边界与数据流向，使智能体能够理解其在系统中的定位与作用。
+ SKILL体系首先定义了系统的层次化架构模型。本系统采用“感知层—决策层—执行层”的三层星型拓扑结构，其中感知层包含手势识别、面部情绪识别与交互应用状态同步三个独立模块，各模块均以TCP Client方式向决策层上报数据；决策层以Qwen3.6 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力；执行层则由Unity客户端与树莓派物理装置组成。SKILL中通过结构化字段明确各层的职责边界与数据流向，使智能体能够理解其在系统中的定位与作用。
 
 \textbf{（2）标准化通信协议抽象}
 
@@ -780,7 +783,7 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 \markboth{结束语}{结束语}
 \thispagestyle{fancy}
 
-本文设计并实现了一套面向实体展览的沉浸式多模态交互系统《回声之境》。系统以Unity引擎为核心交互平台，构建了"感知层—决策层—执行层"的三层星型拓扑架构：感知层整合手势识别、面部情绪识别与交互应用状态同步三源信息，决策层以Qwen3.5 VLM结合DeepAgent框架作为智能决策中枢，执行层驱动虚拟场景的实时渲染与实体LED灯阵的动态响应。在通信层面，设计了标准化的JSON-over-TCP协议，实现了多模块间的松耦合数据交换。在交互设计层面，以旅人的情感成长弧线为叙事主线，通过四个音符的递进解锁构建了从迷茫到自由的情感体验闭环。
+本文设计并实现了一套面向实体展览的沉浸式多模态交互系统《回声之境》。系统以Unity引擎为核心交互平台，构建了"感知层—决策层—执行层"的三层星型拓扑架构：感知层整合手势识别、面部情绪识别与交互应用状态同步三源信息，决策层以Qwen3.6 VLM结合DeepAgent框架作为智能决策中枢，执行层驱动虚拟场景的实时渲染与实体LED灯阵的动态响应。在通信层面，设计了标准化的JSON-over-TCP协议，实现了多模块间的松耦合数据交换。在交互设计层面，以旅人的情感成长弧线为叙事主线，通过四个音符的递进解锁构建了从迷茫到自由的情感体验闭环。
 
 本系统的核心创新在于：利用VLM的零样本能力降低了对大规模标注数据的依赖；通过多模态融合决策实现了对参展者整体状态的深度理解；将虚拟场景与物理灯光装置的联动控制真正落地，使展览交互从屏幕延伸至实体空间。
 
