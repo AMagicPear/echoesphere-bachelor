@@ -59,7 +59,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \subsection{实体展览中的交互装置实践}
 
-在实体展览交互装置领域，国际性跨域艺术团队teamLab以其基于自研引擎的实时视觉演算而著称。如图\ref{fig:teamlab-exhibition}所示，teamLab在沉浸式展览中基于自研引擎实时演算生成花朵的绽放、瀑布的流淌、蝴蝶的路径等视觉效果，并且会根据观众互动实时改变\citing{teamlababout}。他们在世界各地举办了艺术展并开设了多处大型常设美术馆，其展览作品被世界各大艺术机构收藏，代表了沉浸式展览的技术前沿。然而，teamLab的反馈规则本质上是预设的、有限的——观众的互动行为被映射到固定的视觉效果集合中，系统并不具备对观众个体状态的实时感知与自适应调整能力。
+在实体展览交互装置领域，国际性跨域艺术团队teamLab以其基于自研引擎的实时视觉演算而著称。如图\ref{fig:teamlab-exhibition}所示，teamLab在沉浸式展览中基于自研引擎实时演算生成花朵的绽放、瀑布的流淌、蝴蝶的路径等视觉效果，并且会根据观众互动实时改变\citing{teamlababout}。他们在世界各地举办了艺术展并开设了多处大型常设美术馆，其展览作品被世界各大艺术机构收藏，代表了沉浸式展览的技术前沿。
 
 \begin{figure}[htbp]
   \centering
@@ -153,7 +153,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 \subsection{智能体AI的核心架构}
 
-现代多模态交互系统的核心正演变为智能体AI，它被定义为一类能感知视觉刺激、语言输入及其他环境数据，并产生有意义具身动作的交互系统\citing{durante2024agent}。智能体AI强调”感知—决策—执行”的闭环架构：多源感知模块融合异构数据，中央决策模块基于上下文进行推理与任务规划，最终生成结构化的控制指令驱动虚拟场景与物理设备。在实体展览场景中，这一闭环意味着参展者的手势、情绪与应用状态被持续采集并汇聚至决策中枢，经综合推理后转化为对虚拟画面与物理装置的协同控制指令。
+现代多模态交互系统的核心正演变为智能体AI，它被定义为一类能感知视觉刺激、语言输入及其他环境数据，并产生有意义具身动作的交互系统\citing{durante2024agent}。智能体AI强调”感知—决策—执行”的闭环架构\citing{yao2023react}：多源感知模块融合异构数据，中央决策模块基于上下文进行推理与任务规划，最终生成结构化的控制指令驱动虚拟场景与物理设备。在实体展览场景中，这一闭环意味着参展者的手势、情绪与应用状态被持续采集并汇聚至决策中枢，经综合推理后转化为对虚拟画面与物理装置的协同控制指令。
 
 在架构层面，深度代理代表了智能体系统的进化方向，其设计目标是在长达数小时的操作周期内维持逻辑一致性。该架构主要由四大支柱构成：详细的系统提示词、规划与任务管理工具、持久性上下文管理以及分层代理委派机制。通过引入内部规划机制，智能体可将复杂目标分解为多个主要执行阶段并为每个阶段设定明确的成功标准——这种显式规划过程提高了决策透明度，并允许代理在任务执行中根据新信息动态调整策略。研究者提出的智能体变换器框架进一步将系统划分为五个功能模块：环境感知与任务规划、智能体学习、记忆、动作预测和认知\citing{durante2024agent}，为构建面向复杂交互场景的智能体系统提供了结构化指导。
 
@@ -326,7 +326,7 @@ Sim2Real鸿沟是另一关键挑战。在模拟环境中学习的交互策略部
 
 \subsection{系统总体架构}
 
-根据开题阶段的技术路线规划，本系统在实现过程中对架构进行了优化调整，最终形成了如图\ref{fig:system-arch}所示的三层星型拓扑架构。
+以上述设计原则为指导，本系统最终形成了如图\ref{fig:system-arch}所示的三层星型拓扑架构。图\ref{fig:tech-roadmap}展示了开题阶段规划的技术路线，为架构设计提供了方法论基础。
 
 \begin{figure}[htbp]
   \centering
@@ -342,11 +342,17 @@ Sim2Real鸿沟是另一关键挑战。在模拟环境中学习的交互策略部
   \label{fig:system-arch}
 \end{figure}
 
-如图\ref{fig:system-arch}所示，本系统采用”感知层—决策层—执行层”的三层星型拓扑架构。感知层由摄像头、MediaPipe手势识别、面部情绪识别及Unity交互应用状态同步四个模块构成，各模块均以TCP Client方式将数据上报至决策层；决策层以Qwen3.6 VLM为基座模型，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源信息并生成控制指令；执行层则由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务，形成完整的”感知—决策—执行”闭环。
+如图\ref{fig:system-arch}所示，本系统采用“感知层—决策层—执行层”的三层星型拓扑架构。
+
+\textbf{感知层}由四个独立模块构成：MediaPipe手势识别模块负责检测参展者的手部动作（捏合、滑动、指向等）；面部情绪识别模块实时分析参展者的情感状态；Unity交互应用同步上报当前章节进度与场景事件；摄像头则提供原始视觉输入。各模块均以TCP Client方式将感知数据上报至决策层，体现了全流程多模态的设计原则——手势、表情、应用状态三类异构信息统一汇入决策中枢，而非各自独立处理。
+
+\textbf{决策层}以EchoAgent为核心。EchoAgent内部基于大语言模型构建，结合DeepAgent框架实现Tool Calling能力，统一汇聚多源感知信息并综合推理，生成针对性的控制指令。EchoAgent与TCP Server之间通过消息队列解耦：Server负责网络通信，将接收到的客户端消息投入共享队列；EchoAgent则按固定间隔从队列中取出消息，经大语言模型理解后自主决策并调用相应工具。这种设计使决策逻辑与网络通信完全分离——EchoAgent并非TCP客户端，而是通过内部队列与Server协同，Server专注收发，Agent专注推理，二者各司其职。
+
+\textbf{执行层}由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务。这一双层执行结构是虚实结合设计原则的直接体现：同一决策指令可同时驱动虚拟画面变化与物理灯光响应，使展览交互从屏幕内延伸至实体空间，形成完整的“感知—决策—执行”闭环。
 
 \subsection{通信架构设计}
 
-系统采用TCP/IP协议实现模块间通信。决策模块（智能体服务端）与TCP Server一体化部署，作为通信中枢接收来自各感知模块的数据上报，并将决策指令下发至执行模块。Unity客户端、MediaPipe客户端、树莓派客户端等感知与执行模块均作为TCP客户端连接至决策中枢。这种星型拓扑结构实现了各模块的松耦合设计：各感知模块仅需关注自身数据采集，无需了解其他模块的存在；决策模块则充当统一的信息汇聚与分发中心，负责协调各模块间的数据流转。
+系统采用TCP/IP协议实现模块间通信。TCP Server作为通信中枢，接收来自各感知模块的数据上报，并将决策指令下发至执行模块。Unity客户端、MediaPipe客户端、树莓派客户端及调试客户端均作为TCP Client连接至决策中枢，共同构成星型拓扑结构。这种结构实现了各模块的松耦合：各感知模块仅需关注自身数据采集，无需了解其他模块的存在；决策模块则充当统一的信息汇聚与分发中心，协调各模块间的数据流转，充分体现了强可拓展性原则——新增感知通道或执行设备只需以TCP Client接入，无需修改核心决策逻辑。
 
 在通信协议的选择上，本系统经过深入比较，最终确定采用TCP Socket而非WebSocket作为传输层协议。TCP Socket相比WebSocket具有更低的协议开销和传输延迟，且能够提供更精细的流量控制与连接管理能力，便于针对展览场景的特定需求进行优化调参。
 
@@ -354,23 +360,21 @@ Sim2Real鸿沟是另一关键挑战。在模拟环境中学习的交互策略部
 
 在协议格式的设计过程中，本系统经历了从二进制协议到JSON文本协议的演进历程。
 
-\textbf{（1）二进制协议方案}：早期设计采用长度前缀+消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。该方案在理论上具有最高的解析效率，但在实际开发中暴露出若干问题：由于图片数据与文本数据采用完全不同的编码方式，智能体在处理混合类型消息时需要额外的类型判断与解码逻辑，增加了中间件的开发复杂度；此外，二进制协议的调试与维护也较为困难，难以在开发阶段进行直观的协议检查。
+\textbf{（1）二进制协议方案}：早期设计采用长度前缀结合消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。该方案在理论上具有最高的解析效率，但在实际开发中暴露出两个问题：其一，图片数据与文本数据采用完全不同的编码路径，处理混合类型消息时需要额外的类型判断与解码逻辑，增加了开发复杂度；其二，二进制格式无法在开发阶段直接阅读，调试与问题定位均较为困难。
 
-\textbf{（2）JSON文本协议方案}：基于上述实践经验，本系统最终采用长度前缀+UTF-8编码的JSON协议格式。该协议将所有数据统一封装为JSON对象，核心字段定义如下：
+\textbf{（2）JSON文本协议方案}：基于上述实践经验，本系统最终采用“4字节大端序长度前缀 + UTF-8编码JSON载荷”的协议格式。发送端将JSON对象序列化为UTF-8字节序列，计算其长度并以大端序写入前4字节，随后写入载荷；接收端据此解析，确保TCP流式传输中消息边界的正确划分。该协议将所有数据统一封装为JSON对象，核心字段定义如下：
 
 \begin{itemize}
 \item \texttt{type}：消息类型，取值为 \texttt{text}（普通文本消息）、\texttt{image}（Base64编码的图片数据）、\texttt{command}（控制命令）、\texttt{register}（客户端注册）
-\item \texttt{data}：载荷内容，文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据，command类型时为具体命令内容
-\item \texttt{client\_type}：发送者身份标识，取值包括 \texttt{echoagent}（智能体）、\texttt{unity}（Unity客户端）、\texttt{mediapipe}（感知模块）、\texttt{raspberry\_pi}（树莓派控制端）
-\item \texttt{request\_id}：请求追踪标识，采用UUID格式，仅在需要响应的请求中携带
-\item \texttt{relay\_to}：直接转发标识，若消息中包含此字段，则服务端直接将该消息转发至目标客户端，不经智能体处理
+\item \texttt{data}：载荷内容——文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据，command类型时为具体命令名称
+\item \texttt{client\_type}：发送者身份标识，取值包括 \texttt{unity}、\texttt{mediapipe}、\texttt{raspberry\_pi}、\texttt{debug} 四种。客户端在注册时通过此字段声明自身类别，服务端据此维护已连接客户端的注册表
+\item \texttt{request\_id}：请求追踪标识，采用UUID格式。当命令需要响应时，发起方携带此字段，响应方须原样回传以关联请求—响应对
+\item \texttt{relay\_to}：直接转发标识。若消息中包含此字段，服务端不再将消息投入Agent队列，而是直接转发至目标客户端，实现低延迟的客户端间直连通信
 \end{itemize}
 
-其中，\texttt{register}类型具有特定的语义约定：该类型仅由客户端向服务端发起。当客户端首次启动并连接到服务端时，须发送一条\texttt{register}类型消息，且必须携带\texttt{client\_type}字段标识自身类别，服务端据此维护已连接客户端的注册表。
+其中，\texttt{register}类型具有特定的语义约定：该类型仅由客户端向服务端发起。当客户端首次连接到服务端时，须发送一条\texttt{register}类型消息并携带\texttt{client\_type}字段标识自身类别。服务端在收到注册消息后记录该连接的身份信息，后续该连接发送的消息无需重复携带\texttt{client\_type}，服务端将自动补充发送者身份。
 
-\texttt{command}类型遵循特定的命名约定。对于需要响应的命令，以\texttt{request:}为前缀、后接具体操作名，并须携带\texttt{request\_id}以关联响应，如\texttt{request:screenshot}表示请求截图。对于向其他客户端发送输入事件的命令，则以\texttt{input:}为前缀、后接具体输入类型，如\texttt{input:submit}表示向Unity客户端发送提交事件。
-
-该协议格式具有以下优势：JSON的文本形式便于开发阶段的调试与日志分析；统一的数据封装方式简化了智能体端的协议解析逻辑；Base64编码虽然增加了约33\%的数据体积，但换取了协议的一致性与可维护性。考虑到本系统运行于本机与局域网环境下，网络带宽充足且延迟极低（通常低于5ms），上述开销在实际使用中完全可以接受。协议使用实例如表\ref{tbl:protocol-examples}所示。
+JSON文本协议具有三方面优势：文本形式便于开发阶段的调试与日志分析；统一的数据封装方式简化了协议解析逻辑；Base64编码虽然增加了约33\%的数据体积，但换取了协议的一致性与可维护性。考虑到本系统运行于本机与局域网环境下，网络带宽充足且延迟极低（通常低于5ms），上述开销在实际使用中完全可接受。表\ref{tbl:protocol-examples}按消息类型给出了四种典型场景下的协议使用实例。
 
 \begin{table}[h]
 \centering
@@ -379,19 +383,29 @@ Sim2Real鸿沟是另一关键挑战。在模拟环境中学习的交互策略部
 \hline
 场景 & 消息格式 \\
 \hline
-客户端注册 & \texttt{\{“type”: “register”, “client\_type”: “mediapipe”\}} \\
+客户端注册 & \texttt{\{"type": "register", "client\_type": "mediapipe"\}} \\
 \hline
-智能体请求截图 & \texttt{\{“type”: “command”, “client\_type”: “echoagent”, “data”: “request\_screenshot”, “request\_id”: “uuid-xxx”\}} \\
+Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
 \hline
-Unity上报交互应用状态 & \texttt{\{“type”: “text”, “client\_type”: “unity”, “data”: “chapter:2, event:enter\_scene”\}} \\
+截图响应（带请求追踪） & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
 \hline
-Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”: “unity”, “data”: “base64...”, “request\_id”: “uuid-xxx”\}} \\
+客户端间直接转发 & \texttt{\{"type": "text", "client\_type": "mediapipe", "data": "hand\_pos:0.5,0.3", "relay\_to": "unity"\}} \\
 \hline
 \end{tabularx}
 \label{tbl:protocol-examples}
 \end{table}
 
-为完整定义各模块间的交互语义，表\ref{tbl:command-table}汇总了系统中全部控制命令的接收方、发起方与使用说明。
+\subsection{系统控制命令}
+
+基于上述协议格式，系统定义了一套控制命令用于各模块间的协调交互。表\ref{tbl:command-table}按接收客户端分组，汇总了全部控制命令的发起方、接收方与使用说明。
+
+命令的命名遵循三级约定，以前缀区分语义类别：
+
+\begin{enumerate}
+\item \textbf{\texttt{request:}前缀}：请求型命令，期望接收方处理后返回响应。发起方须携带\texttt{request\_id}字段，接收方响应时原样回传以关联请求。典型实例为\texttt{request:screenshot}——Agent请求Unity或MediaPipe客户端截取当前画面以查看运行状态。
+\item \textbf{\texttt{input:}前缀}：输入注入型命令，用于向目标客户端模拟用户交互事件。典型实例包括\texttt{input:submit}（触发提交事件）、\texttt{input:move}（将食指指向映射为输入坐标）、\texttt{input:cancel}（取消当前输入）和\texttt{input:navigate}（触发导航操作）。
+\item \textbf{无前缀}：直接控制命令，即发即忘，无需响应。此类命令主要用于设备控制与状态同步，如灯光模式切换（\texttt{chase}、\texttt{solid}、\texttt{rainbow}、\texttt{breathing}）、音符事件的灯光伴随反馈（\texttt{gain\_note}、\texttt{drop\_note}、\texttt{play\_note}），以及配置开关（\texttt{hand\_direction}）。
+\end{enumerate}
 
 \begin{table}[h]
 \centering
@@ -424,11 +438,13 @@ Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”:
 \hline
 \texttt{drop\_note} & raspberry\_pi & debug & 调试用，模拟失去音符时的灯光反馈 \\
 \hline
-\texttt{play\_note} & raspberry\_pi & -- & 演奏音符时的灯光伴随效果 \\
+\texttt{play\_note} & raspberry\_pi & unity & 演奏音符时的灯光伴随效果 \\
 \hline
 \end{tabularx}
 \label{tbl:command-table}
 \end{table}
+
+从表\ref{tbl:command-table}可见，命令体系完整覆盖了四类客户端之间的交互需求：MediaPipe与Unity之间通过\texttt{input:}前缀命令实现手势到输入的映射；EchoAgent通过\texttt{request:screenshot}主动感知系统运行状态，并通过\texttt{input:cancel}与\texttt{input:navigate}干预交互流程；灯光控制命令以无前缀的简洁形式直接驱动树莓派；音符反馈命令（\texttt{gain\_note}、\texttt{drop\_note}、\texttt{play\_note}）则实现了Unity虚拟事件到物理灯光的实时联动。
 
 \subsection{Unity引擎与交互应用}
 
@@ -491,7 +507,7 @@ Unity发送截图响应 & \texttt{\{“type”: “image”, “client\_type”:
 
 \textbf{（2）标准化通信协议抽象}
 
-智能体与各模块间的通信遵循标准化的JSON-over-TCP协议。SKILL对协议格式进行了形式化描述，包括消息类型体系（text、image、command、register四种消息类型）、客户端身份标识（echoagent、unity、mediapipe、raspberry\_pi）、以及请求追踪机制（request\_id字段用于关联请求与响应）。这种形式化描述使得智能体能够精确理解每条消息的语义，而非依赖自然语言的模糊表述。
+智能体与各模块间的通信遵循标准化的JSON-over-TCP协议。SKILL对协议格式进行了形式化描述，包括消息类型体系（text、image、command、register四种消息类型）、客户端身份标识（unity、mediapipe、raspberry\_pi、debug四种）、以及请求追踪机制（request\_id字段用于关联请求与响应）。这种形式化描述使得智能体能够精确理解每条消息的语义，而非依赖自然语言的模糊表述。
 
 \textbf{（3）感知事件模型}
 
