@@ -228,7 +228,7 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 
 \subsection{用例结构化描述}
 
-为明确系统核心功能的参与者角色、交互流程与响应逻辑，此处枚举系统必须的一些交互性和非交互性功能，如图\ref{fig:use-case}所示：
+为明确系统核心功能的参与者角色、交互流程与响应逻辑，此处枚举系统必须的一些交互性和非交互性功能，如图\ref{fig:use-case}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -239,73 +239,202 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 
 (1) 手势控制移动角色
 
-首选介绍手势交互控制交互应用中的旅人移动的用例。在人们日常生活中，手势往往作为语言以外的一种高效的信息传递方式，点名、问路的时候人们都会下意识地用手指向自己所指代的物体，以至于“所指”这个词本身都已经用上了“指”这个字。如表\ref{tbl:usecase-gesture}所示。
+首先介绍手势交互控制旅人移动的用例。在人们日常生活中，手势往往是语言以外高效的信息传递方式——点名、问路时人们会下意识地用手指向所指代的物体，”所指”一词本身就包含了”指”这个字。因此，为发挥实体展览身体在场性的优势，手势输入必不可少。通过手指指向控制旅人行走，能够达成非常直观的交互感受。系统应在参展者食指伸直时，识别食指所指方向，并控制旅人沿此方向行走。其用例结构化描述如表\ref{tbl:usecase-gesture}所示。
 
 \begin{table}[h]
 \centering
-\caption{手势交互控制角色用例结构化描述表}
+\caption{手势交互控制角色移动用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
 Actors & 参展者、MediaPipe模块、Unity \\
 \hline
-Description & 参展者做出捏合手势后，MediaPipe检测指尖关键点距离并判定为捏合事件，经TCP上报至决策中枢；Agent综合当前章节与情绪状态决策触发何种音符，向Unity下发演奏指令，同步通知树莓派执行灯光伴随效果 \\
+Trigger & 参展者伸直食指指向某一方向 \\
 \hline
-Date & 手部21点关键点坐标、捏合状态、当前章节与场景信息、情绪分类结果 \\
+Preconditions & TCP服务端已启动、MediaPipe模块已启动并开启手指指向捕捉功能、Unity交互应用已启动并处于可自由移动状态 \\
 \hline
-Stimulus & 参展者拇指尖与食指尖归一化距离低于0.06，触发捏合事件 \\
+Description & 参展者伸出食指指向目标方向；MediaPipe 检测手部 21 个特征点坐标，计算食指 MCP 关节（点 5）至指尖 TIP（点 8）的连线方向向量；系统将该方向向量在水平面上归一化，映射为 Unity 的移动输入坐标并经 TCP 发送接入Unity Input System；Unity 实时更新旅人角色的位移向量，驱动其持续行走；摄像机保持平滑跟随。 \\
 \hline
-Response & 虚拟场景中触发音符演奏的视觉与音效反馈；实体LED灯阵同步闪烁对应灯光模式 \\
+Postconditions & 旅人角色位置持续更新至参展者所指方向 \\
 \hline
-Comments & 不同场景下捏合手势映射至不同音符（水滴/道路交错/海浪/风）；手势识别到视觉反馈的端到端延迟控制在100ms以内 \\
+Notes & 移动速度恒定，方向随手势连续变化实时更新；仅当食指伸直且其余四指弯曲时识别为指向手势；手势识别到角色响应的端到端延迟控制在100ms以内 \\
 \hline
 \end{tabularx}
 \label{tbl:usecase-gesture}
 \end{table}
 
-\textbf{用例二：情绪感知与场景适配。}面部情绪识别模块持续分析参展者面部关键点，将情绪状态变化通过TCP上报至EchoAgent；Agent据此调整场景视觉参数与灯光氛围。其结构化描述如表\ref{tbl:usecase-emotion}所示。
+(2) 表情输入
+
+手势提供了空间指向性，而面部表情则承载了参展者的情绪信息。系统通过摄像头实时采集参展者面部图像，经MediaPipe FaceLandmarker提取468个面部关键点，计算七种基本情绪的分类标签与置信度，并在情绪状态发生变化时上报至EchoAgent，作为后续决策的情感上下文。此过程不涉及直接的交互触发，属于后台持续运行的数据采集链路，其用例描述如表\ref{tbl:usecase-expression}所示。
 
 \begin{table}[h]
 \centering
-\caption{情绪感知与场景适配用例结构化描述}
-\begin{tabularx}{\linewidth}{|l|X|}
+\caption{表情输入用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
 \hline
-\textbf{Actors} & 参展者、MediaPipe面部识别模块、EchoAgent、Unity交互应用、树莓派灯光控制器 \\
+Actors & 参展者、MediaPipe面部识别模块、EchoAgent \\
 \hline
-\textbf{Description} & 面部识别模块基于MediaPipe FaceLandmarker持续检测468个面部关键点，当情绪分类结果发生变化时，通过TCP上报至Agent；Agent根据情绪倾向（正向/负向）及强度，向Unity下发着色器参数调整指令，向树莓派下发灯光颜色与亮度调整指令 \\
+Trigger & 参展者面部处于摄像头视野内 \\
 \hline
-\textbf{Date} & 面部468点关键点坐标、情绪分类标签与置信度、当前章节信息 \\
+Preconditions & 摄像头正常工作，MediaPipe FaceLandmarker已初始化 \\
 \hline
-\textbf{Stimulus} & 面部识别模块检测到参展者情绪状态发生变化 \\
+Description & MediaPipe FaceLandmarker持续采集摄像头画面，提取面部478个关键点坐标与52维面部形变系数（blendshapes）；系统实时计算形变系数均值作为情绪强度指标，当指标变化幅度超过预设阈值且距上次上报超过最小间隔时，经TCP将面部形变数据发送至EchoAgent；Agent基于形变系数推理参展者情绪状态，更新内部情感上下文 \\
 \hline
-\textbf{Response} & Unity实时调整场景着色器的菲涅尔强度、抖动幅度等视觉参数；LED灯阵切换颜色基调与亮度 \\
+Postconditions & Agent获得参展者当前面部形变数据（形变系数及其置信度、鼻尖坐标、时间戳） \\
 \hline
-\textbf{Comments} & 正向情绪触发暖色调（琥珀色/金色）+高亮度，负向情绪触发冷色调（蓝紫色）+低亮度；情绪变化至视觉响应的端到端延迟控制在200ms以内 \\
+Notes & 形变系数覆盖52种面部运动单元，为Agent的情绪推理提供细粒度底层特征；面部检测目标帧率≥15fps；均值变化阈值与上报最小间隔均可通过参数调整 \\
 \hline
 \end{tabularx}
-\label{tbl:usecase-emotion}
+\label{tbl:usecase-expression}
 \end{table}
 
-\textbf{用例三：虚实联动灯光反馈。}Unity交互应用中的关键事件触发后，通过TCP上报至Agent，经决策后向树莓派下发灯光控制指令，驱动实体LED灯阵产生同步响应。其结构化描述如表\ref{tbl:usecase-light}所示。
+(3) 与场景物体交互
+
+前述两项用例关注外部感知输入，而交互应用内部的物体交互构成了叙事推进的核心机制。参展者通过手势引导旅人接近场景中的可交互物体（音符、机关触发器、叙事标记点等），Unity基于物理碰撞系统判定交互触发条件，进而执行对应的交互逻辑——收集音符以解锁章节进度、激活机关以改变场景结构，或触发叙事事件以推进情感故事线。关键交互事件同步上报至EchoAgent，使Agent感知参展者的叙事进度。其用例描述如表\ref{tbl:usecase-interaction}所示。
 
 \begin{table}[h]
 \centering
-\caption{虚实联动灯光反馈用例结构化描述}
-\begin{tabularx}{\linewidth}{|l|X|}
+\caption{与场景物体交互用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
 \hline
-\textbf{Actors} & Unity交互应用、EchoAgent、树莓派灯光控制器、WS2812 LED灯阵 \\
+Actors & 参展者、Unity交互应用、EchoAgent \\
 \hline
-\textbf{Description} & Unity端触发关键交互事件（音符获取、章节切换、谜题完成等）后，通过TCP上报事件信息至Agent；Agent根据事件类型与当前状态决策灯光模式，向树莓派下发控制指令；树莓派通过PWM信号驱动WS2812灯带执行 \\
+Trigger & 参展者控制旅人角色进入场景中可交互物体的触发范围 \\
 \hline
-\textbf{Date} & 交互事件类型与参数、当前章节与场景、灯光模式预设（chase/solid/rainbow/breathing） \\
+Preconditions & Unity交互应用正常运行，旅人角色处于可移动状态，场景物体已加载 \\
 \hline
-\textbf{Stimulus} & Unity交互应用中触发预设的关键交互事件 \\
+Description & 参展者通过手势引导旅人接近场景中的可交互物体（音符、触发器、叙事标记点）；Unity物理碰撞系统检测角色与物体的接触或距离进入判定阈值；Unity触发对应的交互逻辑（收集音符、激活机关、触发叙事事件）；Unity更新场景状态与交互进度；关键交互事件经TCP上报至EchoAgent \\
 \hline
-\textbf{Response} & LED灯阵切换至对应灯光模式，与虚拟场景的视觉氛围保持同步 \\
+Postconditions & 场景交互状态更新，叙事进度推进至下一里程碑 \\
 \hline
-\textbf{Comments} & 灯光指令经Agent决策后通过TCP下发，树莓派端使用rpi-ws281x库将PWM信号转换为LED显示；灯光变化延迟控制在200ms以内 \\
+Notes & 交互判定基于Unity物理碰撞系统；不同物体挂载不同的交互脚本，通过统一的事件接口上报Agent \\
+\hline
+\end{tabularx}
+\label{tbl:usecase-interaction}
+\end{table}
+
+(4) 智能体场景理解
+
+上述感知输入——手势指向、表情变化与场景交互事件——最终汇聚至EchoAgent，由Agent完成跨模态的语义整合与意图推理。Agent以Qwen3.6 VLM为核心推理引擎，将多源感知数据与当前叙事状态统一为上下文表示，综合判断参展者的行为意图与情感趋向，生成结构化的决策输出。这一用例属于系统内部的处理链路，不涉及参展者的直接交互，却是连接感知与反馈的关键认知桥梁。其用例描述如表\ref{tbl:usecase-understanding}所示。
+
+\begin{table}[h]
+\centering
+\caption{智能体场景理解用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
+\hline
+Actors & EchoAgent、MediaPipe模块、Unity交互应用 \\
+\hline
+Trigger & Agent接收到来自感知层的多源数据更新（手势、表情、场景事件） \\
+\hline
+Preconditions & 感知层各模块正常运行，Agent与各模块TCP连接正常，叙事状态机已初始化 \\
+\hline
+Description & Agent接收来自MediaPipe的手势识别结果、表情识别结果及Unity的场景状态信息；Agent将多源数据整合为统一的上下文表示，关联当前叙事状态节点；Agent基于上下文进行意图推理与情感判断，评估是否触发状态转移；Agent根据推理结果确定交互策略（视觉参数调整、灯光模式切换、叙事状态推进）；Agent生成结构化的决策输出，供后续控制命令下发使用 \\
+\hline
+Postconditions & Agent完成场景状态理解，生成决策输出（目标视觉参数、灯光模式、叙事状态更新） \\
+\hline
+Notes & 决策基于Qwen3.6 VLM的视觉-语言联合推理能力，通过DeepAgent框架管理工具调用链；上下文窗口保留近30s内的关键交互历史 \\
+\hline
+\end{tabularx}
+\label{tbl:usecase-understanding}
+\end{table}
+
+(5) 发送控制命令
+
+Agent完成场景理解与决策后，需将决策结果转化为执行端可解析的控制指令。系统采用自定义JSON协议，Agent将目标视觉参数、灯光模式与叙事状态更新封装为结构化指令，经TCP分别下发至Unity与树莓派，各执行端解析后执行并返回ACK确认。其用例描述如表\ref{tbl:usecase-command}所示。
+
+\begin{table}[h]
+\centering
+\caption{发送控制命令用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
+\hline
+Actors & EchoAgent、Unity交互应用、树莓派灯光控制器 \\
+\hline
+Trigger & Agent生成决策输出，需要向执行端下发指令 \\
+\hline
+Preconditions & Agent与各执行端TCP连接正常，决策输出已生成 \\
+\hline
+Description & Agent根据决策输出构造JSON格式的控制指令（目标着色器参数、灯光颜色与模式、叙事状态更新等）；指令经TCP分别发送至Unity与树莓派；Unity解析指令，更新场景渲染参数与叙事状态；树莓派解析指令，更新LED灯阵的灯光模式与颜色；各执行端完成更新后返回ACK确认 \\
+\hline
+Postconditions & Unity场景渲染参数与树莓派灯光状态按指令更新，Agent收到ACK确认 \\
+\hline
+Notes & 指令采用自定义JSON协议；若执行端超时未返回ACK，Agent将重试一次；重试失败则记入错误日志 \\
+\hline
+\end{tabularx}
+\label{tbl:usecase-command}
+\end{table}
+
+(6) 动态视觉生成
+
+Unity接收Agent下发的视觉参数后，在GPU端实时计算着色器效果，驱动虚拟场景的动态视觉呈现。场景中的关键视觉元素——山峦的抖动与固化、建筑的舒展与扭曲、潮水的涨落与光点浮动——均通过着色器参数插值实现平滑过渡，避免突变造成的视觉割裂。后处理栈同步调整色调映射与Bloom强度，使画面整体氛围与当前情感基调保持一致。其用例描述如表\ref{tbl:usecase-visual}所示。
+
+\begin{table}[h]
+\centering
+\caption{动态视觉生成用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
+\hline
+Actors & Unity交互应用、EchoAgent \\
+\hline
+Trigger & Unity接收到Agent下发的视觉参数更新指令 \\
+\hline
+Preconditions & Unity交互应用正常运行，场景资源已加载，着色器已预热编译 \\
+\hline
+Description & Unity解析Agent下发的视觉参数（着色器属性、后处理参数、粒子系统参数）；GPU端实时计算顶点/片元着色器，驱动山峦形变、建筑扭曲、水面波动等视觉效果；后处理栈根据情绪倾向调整色调映射、Bloom强度与色彩分级；粒子系统根据场景氛围调整发射速率、生命周期与运动轨迹；所有视觉变化通过Lerp/Slerp插值在0.5--2.0s内平滑过渡 \\
+\hline
+Postconditions & 虚拟场景视觉呈现更新至与当前情绪状态和叙事进度匹配 \\
+\hline
+Notes & 着色器参数插值采用Lerp/Slerp保证平滑过渡；视觉变化目标帧率≥30fps；后处理使用Unity Post-Processing Stack v2 \\
+\hline
+\end{tabularx}
+\label{tbl:usecase-visual}
+\end{table}
+
+(7) 虚实联动灯光控制
+
+虚拟场景的视觉变化通过实体LED灯阵延伸至物理展览空间，使沉浸感从屏幕内部扩散至真实环境。Agent根据场景理解结果确定目标灯光模式、颜色与亮度，通过树莓派驱动WS2812 LED灯阵执行对应效果，使实体空间的光影氛围与虚拟场景的视觉基调协调一致。其用例描述如表\ref{tbl:usecase-light}所示。
+
+\begin{table}[h]
+\centering
+\caption{虚实联动灯光控制用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
+\hline
+Actors & EchoAgent、树莓派灯光控制器、WS2812 LED灯阵 \\
+\hline
+Trigger & Agent判定当前场景状态需要灯光氛围变化 \\
+\hline
+Preconditions & 树莓派已建立TCP连接，LED灯阵电源接通，灯光控制脚本已加载 \\
+\hline
+Description & Agent根据场景理解结果确定目标灯光模式（chase/solid/rainbow/breathing）、颜色与亮度参数；Agent将灯光控制指令经TCP下发至树莓派；树莓派通过rpi-ws281x库将指令转换为PWM信号；WS2812 LED灯阵执行对应灯光模式，实体空间氛围同步变化 \\
+\hline
+Postconditions & LED灯阵切换至指定灯光模式，实体空间与虚拟场景视觉氛围协调一致 \\
+\hline
+Notes & 支持chase/solid/rainbow/breathing四种预设灯光模式；灯光变化端到端延迟控制在200ms以内；LED灯阵共计256颗WS2812可寻址LED \\
 \hline
 \end{tabularx}
 \label{tbl:usecase-light}
+\end{table}
+
+(8) 调取日志记录
+
+多模态链路长且包含模型黑盒，系统需内置完善的调试与监控能力。开发者通过专用调试客户端发起日志查询请求，Agent根据指定条件检索运行日志并返回格式化结果，支撑开发阶段的链路追踪与问题定位，也用于展览运行期间的状态监控。其用例描述如表\ref{tbl:usecase-log}所示。
+
+\begin{table}[h]
+\centering
+\caption{调取日志记录用例结构化描述}
+\begin{tabularx}{\linewidth}{|c|X|}
+\hline
+Actors & 开发者/调试客户端、EchoAgent \\
+\hline
+Trigger & 开发者通过调试客户端发起日志查询请求 \\
+\hline
+Preconditions & 系统运行中，日志模块正常工作，调试客户端与Agent建立TCP连接 \\
+\hline
+Description & 开发者通过调试客户端发送日志查询指令（指定时间范围、模块、日志级别）；Agent解析查询条件，检索对应日志记录；Agent将日志结果格式化后返回至调试客户端；开发者基于日志进行分析、调试或状态监控 \\
+\hline
+Postconditions & 开发者获取指定范围的系统运行日志 \\
+\hline
+Notes & 日志按模块和时间戳索引；支持按DEBUG/INFO/WARN/ERROR级别过滤；支持关键词模糊搜索 \\
+\hline
+\end{tabularx}
+\label{tbl:usecase-log}
 \end{table}
 
 \section{媒体形式与交互设计理念}
@@ -888,7 +1017,7 @@ MediaPipe客户端同样以TCP Client方式连接至智能体服务端，上报�
 
 \begin{enumerate}
 \item \textbf{交互应用内容深度不足}：由于开发时间与个人精力有限，《回声之境》在叙事内容、关卡设计与情感表达等方面仍有较大的打磨空间。四个音符的象征意义与交互机制的结合尚不够紧密，部分场景的情绪基调与交互反馈之间的关联度可以进一步提升。
-\item \textbf{情绪识别精度有限}：当前系统采用现成的MediaPipe方案进行手势与面部关键点检测，情绪状态的量化维度较为单一，尚未充分利用面部关键点的时序变化实现更细腻的情感推断。
+\item \textbf{情绪感知架构的局限性}：当前面部识别模块仅输出MediaPipe的52维形变系数（blendshapes）原始数据，情绪分类与理解完全交由EchoAgent完成。这一设计降低了感知层的复杂度，并使情绪推理能够结合上下文进行深层语义理解，但也带来了两方面代价：其一，Agent推理延迟在秒级，无法满足实时灯光/着色器等毫秒级响应场景的需求；其二，形变系数为底层几何特征，Agent对"中性/混合表情"的边界判断缺乏稳定锚点。后续改进可在感知层增加一个轻量级快通路（如基于形变系数的规则映射），为下游提供低延迟的情绪倾向信号，同时保留Agent的深度理解通路，形成快慢结合的双通道情绪感知架构。
 \item \textbf{实体装置与虚拟场景的同步精度}：目前灯条控制与交互应用内事件之间存在一定的响应延迟，实体装置的物理反馈与虚拟画面的时间一致性尚有优化空间。如需提升至展览级别的用户体验，需在通信延迟优化与同步策略设计上做更多工作。
 \item \textbf{智能体的决策可解释性}：尽管系统集成了Phoenix链路追踪工具，但VLM在Tool Calling决策过程中的推理逻辑仍像一个“黑箱”，难以向非技术用户解释为何在某一时刻选择了特定的工具调用。在面向普通观众的展览场景中，增加决策的可解释性将有助于提升用户对系统的信任感。
 \end{enumerate}
