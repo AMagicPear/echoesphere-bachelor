@@ -171,6 +171,7 @@
 }
 \makeatother
 \AtBeginEnvironment{tabular}{\small}
+\AtBeginEnvironment{tabularx}{\small}
 
 \makeatletter
 \renewcommand{\p@subfigure}{\arabic{chapter}-\arabic{figure}}
