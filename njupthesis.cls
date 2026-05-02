@@ -609,6 +609,7 @@
 \newcommand{\citing}[1]{\textsuperscript{\cite{#1}}}
 \setlist{noitemsep}
 \setlist{nolistsep}
+\setlist[enumerate]{label={(\arabic*)}, leftmargin=2em}
 
 \AtBeginDocument{
   \setlength{\abovedisplayskip}{8pt}
