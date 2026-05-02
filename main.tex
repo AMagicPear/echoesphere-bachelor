@@ -751,7 +751,7 @@ EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一�
 
 \subsection{长度前缀JSON协议}
 
-系统各模块间通过统一的二进制帧协议进行通信：每帧由 4 字节大端序无符号整数（表示负载长度）与紧随其后的 UTF-8 编码 JSON 负载组成。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type}（消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}）、\texttt{data}（负载内容）、\texttt{client\_type}（发送方身份标识，注册消息使用）、\texttt{request\_id}（UUID 格式请求标识，用于关联请求与响应）及 \texttt{relay\_to}（中继目标，指定消息经服务器直接转发至某类客户端）。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}，覆盖系统全部通信节点。
+系统各模块间通过统一的二进制帧协议进行通信：每帧由 4 字节大端序无符号整数（表示负载长度）与紧随其后的 UTF-8 编码 JSON 负载组成。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type}（消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}）、\texttt{data}（负载内容）、\texttt{client\_type}（发送方身份标识，注册消息使用）、\texttt{request\_id}（UUID 格式请求标识，用于关联请求与响应）及 \texttt{relay\_to}（中继目标，指定消息经服务器直接转发至某类客户端）。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}，覆盖系统全部通信节点。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
 
 \begin{code}
 \caption{JsonMessage 消息结构定义}
@@ -772,6 +772,63 @@ class JsonMessage(TypedDict):
 TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息（\texttt{\{"type": "register", "client\_type": "..."\}}），服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
 
 协议层支持中继转发机制：若消息含非空 \texttt{relay\_to} 字段，服务端直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的低延迟直通——典型场景为 MediaPipe 将指向方向数据中继至 Unity 驱动角色移动。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
+
+\subsection{Python端TcpClient实现}
+
+服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TcpClient 是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅/退订式的事件回调机制——调用方可按消息类型（text、image、command）分别注册处理函数，当对应类型消息到达时自动分派。
+
+TcpClient内部维护一个 \texttt{\_Event} 辅助类，管理回调函数的添加（+=）、移除（-=）与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节长度前缀（\texttt{struct.unpack(">I", ...)}，> 表示大端序），再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
+
+\begin{code}
+\caption{简化的TcpClient 客户端核心代码}
+\label{code:tcp-client}
+\lstset{style=codeblock}
+\begin{lstlisting}
+# 事件分发：订阅/退订 + 回调派发
+class _Event:
+    def __init__(self, name):
+        self._callbacks = []
+
+    def __iadd__(self, callback):
+        self._callbacks.append(callback)
+        return self
+
+    def __isub__(self, callback):
+        self._callbacks.remove(callback)
+        return self
+
+    def dispatch(self, *args, **kwargs):
+        for cb in self._callbacks:
+            try:
+                cb(*args, **kwargs)
+            except Exception:
+                logger.exception(f"Error in {self._name} handler")
+
+# 长度前缀帧接收 + 类型分派
+async def _receive_loop(self):
+    try:
+        while self._reader:
+            length_prefix = await self._reader.readexactly(4)
+            payload_len = struct.unpack(">I", length_prefix)[0]
+            json_data = await self._reader.readexactly(payload_len)
+            msg = json.loads(json_data.decode("utf-8"))
+            {
+                "text":    lambda: self.on_text.dispatch(msg["data"]),
+                "image":   lambda: self.on_image.dispatch(
+                                 base64.b64decode(msg["data"])),
+                "command": lambda: self.on_command.dispatch(msg),
+            }.get(msg["type"], lambda: None)()
+    except asyncio.IncompleteReadError:
+        logger.info("Connection closed")
+    finally:
+        await self.close()
+
+# 长度前缀帧发送
+def _send_json(self, obj):
+    raw = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+    self._writer.write(struct.pack(">I", len(raw)) + raw)
+\end{lstlisting}
+\end{code}
 
 \subsection{Unity端AgentCommunicator}
 
@@ -800,7 +857,7 @@ AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screen
 
 为使 智能体 能够通过网络指令驱动旅人移动，系统实现了一个自定义的 VirtualAgentDevice——继承自 Unity Input System 的 \texttt{InputDevice}，向 Input System 注册为独立输入设备，提供 \texttt{move\_stick}（二维摇杆）与 \texttt{submit\_button}、\texttt{cancel\_button} 等控制元。EchoEventCenter 组件监听 智能体 下发的 \texttt{input:move:x,y} 格式指令，将解析出的方向向量写入 VirtualAgentDevice 的状态结构，通过 \texttt{InputSystem.QueueStateEvent()} 注入 Input System 事件队列，从而被 TravelerController 的 Move 动作绑定所消费。这一间接层使网络输入与本地键盘/手柄输入共享同一套 Input System 管线，无需在角色控制器中编写特殊的网络输入分支。
 
-为防止 智能体 指令"粘滞"（即上一次移动指令持续生效），EchoEventCenter 内置了移动超时检测：每 0.2 秒检查距最后一次移动指令的时间，若超过 0.3 秒无新指令则自动清零移动向量，使角色在通信中断或 智能体 静默时自动停步。
+为防止智能体指令“粘滞”（即上一次移动指令持续生效），EchoEventCenter 内置了移动超时检测：每 0.2 秒检查距最后一次移动指令的时间，若超过 0.3 秒无新指令则自动清零移动向量，使角色在通信中断或 智能体 静默时自动停步。
 
 \subsection{场景物体交互}
 
