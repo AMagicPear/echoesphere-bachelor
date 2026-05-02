@@ -700,15 +700,113 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 \chapter{关键技术与模块实现}
 
+\section{TCP通信与并发控制实现}
+
+\subsection{长度前缀JSON协议}
+
+系统各模块间通过统一的二进制帧协议进行通信：每帧由 4 字节大端序无符号整数（表示负载长度）与紧随其后的 UTF-8 编码 JSON 负载组成。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type}（消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}）、\texttt{data}（负载内容）、\texttt{client\_type}（发送方身份标识，注册消息使用）、\texttt{request\_id}（UUID 格式请求标识，用于关联请求与响应）及 \texttt{relay\_to}（中继目标，指定消息经服务器直接转发至某类客户端）。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}，覆盖系统全部通信节点。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
+
+\begin{code}
+\caption{JsonMessage 消息结构定义}
+\label{code:json-message}
+\begin{codebox}
+class JsonMessage(TypedDict):
+    “””用于存储JSON消息的字典类”””
+    type: str # text | image | command | register
+    data: str # 文本内容或base64编码数据，command 时为命令内容
+    client_type: NotRequired[ClientType] # 发送这个消息的客户端类型：mediapipe | unity | raspberry_pi | debug
+    request_id: NotRequired[str] # 需要回应的响应时必须，否则非必须
+    relay_to: NotRequired[str] # 直接转发 如果含本字段 则此消息直接转发给目标客户端
+\end{codebox}
+\end{code}
+
+\subsection{EchoServer与客户端管理}
+
+TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息（\texttt{\{“type”: “register”, “client\_type”: “...”\}}），服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
+
+协议层支持中继转发机制：若消息含非空 \texttt{relay\_to} 字段，服务端直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的低延迟直通——典型场景为 MediaPipe 将指向方向数据中继至 Unity 驱动角色移动。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
+
+\subsection{Python端TcpClient实现}
+
+服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TcpClient 是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅/退订式的事件回调机制——调用方可按消息类型（text、image、command）分别注册处理函数，当对应类型消息到达时自动分派。
+
+TcpClient内部维护一个 \texttt{\_Event} 辅助类，管理回调函数的添加（+=）、移除（-=）与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节长度前缀（\texttt{struct.unpack(“>I”, ...)}，> 表示大端序），再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
+
+\begin{code}
+\caption{简化的TcpClient 客户端核心代码}
+\label{code:tcp-client}
+\lstset{style=codeblock}
+\begin{lstlisting}
+# 事件分发：订阅/退订 + 回调派发
+class _Event:
+    def __init__(self, name):
+        self._callbacks = []
+
+    def __iadd__(self, callback):
+        self._callbacks.append(callback)
+        return self
+
+    def __isub__(self, callback):
+        self._callbacks.remove(callback)
+        return self
+
+    def dispatch(self, *args, **kwargs):
+        for cb in self._callbacks:
+            try:
+                cb(*args, **kwargs)
+            except Exception:
+                logger.exception(f”Error in {self._name} handler”)
+
+# 长度前缀帧接收 + 类型分派
+async def _receive_loop(self):
+    try:
+        while self._reader:
+            length_prefix = await self._reader.readexactly(4)
+            payload_len = struct.unpack(“>I”, length_prefix)[0]
+            json_data = await self._reader.readexactly(payload_len)
+            msg = json.loads(json_data.decode(“utf-8”))
+            {
+                “text”:    lambda: self.on_text.dispatch(msg[“data”]),
+                “image”:   lambda: self.on_image.dispatch(
+                                 base64.b64decode(msg[“data”])),
+                “command”: lambda: self.on_command.dispatch(msg),
+            }.get(msg[“type”], lambda: None)()
+    except asyncio.IncompleteReadError:
+        logger.info(“Connection closed”)
+    finally:
+        await self.close()
+
+# 长度前缀帧发送
+def _send_json(self, obj):
+    raw = json.dumps(obj, ensure_ascii=False).encode(“utf-8”)
+    self._writer.write(struct.pack(“>I”, len(raw)) + raw)
+\end{lstlisting}
+\end{code}
+
+\subsection{Unity端AgentCommunicator}
+
+Unity 侧由 AgentCommunicator 组件（挂载于 GameRoot 持久化对象）承担 TCP 客户端角色。启动时异步连接至 智能体 服务端并发送注册消息，随后在后台 Task 中运行接收循环，按长度前缀协议解析入站消息，根据消息类型分派至对应回调。
+
+在发送侧，\texttt{SendRawAsync} 方法使用 \texttt{SemaphoreSlim(1,1)} 作为发送锁，确保同一时刻仅有一个异步任务持有网络流的写入权，避免多协程并发写入导致的 TCP 数据交错。所接收消息通过 \texttt{SynchronizationContext.Post()} 投递至 Unity 主线程执行回调，符合 Unity 的单线程执行模型。
+
+AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
+
 \section{智能体EchoAgent实现}
 
 \subsection{运行机制}
 
-EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构建，负责整合多源感知数据并做出交互决策。系统启动时按以下顺序初始化各组件：首先创建一个全局的异步消息队列（\texttt{asyncio.Queue}），随后创建 TCP 服务器（EchoServer）并注入队列引用，最后创建 EchoAgent 实例，使其同时持有队列与服务器的引用。这一初始化顺序确保 智能体 能够通过消息队列接收来自各客户端的上报数据，并通过 EchoServer 向各客户端主动发送指令。
+EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构建，负责整合多源感知数据并做出交互决策。系统启动时按以下顺序初始化各组件：首先创建一个全局的异步消息队列（\texttt{asyncio.Queue}），随后创建 EchoServer 并注入队列引用，最后创建 EchoAgent 实例，使其同时持有队列与 EchoServer 的引用。EchoAgent 与 EchoServer 及消息队列的集成方式如图\ref{fig:agent-server-topology}所示。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{pic/EchoAgent和TCP Server之间集成以及队列实现拓扑图.pdf}
+\caption{EchoAgent与TCP Server之间集成及队列实现拓扑}
+\label{fig:agent-server-topology}
+\end{figure}
 
 运行时，EchoServer 与 EchoAgent 各自在独立的异步循环中运行。EchoServer 在端口 65432 上持续监听 TCP 连接，接收来自 MediaPipe、Unity 与树莓派等客户端的上报消息，将非注册、非中继类消息写入共享队列。EchoAgent 按固定间隔（默认 5 秒）从队列中批量取出积压消息，交由 Qwen3.6 理解与推理，由模型自主选择并调用合适工具完成响应。这种生产者—消费者模式解耦了消息接收与决策处理，使两者可以独立伸缩。
 
-智能体 的完整交互闭环如图~\ref{fig:agent-trace} 所示：MediaPipe 模块检测到参展者的手势或表情变化后，通过 TCP 上报至 智能体；智能体 结合当前叙事章节、参展者进度与情绪上下文进行综合决策，必要时调用截图工具获取 Unity 当前画面以辅助判断；截图请求经 TCP 发送至 Unity 客户端，Unity 执行截图后将图像回传；智能体 理解图像内容后发起下一步交互指令，形成“感知—理解—反馈”闭环。
+智能体 的完整交互闭环如图~\ref{fig:agent-trace} 所示：MediaPipe 模块检测到参展者的手势或表情变化后，通过 TCP 上报至 智能体；智能体 结合当前叙事章节、参展者进度与情绪上下文进行综合决策，必要时调用截图工具获取 Unity 当前画面以辅助判断；截图请求经 TCP 发送至 Unity 客户端，Unity 执行截图后将图像回传；智能体 理解图像内容后发起下一步交互指令，形成”感知—理解—反馈”闭环。
 
 \begin{figure}[htbp]
 \centering
@@ -744,97 +842,6 @@ EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构
 EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一次性排空所有积压消息，将其转换为 LangChain 的 \texttt{HumanMessage} 列表后批量送入 智能体。对于文本类消息，直接将原始 JSON 字符串作为消息内容；对于图像类消息，则构造包含 Base64 编码图像与描述文本的多模态内容结构。智能体 通过 \texttt{deep\_agent.ainvoke()} 执行推理，模型根据系统提示词与当前上下文自主决定是否以及调用哪个工具，工具执行结果以 \texttt{ToolMessage} 形式追加至对话历史，供下一轮推理使用。
 
 这种批量处理模式的设计兼顾了两方面考量：一方面，将多源异步到达的消息聚合后统一推理，使 智能体 能够在同一上下文中综合考虑手势、表情与场景事件的关联；另一方面，5 秒的间隔避免了模型 API 的频繁调用，在交互响应性与资源开销之间取得了平衡。
-
-\section{TCP通信与并发控制实现}
-
-\subsection{长度前缀JSON协议}
-
-系统各模块间通过统一的二进制帧协议进行通信：每帧由 4 字节大端序无符号整数（表示负载长度）与紧随其后的 UTF-8 编码 JSON 负载组成。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type}（消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}）、\texttt{data}（负载内容）、\texttt{client\_type}（发送方身份标识，注册消息使用）、\texttt{request\_id}（UUID 格式请求标识，用于关联请求与响应）及 \texttt{relay\_to}（中继目标，指定消息经服务器直接转发至某类客户端）。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}，覆盖系统全部通信节点。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
-
-\begin{code}
-\caption{JsonMessage 消息结构定义}
-\label{code:json-message}
-\begin{codebox}
-class JsonMessage(TypedDict):
-    """用于存储JSON消息的字典类"""
-    type: str # text | image | command | register
-    data: str # 文本内容或base64编码数据，command 时为命令内容
-    client_type: NotRequired[ClientType] # 发送这个消息的客户端类型：mediapipe | unity | raspberry_pi | debug
-    request_id: NotRequired[str] # 需要回应的响应时必须，否则非必须
-    relay_to: NotRequired[str] # 直接转发 如果含本字段 则此消息直接转发给目标客户端
-\end{codebox}
-\end{code}
-
-\subsection{EchoServer与客户端管理}
-
-TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息（\texttt{\{"type": "register", "client\_type": "..."\}}），服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
-
-协议层支持中继转发机制：若消息含非空 \texttt{relay\_to} 字段，服务端直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的低延迟直通——典型场景为 MediaPipe 将指向方向数据中继至 Unity 驱动角色移动。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
-
-\subsection{Python端TcpClient实现}
-
-服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TcpClient 是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅/退订式的事件回调机制——调用方可按消息类型（text、image、command）分别注册处理函数，当对应类型消息到达时自动分派。
-
-TcpClient内部维护一个 \texttt{\_Event} 辅助类，管理回调函数的添加（+=）、移除（-=）与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节长度前缀（\texttt{struct.unpack(">I", ...)}，> 表示大端序），再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
-
-\begin{code}
-\caption{简化的TcpClient 客户端核心代码}
-\label{code:tcp-client}
-\lstset{style=codeblock}
-\begin{lstlisting}
-# 事件分发：订阅/退订 + 回调派发
-class _Event:
-    def __init__(self, name):
-        self._callbacks = []
-
-    def __iadd__(self, callback):
-        self._callbacks.append(callback)
-        return self
-
-    def __isub__(self, callback):
-        self._callbacks.remove(callback)
-        return self
-
-    def dispatch(self, *args, **kwargs):
-        for cb in self._callbacks:
-            try:
-                cb(*args, **kwargs)
-            except Exception:
-                logger.exception(f"Error in {self._name} handler")
-
-# 长度前缀帧接收 + 类型分派
-async def _receive_loop(self):
-    try:
-        while self._reader:
-            length_prefix = await self._reader.readexactly(4)
-            payload_len = struct.unpack(">I", length_prefix)[0]
-            json_data = await self._reader.readexactly(payload_len)
-            msg = json.loads(json_data.decode("utf-8"))
-            {
-                "text":    lambda: self.on_text.dispatch(msg["data"]),
-                "image":   lambda: self.on_image.dispatch(
-                                 base64.b64decode(msg["data"])),
-                "command": lambda: self.on_command.dispatch(msg),
-            }.get(msg["type"], lambda: None)()
-    except asyncio.IncompleteReadError:
-        logger.info("Connection closed")
-    finally:
-        await self.close()
-
-# 长度前缀帧发送
-def _send_json(self, obj):
-    raw = json.dumps(obj, ensure_ascii=False).encode("utf-8")
-    self._writer.write(struct.pack(">I", len(raw)) + raw)
-\end{lstlisting}
-\end{code}
-
-\subsection{Unity端AgentCommunicator}
-
-Unity 侧由 AgentCommunicator 组件（挂载于 GameRoot 持久化对象）承担 TCP 客户端角色。启动时异步连接至 智能体 服务端并发送注册消息，随后在后台 Task 中运行接收循环，按长度前缀协议解析入站消息，根据消息类型分派至对应回调。
-
-在发送侧，\texttt{SendRawAsync} 方法使用 \texttt{SemaphoreSlim(1,1)} 作为发送锁，确保同一时刻仅有一个异步任务持有网络流的写入权，避免多协程并发写入导致的 TCP 数据交错。所接收消息通过 \texttt{SynchronizationContext.Post()} 投递至 Unity 主线程执行回调，符合 Unity 的单线程执行模型。
-
-AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
 
 \section{虚拟场景与视觉呈现}
 
@@ -883,9 +890,20 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 \subsection{摄像机系统}
 
-<目前较简略，待补充>
+《回声之境》中摄像机的运镜基于 Unity 的 Cinemachine 3.1\citing{unity2024cinemachine} 与 Splines 官方包，以 Spline Dolly Camera 配合 Look At 目标实现。样条线决定相机的空间位置，Look At 目标决定相机的朝向，二者独立配置、组合生效。图\ref{fig:cinemachine-config}展示了实际的 Cinemachine 配置编辑界面。
 
-主场景的摄像机跟随基于 Cinemachine 虚拟相机实现，提供平滑的位置跟踪与阻尼缓动。旅人角色的移动方向计算中，TravelerController 引用主摄像机的偏航角将输入方向从局部空间旋转至世界空间，使参展者推摇杆向前时角色始终向画面深处行进。在部分谜题场景中，Cinemachine 的 Spline Dolly 轨道跟随组件通过在场景中构建样条曲线路径并绑定虚拟相机，实现沿预设轨道的平滑运镜，强化特定关卡的镜头叙事效果。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{pic/Cinemachine配置编辑展示.png}
+  \caption{Cinemachine Spline Dolly Camera 配置界面——Spline 槽位绑定样条路径，Look At 槽位指定跟踪目标}
+  \label{fig:cinemachine-config}
+\end{figure}
+
+具体实现流程为：首先通过 GameObject > Spline > Draw Splines 在场景中绘制样条曲线路径；随后创建 Spline Dolly Camera，将 Spline Container 拖入 Spline Dolly 组件的 Spline 槽位以绑定路径，勾选Automatic Dolly，然后Method选择Nearest Point To Target，再将旅人拖入虚拟相机的 Look At 槽位，由 Rotation Composer 控制跟踪朝向的阻尼与构图偏移。相机的移动控制视场景需求采用两种方式：开场动画使用 Timeline 对 Spline Offset 做关键帧动画；交互过程中的相机跟随则通过样条线路径滑行。此外，部分场景在相机底部的 Noise 选项中叠加了 Basic Multi-Channel Perlin 噪声，模拟摄影师手持跟拍的微颤效果，以增强真实感。
+
+旅人角色的移动方向计算中，TravelerController 脚本引用主摄像机的偏航角将输入向量从局部空间旋转至世界空间，使角色始终依据当前摄像机的方位相对移动。
+
+在多个虚拟相机之间的切换上，系统利用 Cinemachine 的 Blend 混合机制：不同相机间的过渡并非简单的画面淡入淡出，而是主相机的位置与旋转沿平滑曲线插值移动，使动画序列与实际交互之间的衔接自然流畅，消除了生硬的镜头跳跃感。
 
 \section{虚实联动控制实现}
 
@@ -955,7 +973,7 @@ music_notes_pixels_map: dict[str, set[int]] = {
 
 以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
 
-音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入"灭—亮—灭—亮"的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
+音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入“灭—亮—灭—亮”的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
 
 \begin{code}
 \caption{LedController 灯光控制器核心实现}
