@@ -823,7 +823,7 @@ EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构
 
 \subsection{工具函数设计}
 
-工具调用（Tool Calling）是 智能体 控制外部设备的唯一途径。EchoAgent 通过 LangChain 的 \texttt{@tool} 装饰器定义了五个工具函数，均以 EchoAgent 的静态方法形式实现，在初始化时通过闭包绑定 EchoServer 实例。工具参数均采用简单字符串类型以降低 VLM 生成结构化参数的出错概率：
+工具调用（Tool Calling）是 智能体 控制外部设备的唯一途径。EchoAgent 通过 LangChain 的 \texttt{@tool} 装饰器定义了五个工具函数，均以 EchoAgent 的静态方法形式实现，在初始化时通过闭包绑定 EchoServer 实例。工具参数均采用简单字符串类型。
 
 \begin{enumerate}
 \item \textbf{\texttt{send\_to\_client}}：向指定类型的客户端发送通用消息。参数为 \texttt{client\_type}（\texttt{unity}、\texttt{mediapipe} 或 \texttt{raspberry\_pi}）与 \texttt{message}（纯文本）。内部通过 EchoServer 遍历已注册连接，找到匹配类型的客户端后发送 JSON 消息。
@@ -847,9 +847,96 @@ EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一�
 
 \subsection{旅人控制器与虚拟输入设备}
 
-旅人角色的移动由 TravelerController 组件驱动，该组件依赖 Unity 的 CharacterController 进行物理位移计算。在 \texttt{FixedUpdate} 中按固定时间步长执行重力施加、输入解析、旋转平滑与位移更新：读取 Input System 的 Move 动作获取二维输入向量，结合主摄像机的偏航角计算世界空间移动方向，通过 \texttt{Mathf.SmoothDampAngle} 实现角色朝向的平滑过渡；垂直方向累计重力加速度，着地时清零。
+旅人角色的移动由 TravelerController 组件驱动，该组件依赖 Unity 的 CharacterController 进行物理位移计算。在 \texttt{FixedUpdate} 中按固定时间步长执行重力施加、输入解析、旋转平滑与位移更新：读取 Input System 的 Move 动作获取二维输入向量，结合主摄像机的偏航角计算世界空间移动方向，通过 \texttt{Mathf.SmoothDampAngle} 实现角色朝向的平滑过渡；垂直方向累计重力加速度，着地时清零。TravelerController 的核心移动逻辑如代码\ref{code:traveler-controller}所示。
 
-为使 智能体 能够通过网络指令驱动旅人移动，系统实现了一个自定义的 VirtualAgentDevice——继承自 Unity Input System 的 \texttt{InputDevice}，向 Input System 注册为独立输入设备，提供 \texttt{move\_stick}（二维摇杆）与 \texttt{submit\_button}、\texttt{cancel\_button} 等控制元。EchoEventCenter 组件监听 智能体 下发的 \texttt{input:move:x,y} 格式指令，将解析出的方向向量写入 VirtualAgentDevice 的状态结构，通过 \texttt{InputSystem.QueueStateEvent()} 注入 Input System 事件队列，从而被 TravelerController 的 Move 动作绑定所消费。这一间接层使网络输入与本地键盘/手柄输入共享同一套 Input System 管线，无需在角色控制器中编写特殊的网络输入分支。
+\begin{code}
+\caption{TravelerController 核心移动逻辑}
+\label{code:traveler-controller}
+\lstset{style=codeblock}
+\begin{lstlisting}
+[RequireComponent(typeof(CharacterController))]
+public class TravelerController : MonoBehaviour {
+    [SerializeField] private InputActionReference moveActionRef;
+    public float moveSpeed = 2.0f;
+    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
+    private CharacterController _controller;
+    private GameObject _mainCamera;
+    private float _targetRotation, _rotationVelocity, _verticalVelocity;
+
+    private void FixedUpdate() {
+        ApplyGravity();
+        Move();
+    }
+
+    private void Move() {
+        Vector2 moveInput = moveActionRef.action.ReadValue<Vector2>();
+        Vector3 inputDirection = new Vector3(moveInput.x, 0.0f, moveInput.y).normalized;
+        if (moveInput != Vector2.zero) {
+            _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg
+                            + _mainCamera.transform.eulerAngles.y;
+            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation,
+                ref _rotationVelocity, rotationSmoothTime);
+            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            _controller.Move(targetDirection.normalized
+                * (moveSpeed * Time.deltaTime * moveInput.magnitude)
+                + new Vector3(0, _verticalVelocity * Time.deltaTime, 0));
+        }
+    }
+
+    private void ApplyGravity() {
+        if (!_controller.isGrounded)
+            _verticalVelocity += Physics.gravity.y * Time.deltaTime;
+        else
+            _verticalVelocity = -.5f;
+    }
+}
+\end{lstlisting}
+\end{code}
+
+为了能够通过网络指令驱动旅人移动，系统实现了一个自定义的 VirtualAgentDevice——继承自 Unity Input System 的 \texttt{InputDevice}，向 Input System 注册为独立输入设备，提供 \texttt{move\_stick}（二维摇杆）与 \texttt{submit\_button}、\texttt{cancel\_button} 等控制元。VirtualAgentDevice 的实现如代码\ref{code:virtual-agent-device}所示，其通过 Input System 的布局注册机制将自定义状态结构挂载至 Unity 的输入管线。
+
+\begin{code}
+\caption{VirtualAgentDevice 自定义输入设备}
+\label{code:virtual-agent-device}
+\lstset{style=codeblock}
+\begin{lstlisting}
+public struct VirtualAgentState : IInputStateTypeInfo {
+    public FourCC format => new FourCC('V', 'A', 'G', 'T');
+
+    [InputControl(name = "submit", layout = "Button", bit = 0)]
+    [InputControl(name = "cancel", layout = "Button", bit = 1)]
+    [InputControl(name = "navigate", layout = "Button", bit = 2)]
+    public uint buttons;
+
+    [InputControl(name = "move", layout = "Stick", usage = "Primary2DMotion")]
+    public Vector2 move;
+}
+
+[InputControlLayout(stateType = typeof(VirtualAgentState))]
+public class VirtualAgentDevice : InputDevice {
+    static VirtualAgentDevice() {
+        InputSystem.RegisterLayout<VirtualAgentDevice>();
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void initialize() => InputSystem.RegisterLayout<VirtualAgentDevice>();
+
+    public ButtonControl submit_button { get; private set; }
+    public ButtonControl cancel_button { get; private set; }
+    public StickControl move_stick { get; private set; }
+
+    protected override void FinishSetup() {
+        base.FinishSetup();
+        submit_button = GetChildControl<ButtonControl>("submit");
+        cancel_button = GetChildControl<ButtonControl>("cancel");
+        move_stick = GetChildControl<StickControl>("move");
+    }
+}
+\end{lstlisting}
+\end{code}
+
+EchoEventCenter 组件监听 智能体 下发的 \texttt{input:move:x,y} 格式指令，将解析出的方向向量写入 VirtualAgentDevice 的状态结构，通过 \texttt{InputSystem.QueueStateEvent()} 注入 Input System 事件队列，从而被 TravelerController 的 Move 动作绑定所消费。这一间接层使网络输入与本地键盘/手柄输入共享同一套 Input System 管线，无需在角色控制器中编写特殊的网络输入分支。
 
 为防止智能体指令“粘滞”（即上一次移动指令持续生效），EchoEventCenter 内置了移动超时检测：每 0.2 秒检查距最后一次移动指令的时间，若超过 0.3 秒无新指令则自动清零移动向量，使角色在通信中断或 智能体 静默时自动停步。
 
@@ -894,8 +981,8 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{pic/Cinemachine配置编辑展示.png}
-  \caption{Cinemachine Spline Dolly Camera 配置界面——Spline 槽位绑定样条路径，Look At 槽位指定跟踪目标}
+  \includegraphics[width=0.6\textwidth]{pic/Cinemachine配置编辑展示.png}
+  \caption{Cinemachine Spline Dolly Camera 配置界面}
   \label{fig:cinemachine-config}
 \end{figure}
 
