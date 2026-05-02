@@ -836,17 +836,6 @@ Unity 侧由 AgentCommunicator 组件（挂载于 GameRoot 持久化对象）承
 
 AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
 
-\subsection{调试客户端}
-
-为便于开发阶段的链路追踪与指令模拟，本系统基于 Rust 实现了独立的调试客户端 echo\_client。该客户端提供可编程的 Rust 库（\texttt{EchoClient}），支持基于事件回调（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）的异步消息订阅，以及 \texttt{send\_text}、\texttt{send\_command}（支持 relay\_to 参数）等发送接口。在此库基础上，通过 warp 框架实现了 WebSocket-to-TCP 桥接服务器（端口 8080），并配套基于浏览器的可视化调试界面——开发者可直接在网页中选择客户端类型、构造消息内容并指定中继目标，实时查看收发日志，极大降低了多模块联调的复杂度。如图\ref{fig:debug-client-screenshot}所示为该调试客户端的实际运行界面。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.5\textwidth]{pic/定制的调试客户端运行截图.png}
-  \caption{定制调试客户端运行截图}
-  \label{fig:debug-client-screenshot}
-\end{figure}
-
 \section{虚拟场景与视觉呈现}
 
 \subsection{旅人控制器与虚拟输入设备}
@@ -875,7 +864,14 @@ MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取�
 
 \textbf{半透明抖动山峦}。远景山峦的视觉表现由 GhostMountain 组件与山峦 Shader Graph 协同完成。着色器利用菲涅尔效应（Schlick 近似公式）控制边缘发光——视线方向与表面法线夹角越大，菲涅尔因子越趋近于 1，使山峦轮廓呈现明亮的发光边缘，而正对视角区域保持较高透明度，整体呈现若隐若现的质感。顶点着色器中引入基于时间的连续噪声函数，对各顶点施加随机微小偏移，形成山峦轮廓的持续微颤效果。
 
-GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个 Uniform 参数：\texttt{\_WobbleSpeed}（抖动速度，控制噪声函数的时间频率）与 \texttt{\_WobbleIntensity}（抖动强度，控制顶点偏移幅度）。当 智能体 根据情绪状态决策调整场景氛围时，可通过下发指令更新这两个参数，使山峦的抖动强度与速度随情绪变化——例如从迷茫态的剧烈抖动渐变为锚定态的轻微起伏乃至完全静止。
+GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个 Uniform 参数：\texttt{\_WobbleSpeed}（抖动速度，控制噪声函数的时间频率）与 \texttt{\_WobbleIntensity}（抖动强度，控制顶点偏移幅度）。当 智能体 根据情绪状态决策调整场景氛围时，可通过下发指令更新这两个参数，使山峦的抖动强度与速度随情绪变化——例如从迷茫态的剧烈抖动渐变为锚定态的轻微起伏乃至完全静止。半透明抖动山峦的实际渲染效果如图\ref{fig:ghost-mountain}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{pic/半透明抖动山峦.png}
+  \caption{半透明抖动山峦效果——菲涅尔边缘发光与顶点噪声偏移共同营造若隐若现的视觉质感}
+  \label{fig:ghost-mountain}
+\end{figure}
 
 \textbf{风格化草地}。草地着色器在顶点着色阶段利用二维连续噪声纹理模拟风力驱动：将噪声值线性映射至偏移量，随时间滚动采样以产生持续变化的风向与风力，驱动草丛顶点的周期性摆动。草地区域色彩通过 Uniform 参数暴露，可随情绪倾向在暖色调与冷色调之间动态调整。
 
@@ -918,7 +914,7 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 \subsection{多线程事件上报架构}
 
-整个感知子系统采用"共享视频源 + 异步分发"的架构。CameraCapture 类运行于独立守护线程，以尽可能高的帧率从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳分发给所有注册的帧回调（HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法）。两个识别器各自在 MediaPipe 回调线程中处理检测结果，通过 \texttt{asyncio.run\_coroutine\_threadsafe()} 将发送协程调度至 TcpClient 所在的 asyncio 事件循环线程，实现跨线程安全通信。
+整个感知子系统采用“共享视频源 + 异步分发”的架构。CameraCapture 类运行于独立守护线程，以尽可能高的帧率从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳分发给所有注册的帧回调（HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法）。两个识别器各自在 MediaPipe 回调线程中处理检测结果，通过 \texttt{asyncio.run\_coroutine\_threadsafe()} 将发送协程调度至 TcpClient 所在的 asyncio 事件循环线程，实现跨线程安全通信。
 
 TcpClient 基于 Python \texttt{asyncio} 实现，支持 \texttt{send\_text}、\texttt{send\_command}（含 relay\_to 参数）等方法，所有发送操作均在 asyncio 事件循环中串行执行。连接建立后首先发送注册消息（\texttt{client\_type: "mediapipe"}），随后持续监听服务端下发的控制指令（如 \texttt{hand\_direction:on/off} 以开关指向检测）。主线程则运行 OpenCV 预览窗口，渲染手部骨架、手势标签、FPS 计数器与面部鼻尖标注，供现场调试使用。
 
@@ -938,9 +934,91 @@ TcpClient 基于 Python \texttt{asyncio} 实现，支持 \texttt{send\_text}、\
 
 软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
 
-灯光模式分为基础模式与音符联动模式两类。基础模式包括 \texttt{chase}（循环点亮，单颗 LED 沿阵列依次亮起形成追逐效果）、\texttt{solid}（实色常亮，需指定颜色参数如 \texttt{warm\_amber}、\texttt{cool\_blue} 等）、\texttt{rainbow}（彩虹渐变，全阵列平滑循环过渡）与 \texttt{breathing}（呼吸，整体亮度周期性脉冲）。音符联动模式下，\texttt{gain\_note} 与 \texttt{play\_note} 分别在参展者获得或演奏音符时触发灯光反馈，均需 \texttt{note} 参数指定音符类型（\texttt{waterdrop}、\texttt{crossing}、\texttt{tide}、\texttt{breeze}）。灯光模式与颜色的切换由 智能体 通过 \texttt{control\_lights} 工具驱动，使实体空间的灯光氛围与虚拟场景的视觉基调在统一决策下协调变化。
+树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
 
-四个音符的技能图标使用了四块15cm宽、5mm厚的正六边形松木板。首先在计算机上用矢量绘图工具Affinity绘制贝塞尔曲线设计音符图标。使用A4纸打印出这四个图标后，再使用美工刀经手工雕刻出黑色轮廓，然后使用502胶水粘贴于松木板上。最后串以装饰麻绳，并将灯条组成的灯带沿着整体图形的外轮廓包裹，恰好使用了64颗灯珠。其具体的灯珠序号和空间位置如图<待补充>所示。灯条原始规格为每米 30 颗、全长共 150 颗灯珠，利用 WS2812 可任意裁剪的特性，可将灯条从第 64 颗灯珠处剪断。最后将这个灯光装置悬挂于展台一侧，形成与交互应用中的虚拟音符UI界面相呼应的实体视觉锚点。
+\begin{code}
+\caption{音符-灯珠索引映射}
+\label{code:music-notes-pixels}
+\begin{codebox}
+music_notes_pixels_map: dict[str, set[int]] = {
+    "waterdrop": {0, 1, 2, 3, 4, 5, 6, 57, 58, 59, 60, 61, 62, 63},
+    "crossing":  {9, 10, 11, 12, 13, 14, 54, 53, 52, 51, 50, 49},
+    "tide":      {17, 18, 19, 20, 21, 22, 23, 46, 45, 44, 43, 42, 41},
+    "breeze":    {25, 26, 27, 28, 29, 30, 31, 32, 38, 37, 36, 35, 34, 33},
+}
+\end{codebox}
+\end{code}
+
+灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
+
+基础模式中，动态效果的核心思路是利用 HLS 颜色空间（色相 Hue—亮度 Lightness—饱和度 Saturation）而非直接操作 RGB 分量。原因在于，HLS 将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
+
+以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
+
+音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入"灭—亮—灭—亮"的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
+
+\begin{code}
+\caption{LedController 灯光控制器核心实现}
+\label{code:led-controller}
+\begin{codebox}
+class LedController:
+    def __init__(self, pixel_pin=board.D23, num_pixels=64, brightness=0.2):
+        self.pixels = neopixel.NeoPixel(
+            pixel_pin, num_pixels, auto_write=True, brightness=brightness)
+        self._stop_flag = threading.Event()
+
+    def _rainbow_chase_loop(self):
+        num_heads = 5
+        tail_length = 15
+        positions = [0] * num_heads
+        hues = [i / num_heads for i in range(num_heads)]
+        while not self._stop_flag.is_set():
+            self.pixels.fill((0, 0, 0))
+            for head in range(num_heads):
+                for t in range(tail_length, 0, -1):
+                    idx = (positions[head] - t) % self.pixels.n
+                    fade = (1 - t / tail_length) * 0.9 + 0.1
+                    r, g, b = colorsys.hls_to_rgb(hues[head], 0.5 * fade, 0.6)
+                    self.pixels[idx] = (int(r * 255), int(g * 255), int(b * 255))
+            self.pixels.show()
+            time.sleep(0.03)
+            for head in range(num_heads):
+                positions[head] = (positions[head] + 2) % self.pixels.n
+            hues = [(h + 0.008) % 1.0 for h in hues]
+
+    def gain_note(self, note_name, color=(255, 255, 255)):
+        for idx in music_notes_pixels_map.get(note_name, set()):
+            self.pixels[idx] = color
+        self.pixels.show()
+
+    def play_note(self, note_name, color=(255, 255, 255)):
+        indices = [i for i in music_notes_pixels_map.get(note_name, set())
+                   if i < self.pixels.n]
+        for _ in range(2):
+            for idx in indices:
+                self.pixels[idx] = (0, 0, 0)
+            self.pixels.show(); time.sleep(0.1)
+            for idx in indices:
+                self.pixels[idx] = color
+            self.pixels.show(); time.sleep(0.1)
+
+    def _start_effect(self, effect_func):
+        self._stop_flag.clear()
+        t = threading.Thread(target=effect_func)
+        t.daemon = True
+        t.start()
+\end{codebox}
+\end{code}
+
+四个音符的技能图标使用了四块15cm宽、5mm厚的正六边形松木板。首先在计算机上用矢量绘图工具Affinity绘制贝塞尔曲线设计音符图标。使用A4纸打印出这四个图标后，再使用美工刀经手工雕刻出黑色轮廓，然后使用502胶水粘贴于松木板上。最后串以装饰麻绳，并将灯条组成的灯带沿着整体图形的外轮廓包裹，恰好使用了64颗灯珠。其具体的灯珠序号和空间位置如图\ref{fig:led-layout}所示，与 \texttt{music\_notes\_pixels\_map} 中的索引一一对应。灯条原始规格为每米 30 颗、全长共 150 颗灯珠，利用 WS2812 可任意裁剪的特性，可将灯条从第 64 颗灯珠处剪断。最后将这个灯光装置悬挂于展台一侧，形成与交互应用中的虚拟音符UI界面相呼应的实体视觉锚点。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{pic/灯珠位置示意图.pdf}
+  \caption{灯珠序号与空间位置示意图}
+  \label{fig:led-layout}
+\end{figure}
+
 
 \chapter{应用场景演示与测试}
 
@@ -948,13 +1026,22 @@ TcpClient 基于 Python \texttt{asyncio} 实现，支持 \texttt{send\_text}、\
 
 为验证系统在真实展览环境中的可用性，本文在实验室环境中搭建了一套完整的实体展览装置。整个部署环境由一台运行EchoAgent与MediaPipe模块的开发机、一台显示Unity交互应用的显示屏、一套树莓派驱动的WS2812可编程RGB LED灯阵，以及用于手势与面部捕捉的摄像头模块组成。树莓派作为LED控制中枢，通过TCP协议连接至EchoAgent服务端，接收实时灯光控制指令。
 
-实体装置的核心是四个音符的技能图标。每个图标使用一块15cm宽、5mm厚的正六边形松木板承载：先在矢量绘图工具Affinity中通过贝塞尔曲线绘制音符轮廓，A4打印后以美工刀手工雕刻出黑色剪影，再用502胶水粘贴于松木板上，最后串以装饰麻绳。灯条则沿图标整体外轮廓包裹，共使用64颗灯珠——灯条原始规格为每米30颗、全长150颗，利用WS2812可任意裁剪的特性，从第64颗灯珠处剪断后即成为独立灯组。悬挂于展台一侧后，这套实体图标与Unity交互应用中的虚拟音符UI形成了视觉上的呼应，成为展览空间中引人触摸与注视的物理锚点。
+实体装置的核心是四个音符的技能图标，其制作工艺与灯珠布局已在第4.4节详述。在展览现场，四块正六边形松木板图标以麻绳串联悬挂于展台一侧，灯带沿图标外轮廓包裹后与虚拟音符UI在空间与形态上形成呼应；当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效，灯光氛围随章节情绪基调的转换而动态变化，使沉浸感从屏幕内部延伸至物理空间。这一装置既是技术验证的载体，也是展览空间中引人触摸与注视的物理锚点。
 
 \section{交互流程演示}
 
 以下以交互应用的第一章“初域·未定之原”为例，完整展示系统从启动、手势交互到智能体决策与多模态反馈的全链路运行过程。
 
-交互应用启动后，初始界面首先呈现标题Logo与初始场景的叠加场景，此时旅人站在石台上，系统会屏蔽所有输入。检测到参展者人脸进入画面以后，MediaPipe客户端会向Unity端发送开始信号，进入开场动画：画面缓缓放大，摄像机穿越层层迷雾进入三维场景——其间迷雾中浮现出蓝色波形图案。摄像机持续前推，最终从云雾中显现出旅人在绵延山峦与旷野前行的画面。摄像机逐渐减速，最终停在旅人斜前方，平视旅人，留出背后辽阔的风景，画面叠加第一章名称“初域·未定之原”。这一序幕以电影化的镜头语言为参展者建立了初步的情感锚点与叙事期待。
+交互应用启动后，首先呈现的是如图\ref{fig:start-screen}所示的初始场景：旅人静立于一座白色石块堆砌的六边形祭坛之上；画面右侧是一座深褐色石质容器，其上发光的水滴符号与中心跃动的橙色火苗相互映照；空中悬浮着大小不一的白色立方体，远处延绵的丘陵隐没于浓厚的体积雾中，整体以低多边形风格配合Bloom渲染，营造出空灵、静谧而略带神秘感的世界基调。此时系统屏蔽所有输入，等待入场触发。
+
+当MediaPipe客户端检测到参展者人脸进入摄像头画面后，向Unity端发送开始信号，随后进入开场动画：画面缓缓放大，摄像机穿越层层迷雾进入三维场景——其间迷雾中浮现出蓝色波形图案。摄像机持续前推，最终从云雾中显现出旅人在绵延山峦与旷野前行的画面。摄像机逐渐减速，最终停在旅人斜前方，平视旅人，留出背后辽阔的风景，画面叠加第一章名称”初域·未定之原”。这一序幕以电影化的镜头语言为参展者建立了初步的情感锚点与叙事期待。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{pic/screenshot_20260502_135533_4dc56e25-b557-4aac-9b74-b021009da301.jpg}
+  \caption{应用开始界面——旅人立于白色祭坛之上，空中悬浮立方体，画面中浮现回声之境与ECHOESPHERE标题}
+  \label{fig:start-screen}
+\end{figure}
 
 进入场景后，参展者面对的是一个开阔却无形变幻的世界。地貌不断变动，柔软的草浪起伏，半透明的山丘若隐若现，石块漂浮又坠落。这里没有威胁，只有弥漫的迷茫——有些地方之所以难走，是因为自己的方向感仍未成形；世界不会惩罚旅人，它只是保持未定，等待旅人决定它的形状。
 
@@ -1059,9 +1146,20 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth]{pic/phoenix-trace-example.png}
+  \includegraphics[width=0.9\textwidth]{pic/phoenix-trace-example.png}
   \caption{Phoenix 链路追踪面板示例}
   \label{fig:phoenix-trace}
+\end{figure}
+
+\subsection{调试客户端}
+
+除日志与追踪体系外，系统还基于 Rust 实现了独立的调试客户端 echo\_client，提供可编程的 Rust 库（\texttt{EchoClient}）与基于 warp 框架的 WebSocket-to-TCP 桥接服务器（端口 8080），配套基于浏览器的可视化调试界面——开发者可直接在网页中选择客户端类型、构造消息内容并指定中继目标，实时查看收发日志，极大降低了多模块联调的复杂度。调试客户端的实际运行界面如图\ref{fig:debug-client-screenshot}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.4\textwidth]{pic/定制的调试客户端运行截图.png}
+  \caption{定制调试客户端运行截图}
+  \label{fig:debug-client-screenshot}
 \end{figure}
 
 \section{交互体验评估}
