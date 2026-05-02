@@ -57,6 +57,7 @@
 \RequirePackage{calc}
 \RequirePackage{float}
 \RequirePackage{fancyvrb}
+\RequirePackage{listings}
 \RequirePackage{fancyhdr}
 \RequirePackage{titlesec}
 \RequirePackage{setspace}
@@ -114,6 +115,31 @@
 \captionsetup[algorithm]{aboveskip=6pt}
 \AtBeginEnvironment{algorithm}{\vspace{6pt}}
 
+% 代码浮动环境
+\DeclareFloatingEnvironment{code}
+\renewcommand{\codename}{代码}
+\renewcommand{\thecode}{\arabic{chapter}.\arabic{code}}
+\captionsetup[code]{position=above, aboveskip=4pt, belowskip=2pt}
+
+\lstdefinestyle{codeblock}{
+  basicstyle=\small\ttfamily,
+  frame=single,
+  breaklines=true,
+  breakautoindent=false,
+  columns=fullflexible,
+  extendedchars=true,
+  framesep=6pt,
+  aboveskip=0pt,
+  belowskip=0pt,
+  xleftmargin=2pt,
+  xrightmargin=0pt,
+  language={},
+}
+
+\lstnewenvironment{codebox}
+  {\lstset{style=codeblock}}
+  {}
+
 \graphicspath{{./pic/}}
 
 \RequirePackage[titles, subfigure]{tocloft}
@@ -167,6 +193,12 @@
 
 \makeatletter
 \AtBeginEnvironment{table}{
+  \def\@floatboxreset{\centering}
+}
+\makeatother
+
+\makeatletter
+\AtBeginEnvironment{code}{
   \def\@floatboxreset{\centering}
 }
 \makeatother
