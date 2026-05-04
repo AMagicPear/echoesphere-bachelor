@@ -757,7 +757,7 @@ class _Event:
             except Exception:
                 logger.exception(f”Error in {self._name} handler”)
 
-# 长度前缀帧接收 + 类型分派
+# 长度前缀帧接收 + 类型分派（含自动重连）
 async def _receive_loop(self):
     try:
         while self._reader:
@@ -772,9 +772,15 @@ async def _receive_loop(self):
                 “command”: lambda: self.on_command.dispatch(msg),
             }.get(msg[“type”], lambda: None)()
     except asyncio.IncompleteReadError:
-        logger.info(“Connection closed”)
+        logger.info(“Connection closed by peer”)
+    except ConnectionResetError:
+        logger.warning(“Connection reset”)
     finally:
-        await self.close()
+        await self._cleanup_transport()
+        if self._should_reconnect:
+            await asyncio.sleep(self._reconnect_delay)
+            self._reconnect_delay = min(self._reconnect_delay * 2, 30.0)
+            asyncio.create_task(self.connect())
 
 # 长度前缀帧发送
 def _send_json(self, obj):
@@ -782,6 +788,8 @@ def _send_json(self, obj):
     self._writer.write(struct.pack(“>I”, len(raw)) + raw)
 \end{lstlisting}
 \end{code}
+
+除上述基本收发逻辑外，TcpClient 还内置了自动重连机制：当连接因对端关闭或网络异常而断开时，接收循环在清理当前传输层后不会直接退出，而是按指数退避策略（初始 1s，每次翻倍直至上限 30s）延迟后自动发起重连。重连成功后触发 \texttt{on\_connected} 事件，调用方可借此实现自动重新注册等恢复逻辑。该机制使 MediaPipe 感知模块在服务端重启后无需人工干预即可恢复通信。
 
 \subsection{Unity端AgentCommunicator}
 
@@ -1005,7 +1013,7 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 手部感知由 HandsRecognizer 类实现，基于 MediaPipe GestureRecognizer 模型（\texttt{gesture\_recognizer.task}）运行于 LIVE\_STREAM 模式。MediaPipe 内置手势分类器可识别"Thumb\_Up""Open\_Palm""Pointing\_Up""Victory"等预定义手势类别，检测结果包含手势标签、置信度与手腕归一化坐标。HandsRecognizer 内部维护手势状态缓存，仅在手势类别发生变化时触发结果回调，避免逐帧冗余上报。
 
-除 MediaPipe 内置手势分类外，系统独立实现了食指指向方向检测算法。算法流程为：若画面中存在单只手则直接选用，若存在两只手则优先选用 MediaPipe handedness 分类为"Left"的手；检查食指是否伸直——计算指尖（landmark 8）至 MCP 关节（landmark 5）的归一化欧氏距离，超过阈值 0.07 则判定为伸直态；随后计算方向向量 $\vec{d} = (x_8 - x_5, -(y_8 - y_5))$，将归一化坐标映射至像素空间（乘以摄像头分辨率 1280×720）后归一化为单位向量。方向数据以 \texttt{input:move:x,y} 格式通过 TCP 中继直发 Unity，驱动 VirtualAgentDevice 的移动摇杆，进而控制旅人沿指向方向行走。
+除 MediaPipe 内置手势分类外，系统独立实现了食指指向方向检测算法。算法流程为：若画面中存在单只手则直接选用，若存在两只手则优先选用 MediaPipe handedness 分类为"Left"的手；检查食指是否伸直——计算指尖（landmark 8）至 MCP 关节（landmark 5）的归一化欧氏距离，超过阈值 0.07 则判定为伸直态；随后计算方向向量 $\vec{d} = (x_8 - x_5, -(y_8 - y_5))$，将归一化坐标映射至像素空间（乘以当前帧的实际分辨率，该尺寸从每次接收的图像数据中提取，可自适应不同摄像头配置）后归一化为单位向量。方向数据以 \texttt{input:move:x,y} 格式通过 TCP 中继直发 Unity，驱动 VirtualAgentDevice 的移动摇杆，进而控制旅人沿指向方向行走。
 
 指向检测运行于每帧（无节流），保证移动控制的实时跟手性；而手势分类事件仅在状态变化时上报 智能体，作为高层交互决策的触发信号。
 
@@ -1021,7 +1029,7 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 整个感知子系统采用“共享视频源 + 异步分发”的架构。CameraCapture 类运行于独立守护线程，以尽可能高的帧率从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳分发给所有注册的帧回调（HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法）。两个识别器各自在 MediaPipe 回调线程中处理检测结果，通过 \texttt{asyncio.run\_coroutine\_threadsafe()} 将发送协程调度至 TcpClient 所在的 asyncio 事件循环线程，实现跨线程安全通信。
 
-TcpClient 基于 Python \texttt{asyncio} 实现，支持 \texttt{send\_text}、\texttt{send\_command}（含 relay\_to 参数）等方法，所有发送操作均在 asyncio 事件循环中串行执行。连接建立后首先发送注册消息（\texttt{client\_type: "mediapipe"}），随后持续监听服务端下发的控制指令（如 \texttt{hand\_direction:on/off} 以开关指向检测）。主线程则运行 OpenCV 预览窗口，渲染手部骨架、手势标签、FPS 计数器与面部鼻尖标注，供现场调试使用。
+TcpClient 基于 Python \texttt{asyncio} 实现，支持 \texttt{send\_text}、\texttt{send\_command}（含 relay\_to 参数）等方法，所有发送操作均在 asyncio 事件循环中串行执行。连接建立后通过 \texttt{on\_connected} 事件回调自动发送注册消息（\texttt{client\_type: "mediapipe"}）；若连接因服务端重启或网络波动断开，TcpClient 将以指数退避策略自动重连，重连成功后再次触发 \texttt{on\_connected} 完成重新注册，无需人工干预。MediaPipe 客户端同时持续监听服务端下发的控制指令（如 \texttt{hand\_direction:on/off} 以开关指向检测）。主线程则运行 OpenCV 预览窗口，渲染手部骨架、手势标签、FPS 计数器与面部鼻尖标注，供现场调试使用。
 
 \subsection{实体灯光控制与场景布置}
 
@@ -1402,8 +1410,8 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
 
-\thesisappendix
-
 \thesisloadbibliography[nocite]{reference}
+
+\thesisappendix
 
 \end{document}

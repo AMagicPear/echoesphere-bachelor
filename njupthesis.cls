@@ -156,11 +156,12 @@
 
 
 \RequirePackage[a4paper,
-  inner=3cm, outer=3cm, top=2cm, bottom=3.75cm,
+  inner=3cm, outer=3cm, top=1.5cm, bottom=3cm,
   bindingoffset=0cm]{geometry}
 
 \setlength{\headheight}{1.5cm}
-\setlength{\footskip}{20pt}
+\setlength{\headsep}{10pt}
+\setlength{\footskip}{15pt}
 
 \pagestyle{fancy}
 \linespread{1.391}
@@ -204,6 +205,7 @@
 \makeatother
 \AtBeginEnvironment{tabular}{\small}
 \AtBeginEnvironment{tabularx}{\small}
+\newcolumntype{p}[1]{m{#1}}
 
 \makeatletter
 \renewcommand{\p@subfigure}{\arabic{chapter}-\arabic{figure}}
@@ -309,7 +311,7 @@
   \vspace{\baselineskip}
   \noindent
     \begin{minipage}[t]{48pt}
-      \noindent\textbf{关键词\chinesecolon}
+      \noindent{\heiti 关键词\chinesecolon}
     \end{minipage}
     \begin{minipage}[t]{\linewidth - 48pt}
       #1
@@ -325,7 +327,7 @@
 \newcommand{\englishkeyword}[1]{
   \vspace{\baselineskip}
   \noindent\begin{minipage}[t]{2.1cm}
-      \noindent\textbf{Keywords:}
+      \noindent\textbf{Key words:}
     \end{minipage}
     \begin{minipage}[t]{
       \linewidth - 2.1cm}
@@ -430,14 +432,15 @@
 
 \newcommand{\makecover}{
 \thispagestyle{empty}
-\setlength{\extrarowheight}{36pt}
+\setlength{\extrarowheight}{0pt}
+  \renewcommand{\arraystretch}{3}
 \begin{center}
-  \fontsize{36pt}{36pt}\selectfont{\heiti 南京邮电大学 \\ 毕{}业{}设{}计（论{}文）\\}
+  \fontsize{36pt}{36pt}\selectfont{\heiti 南京邮电大学 \\ 毕\enspace 业\enspace 设\enspace 计（论\enspace 文）\\}
   \vspace{2cm}
   
-  \begin{tabular}{>{\fontsize{16pt}{16pt}\kaiti}l
+  \begin{tabular}{>{\fontsize{16pt}{16pt}\kaiti}m{3cm}
       >{\centering\arraybackslash\fontsize{15pt}{15pt} \kaiti}
-      p{11.53cm}}
+      m{11.53cm}}
     题\chinesespace\chinesespace 目{}{} & \thetitle \\
     \cline{2-2}
     专\chinesespace\chinesespace 业{}{} & \themajor \\
@@ -469,7 +472,7 @@
 \end{center}
 
 \begin{spacing}{2.0}
-郑重声明：所提交的毕业设计（论文），是本人在导师指导下，独立进行研究工作所取得的成果。除文中已注明引用的内容外，本毕业设计（论文）不包含任何其他个人或集体已经发表或撰写过的作品成果。对本研究做出过重要贡献的个人和集体，均已在文中以明确方式标明并表示了谢意。\\ \\ 
+本人郑重声明：所提交的毕业设计（论文），是本人在导师指导下，独立进行研究工作所取得的成果。除文中已注明引用的内容外，本毕业设计（论文）不包含任何其他个人或集体已经发表或撰写过的作品成果。对本研究做出过重要贡献的个人和集体，均已在文中以明确方式标明并表示了谢意。\\ \\ 
 
 \hspace*{7cm} 论文作者签名：
 
@@ -481,14 +484,15 @@
 \setcounter{page}{0}
 \setcounter{pseudopage}{0}
 \setlength{\extrarowheight}{5pt}
+  \renewcommand{\arraystretch}{1}
 }
 
 \ProcessOptions\relax
 
 \newcommand{\standardhead}{
   \fancyhf{}
-  \fancyhead[CE, CO]{\fontsize{10.5pt}{12.6pt}\selectfont 南京邮电大学\thegraduateyear 届本科生毕业设计（论文）\\}
-  \fancyfoot[CE, CO]{\fontsize{10.5pt}{12.6pt}\selectfont\thepage}
+  \fancyhead[CE, CO]{\fontsize{10.5pt}{12.6pt}\selectfont 南京邮电大学\thegraduateyear 届本科生毕业设计（论文）}
+  \fancyfoot[CE, CO]{\fontsize{9pt}{10.8pt}\selectfont - \thepage{} -}
 }
 
 % TODO: 更改目录样式
@@ -520,7 +524,9 @@
 }
 
 \newcommand{\thesisappendix}{
-  \chapter*{附\chinesespace\chinesespace 录}
+  \titleformat{name=\chapter,numberless}[block]
+    {\fontsize{15pt}{15pt}\selectfont\heiti\thispagestyle{fancy}}{}{0pt}{}
+  \chapter*{附录}
     \setcounter{section}{0}
     \addcontentsline{toc}{chapter}{附录}
     \markboth{附录}{附录}
@@ -543,7 +549,7 @@
 \newenvironment{thesisbibliography}{
   \begin{thebibliography}{lo}
     \interlinepenalty=10000
-    \begin{spacing}{1.667}
+    \begin{spacing}{1.391}
     \thispagestyle{fancy}
     \small
 }{
@@ -552,9 +558,11 @@
 }
 
 \pretocmd{\bibliography}{
+  \titleformat{name=\chapter,numberless}[block]
+    {\fontsize{15pt}{15pt}\selectfont\heiti\thispagestyle{fancy}}{}{0pt}{}
   \thispagestyle{fancy}
   \interlinepenalty=10000
-  \begin{spacing}{1.667}
+  \begin{spacing}{1.391}
 }{}{}
 
 \apptocmd{\bibliography}{
