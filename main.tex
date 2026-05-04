@@ -563,7 +563,7 @@ Notes & 日志按模块和时间戳索引；支持按级别过滤与关键词模
 }
 \medskip
 
-在确定概念之后，我使用Google推出的NanoBanana生成了旅人的形象以及其不同视图；然后根据不同视图图片，使用字节跳动推出的Seed 3D生成带PBR材质的OBJ格式3D模型；由于此旅人形象非标准人形，所以无法套用通用的人体骨骼模板，因此接下来，我将3D模型导入Blender，手工完成骨骼绑定和关键帧动画；最后要让旅人能够在Unity中被控制，还需要实现一套输入控制脚本和简单的状态机。
+在确定概念之后，形象设计、3D建模、骨骼绑定与动画状态机的具体实现流程，将在第4章的“旅人角色的建模与动画实现”一节中详细阐述。
 
 \section{总体架构和通信协议}
 
@@ -853,9 +853,21 @@ EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一�
 
 \section{虚拟场景与视觉呈现}
 
+\subsection{旅人角色的建模与动画实现}
+
+第3.2.3节已从设计角度阐述了旅人形象的创作理念与概念设定。本节将从实现角度，完整描述旅人角色从二维概念图到Unity中可操控三维角色的技术流程，涵盖AI辅助3D建模、Blender骨骼绑定与关键帧动画、以及Unity动画状态机的构建。
+
+旅人形象实现的第一步是将概念设计阶段的平面形象转化为三维模型。首先使用Google推出的NanoBanana图像生成模型，以第3.2.3节中ChatGPT生成的诗意概念描述为提示词，生成旅人的多视角的图片；随后将该图片输入字节跳动推出的Seed 3D模型，生成带PBR（Physically Based Rendering）材质的OBJ格式三维模型。Seed 3D能够从图像中推断几何结构与表面材质属性，输出的OBJ模型包含网格数据、UV映射以及漫反射、法线与粗糙度贴图，可直接导入Unity呈现正确的效果。
+
+为了让旅人能够在世界中行走，需要为其制作一段行走动画。制作动画的前提是需要为其制作一套骨骼并绘制权重。由于该旅人为非标准人形，没有标准的手臂和手部，也没有脚部，且由于其3D模型为AI一次性生成，没有传统的分部建模过程，所其斗篷部分与身体黏合在一起无法简单地分开，这也导致了无法直接套用通用人形骨骼模板，也难以使用通用工具一键生成骨骼绑定。因此本设计在Blender中手工完成了从骨骼绑定和动画制作。其中，权重绘制（Weight Painting）是确保蒙皮变形自然的关键步骤。
+
+完成后的模型与动画通过Blender的FBX导出器导出为单一FBX文件，导出设置中勾选“包含动画”“烘焙动画”与“应用缩放=1.0”，确保坐标系与Unity的Y轴朝上、Z轴朝前约定一致。
+
+FBX文件导入Unity后，引擎自动生成Avatar与Animation Clip资源。由于旅人角色为非人形骨骼结构，Avatar类型设置为Generic（通用），并在Avatar配置中手动指定盆骨为Root Motion的驱动节点。动画控制采用Unity Animator Controller构建有限状态机（Finite State Machine）。
+
 \subsection{旅人控制器与虚拟输入设备}
 
-旅人角色的移动由 TravelerController 组件驱动，该组件依赖 Unity 的 CharacterController 进行物理位移计算。在 \texttt{FixedUpdate} 中按固定时间步长执行重力施加、输入解析、旋转平滑与位移更新：读取 Input System 的 Move 动作获取二维输入向量，结合主摄像机的偏航角计算世界空间移动方向，通过 \texttt{Mathf.SmoothDampAngle} 实现角色朝向的平滑过渡；垂直方向累计重力加速度，着地时清零。TravelerController 的核心移动逻辑如代码\ref{code:traveler-controller}所示。
+旅人角色的移动由 TravelerController 组件驱动，该组件依赖 Unity 的 CharacterController 进行物理位移计算。在 \texttt{FixedUpdate} 中按固定时间步长执行重力施加、输入解析、旋转平滑与位移更新：读取 Input System 的 Move 动作获取二维输入向量，结合主摄像机的偏航角计算世界空间移动方向，通过 \texttt{Mathf.SmoothDampAngle} 实现角色朝向的平滑过渡；垂直方向累计重力加速度，着地时清零。TravelerController 的核心移动逻辑所示。
 
 \begin{code}
 \caption{TravelerController 核心移动逻辑}
