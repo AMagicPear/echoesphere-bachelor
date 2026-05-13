@@ -138,7 +138,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 随着虚拟现实与人工智能技术的介入，数字表演中的互动性被进一步深化。VR将观者的参与性从架上的“画外”升华至虚拟现实的“画内”，沉浸式体验不再仅是一种视觉奇观，更是一种身体在场的感知方式。蒋旎等人围绕敦煌艺术展开的沉浸式展览实践为这一方向提供了具体参照\citing{jiang2024dunhuang}：在“遇见当代飞天”主体展演空间中，随着参观者位置移动，投影区域相应位置实时生成雷达交互后的粒子渲染画面，形成视频画面层与动态实时渲染层叠加的沉浸效果。这一实践表明，数字人文研究成果正从文本数据转化为具有场域感、以全息与沉浸式为体验特点的艺术语言。
 
-在国际层面，Pietroni等学者围绕博物馆多感官交互体验开展了系统研究：其主导的IntARSI项目探索了基于自然用户界面的博物馆交互设计方法，整合手势、触觉与听觉等多通道感知\citing{pietroni2021accessibility}；在此基础上，其近期研究进一步提出了面向混合现实与多感官叙事的博物馆体验框架，主张物理空间与数字内容的深度融合是下一代博物馆体验的核心方向\citing{pietroni2025multisensory}。
+在国际层面，Pietroni等学者围绕博物馆多感官交互体验开展了系统研究：其主导的IntARSI项目探索了基于自然用户界面的博物馆交互设计方法，整合手势、触觉与听觉等多通道感知\citing{pietroni2021accessibility}；在此基础上，其近期研究进一步提出了面向混合现实与多感官叙事的博物馆体验框架，主张物理空间与数字内容的深度融合是下一代博物馆体验的核心方向\citing{pietroni2025multisensory}。在虚拟博物馆远程访问领域，汤沁怡将博物馆服务机器人与虚拟现实技术相结合，设计了虚拟博物馆场景下的阿凡达式机器人，通过TCP通信实现Unity中机器人运动仿真与用户自定义漫游，为博物馆远程参观提供了一种高参与度的交互方案\citing{tang2022avatar}。
 
 互动仪式链理论从设计层面为上述实践提供了系统的组织框架\citing{wen2022huadong}。温文龙等学者指出，通过预设具有规范性、表演性与趣味性的互动仪式，可以为参与者创造特定的体验情境——在仪式化的互动过程中，情感能量得以产生、分享与传递，并通过“仪式链”的连续性维持高强度的参与体验。如图\ref{fig:ritual}所示，这一理论将展览体验解构为一系列可设计的情感阶段，每个阶段的交互机制与视觉反馈均服务于相应的情感目标。
 
@@ -169,9 +169,7 @@ With the rapid development of digital technologies such as virtual reality and a
 
 在具体开发层面，Unity引擎以C\#作为脚本语言控制对象行为与系统流程\citing{chen2024u3d}。在视觉渲染层面，Unity配合Shader编程可实现光影、粒子、后期处理等沉浸式空间效果\citing{feng2016unityshader}。为提高展览场景中的渲染效率，动态批处理、静态批处理与LOD等优化手段可将渲染开销控制在目标帧率以内\citing{chen2024u3d}。蒋旎等人在敦煌沉浸式展览中采用的“视频画面层+动态实时渲染画面”叠加方式\citing{jiang2024dunhuang}，即是将上述技术应用于展览场景的实例——随着参观者位置移动，雷达交互数据驱动粒子系统实时生成响应式视觉画面，而批处理与LOD优化则是保证这一实时管线流畅运行的工程前提。
 
-此外，Unity具有良好的外部设备扩展能力。一个典型实例是LeapMotion（现更名为Ultraleap）手势追踪设备与Unity的集成应用。LeapMotion基于红外光学技术，能够以亚毫米精度捕获手部骨骼关节的三维坐标与姿态，通过官方的Ultraleap Unity SDK，开发者可将采集的双手骨骼数据直接映射为Unity场景中的虚拟手部模型，实现对虚拟物体的自然抓取、旋转与缩放操作。倪嘉昊等人利用此方案构建了面向博物馆的虚拟文物操作体验，参观者可通过裸手手势旋转、放大与拆解文物三维模型\citing{ni2024leapmotion}；Ogrizek等人在VR博物馆场景中也验证了实体操作工具与手势交互结合对用户体验的积极影响\citing{ogrizek2024vr}。这些实践表明，Unity与手势追踪设备的集成已在展览交互领域形成了较为成熟的技术路径。
-
-另一个案例是微控制器与Unity的串行通信集成。在实体展览中，物理按钮、旋钮等触觉控制器能够为参观者提供区别于触摸屏的具身操作体验。Arduino作为开源微控制器平台，凭借丰富的I/O接口与传感器生态，可通过Unity的Serial Port串行通信API将光敏传感器、压力传感器等物理输入设备的信号实时传输至Unity，触发虚拟场景中的对应事件；反之，Unity也可向Arduino发送指令控制电机、LED等输出设备。如前文图\ref{fig:liangzhu-interactive}所示的良渚博物馆交互装置中，参观者转动实体转盘的操作即通过类似机制映射为虚拟场景中视角或时间线的变化。这一集成模式使物理交互装置的形式不再受限于标准化输入设备，而是可以根据展览叙事需要自由定制。Unity凭借对上述多样化外部设备的集成能力，成为连接视觉生成、物理设备与感知模块的理想平台——本课题正是利用这一特性，将MediaPipe的手势与表情感知数据、树莓派控制的灯光装置与Unity虚拟场景统一整合在同一交互循环中。
+此外，Unity 具备卓越的外部设备扩展能力。它不仅能通过专用 API 与 LeapMotion 等高精度感知硬件实现毫秒级数据同步\citing{ni2024leapmotion}，更能够接入多种外部系统与工业级协议，在数字孪生与机器人仿真等复杂场景中发挥关键作用。在数字孪生领域，徐曼菲等人针对火工品装配车间的数字化改造需求，以 Unity3D 为核心构建了数据采集、数据管理、数字化建模与功能集成四层架构，实现了物理车间装备与虚拟模型的状态同步监控，验证了 Unity 在工业实时数据驱动场景中的适用性\citing{xu2026digitaltwin}。在机器人仿真领域，周骞等人设计的 Unity-ROS 协同仿真系统通过 Socket 通信实现跨平台数据交互——ROS 端负责无人平台的运动控制建模与 IMU、GPS 等传感器数据模拟，Unity 端则提供高保真三维场景渲染及 RGB、深度等多模态图像生成，共同构成支撑导航算法快速验证的仿真闭环\citing{zhou2021unityros}。这使得 Unity 并非孤立的渲染引擎，而是连接物理装置与感知模块的多维集成平台。
 
 \section{多模态交互与智能体技术研究进展}
 
@@ -439,61 +437,36 @@ Notes & 日志按模块和时间戳索引；支持按级别过滤与关键词模
 \label{tbl:usecase-log}
 \end{table}
 
-\section{系统总体设计}
+\section{系统概要设计}
 
-\subsection{系统总体架构}
-
-以上述设计原则为指导，本系统最终形成了如图\ref{fig:system-arch}所示的三层星型拓扑架构。图\ref{fig:tech-roadmap}展示了开题阶段规划的技术路线，为架构设计提供了方法论基础。
+\subsection{总体架构}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.9\textwidth]{pic/开题报告技术路线图.pdf}
-  \caption{技术路线图}
-  \label{fig:tech-roadmap}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.9\textwidth]{pic/面向实体展览的沉浸式多模态交互系统 架构图.pdf}
+  \includegraphics[width=1.0\textwidth]{pic/系统总体架构图.pdf}
   \caption{系统总体架构图}
   \label{fig:system-arch}
 \end{figure}
 
-如图\ref{fig:system-arch}所示，本系统采用“感知层—理解层—反馈层”的三层星型拓扑架构。
+以上述需求为指导，本系统最终形成了如图\ref{fig:system-arch}所示的“感知—理解—反馈”三层架构。理解层居于上层，由EchoAgent与TCP服务端组成，是系统的通信中枢与决策核心；感知层与反馈层居于下层、左右并排，均以TCP Client身份接入理解层——感知层负责采集多源数据并上报，反馈层负责接收决策指令并执行。四个核心模块分布其中：MediaPipe客户端归属感知层，树莓派客户端归属反馈层，Unity客户端同时跨越感知与反馈两层，EchoAgent与TCP服务端构成理解层。
 
-\textbf{感知层}由四个独立模块构成：MediaPipe手势识别模块负责检测参展者的手部动作（捏合、滑动、指向等）；面部情绪识别模块实时分析参展者的情感状态；Unity交互应用同步上报当前章节进度与场景事件；摄像头则提供原始视觉输入。各模块均以TCP Client方式将感知数据上报至理解层，体现了全流程多模态的设计原则——手势、表情、应用状态三类异构信息统一汇入决策中枢，而非各自独立处理。
+感知层采集三类数据。MediaPipe客户端运行于独立Python进程中，通过摄像头获取手势与面部信息：手势识别部分检测参展者手部动作类别与食指指向方向，面部识别部分提取52维面部形变系数。Unity客户端上报当前章节进度、场景交互事件与旅人状态变化，为智能体提供叙事上下文。二者均以TCP Client将数据发送至理解层，其中手势数据经中继通道直发Unity驱动角色移动，面部数据则进入消息队列供EchoAgent进行情绪语义推理。
 
-\textbf{理解层}以EchoAgent为核心。EchoAgent内部基于大语言模型构建，结合Deep Agents框架实现Tool Calling能力，统一汇聚多源感知信息并综合推理，生成针对性的控制指令。EchoAgent与TCP Server之间通过消息队列解耦：Server负责网络通信，将接收到的客户端消息投入共享队列；EchoAgent则按固定间隔从队列中取出消息，经大语言模型理解后自主决策并调用相应工具。这种设计使决策逻辑与网络通信完全分离——EchoAgent并非TCP客户端，而是通过内部队列与Server协同，Server专注收发，智能体专注推理，二者各司其职。
+反馈层执行两类指令。Unity客户端接收视觉参数与叙事指令，驱动虚拟场景的实时渲染；树莓派客户端运行于树莓派5之上，接收灯光控制指令，经rpi-ws281x库转换为PWM信号，驱动64颗WS2812可编程LED灯珠，支持追逐、常亮、彩虹渐变、呼吸四种基础模式以及音符获取事件的联动反馈。Unity端通过AgentCommunicator组件管理TCP连接，通过VirtualAgentDevice将网络输入映射至Unity Input System管线，使远程手势与本地输入共享同一套控制逻辑。
 
-\textbf{反馈层}由Unity客户端与树莓派物理装置组成，分别承担虚拟场景渲染与实体灯光控制任务。这一双层反馈结构是虚实结合设计原则的直接体现：同一决策指令可同时驱动虚拟画面变化与物理灯光响应，使展览交互从屏幕内延伸至实体空间，形成完整的“感知—理解—反馈”闭环。
+理解层是系统的神经中枢。TCP服务端基于Python asyncio实现，在端口65432上监听连接，统一管理各客户端的注册、消息路由与中继转发。EchoAgent基于大语言模型构建，结合Deep Agents框架实现Tool Calling能力，以5秒为间隔从共享消息队列中批量获取感知数据，经多模态推理后自主调用五个工具函数——通用消息发送、Unity截图请求、LED灯光控制、音乐播放控制与TTS语音合成——生成控制决策。服务端与Agent运行于同一进程，通过asyncio.Queue以生产者—消费者模式协同工作，服务端专注收发，Agent专注推理。
 
-系统采用TCP/IP协议实现模块间通信。TCP Server作为通信中枢，接收来自各感知模块的数据上报，并将决策指令下发至反馈模块。Unity客户端、MediaPipe客户端、树莓派客户端及调试客户端均作为TCP Client连接至决策中枢，共同构成星型拓扑结构。这种结构实现了各模块的松耦合：各感知模块仅需关注自身数据采集，无需了解其他模块的存在；决策模块则充当统一的信息汇聚与分发中心，协调各模块间的数据流转，充分体现了强可拓展性原则——新增感知通道或反馈设备只需以TCP Client接入，无需修改核心决策逻辑。
-
-在通信协议的选择上，本系统经过深入比较，最终确定采用TCP Socket而非WebSocket作为传输层协议。TCP Socket相比WebSocket具有更低的协议开销和传输延迟，且能够提供更精细的流量控制与连接管理能力，便于针对展览场景的特定需求进行优化调参。
-
-
-\subsection{功能模块设计}
-\label{sec:module-design}
-
-上述三层架构由四个核心功能模块协同实现，各模块之间通过统一的TCP协议与消息队列进行数据交换。
-
-\textbf{MediaPipe感知模块}承担手势识别与面部形变系数采集任务。该模块运行于独立Python进程中，通过TCP Client接入系统，将手势类别、食指指向方向与面部形变数据实时上报至理解层。手势数据经中继通道直发Unity驱动角色移动，面部数据则进入消息队列供智能体进行情绪语义推理。
-
-\textbf{Unity交互应用模块}具有双重角色。作为感知层节点，该模块上报当前章节进度、场景交互事件与旅人状态变化，为智能体提供叙事上下文；作为反馈层节点，该模块接收并执行理解层下发的视觉参数更新与叙事状态指令，驱动虚拟场景的实时视觉呈现。Unity端通过AgentCommunicator组件管理TCP连接与消息收发，通过VirtualAgentDevice将网络输入映射至Unity Input System管线，使远程手势数据与本地输入共享同一套控制逻辑。
-
-\textbf{EchoAgent与TCP Server模块}构成理解层核心。TCP Server基于Python asyncio实现，在端口65432上监听连接，统一管理Unity、MediaPipe、树莓派与调试四类客户端的注册、消息路由与中继转发。EchoAgent基于大语言模型构建，通过Deep Agents框架实现工具调用能力，以5秒为间隔从共享消息队列中批量获取感知数据，经多模态推理后自主调用五个工具函数——通用消息发送、Unity截图请求、LED灯光控制、音乐播放控制与TTS语音合成——生成对反馈层的结构化控制决策。Server与Agent之间通过asyncio.Queue解耦，Server专注网络收发，Agent专注推理决策，二者以生产者—消费者模式独立运行。
-
-\textbf{树莓派灯光控制模块}作为物理反馈终端，运行于树莓派5之上，以TCP Client身份接入系统。该模块接收理解层下发的灯光控制指令（格式为\texttt{lights:mode[:color][:note]}），经解析后通过rpi-ws281x库转换为PWM信号，驱动64颗WS2812可编程LED灯珠呈现追逐、常亮、彩虹渐变、呼吸四种基础模式以及音符获取与演奏的联动反馈，使虚拟场景的氛围变化延伸至实体展览空间。
+系统以理解层为中枢构成星型拓扑，新增感知通道或反馈设备只需以TCP Client接入，无需修改核心逻辑。同一决策指令可同时驱动虚拟画面变化与物理灯光响应，使展览交互从屏幕延伸至实体空间。通信采用TCP Socket而非WebSocket，以获得更低的协议开销、传输延迟与更精细的流量控制。
 
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{pic/EchoAgent和TCP Server之间集成以及队列实现拓扑图.pdf}
-  \caption{EchoAgent与TCP Server之间集成及队列实现拓扑}
+  \caption{EchoAgent与TCP服务端之间集成及队列实现拓扑}
   \label{fig:agent-server-topology}
 \end{figure}
 
-EchoAgent与EchoServer及消息队列的集成方式如图\ref{fig:agent-server-topology}所示：EchoServer在端口65432上持续监听TCP连接，将非注册、非中继类消息写入共享的\texttt{asyncio.Queue}；EchoAgent按固定间隔从队列中批量取出消息，交由大语言模型推理后自主调用工具。Server与Agent各自在独立的异步循环中运行，以生产者—消费者模式解耦消息接收与决策处理。
+EchoAgent与EchoServer及消息队列的集成方式如图\ref{fig:agent-server-topology}所示：EchoServer在端口65432上持续监听TCP连接，将非注册、非中继类消息写入共享的\texttt{asyncio.Queue}；EchoAgent按固定间隔从队列中批量取出消息，交由大语言模型推理后自主调用工具。服务端与Agent各自在独立的异步循环中运行，以生产者—消费者模式协同消息接收与决策处理。
 
 智能体的完整交互闭环如图\ref{fig:agent-trace}所示：MediaPipe模块检测到参展者的手势或表情变化后，通过TCP上报至智能体；智能体结合当前叙事章节、参展者进度与情绪上下文进行综合决策，必要时调用截图工具获取Unity当前画面以辅助判断；截图请求经TCP发送至Unity客户端，Unity执行截图后将图像回传；智能体理解图像内容后发起下一步交互指令，形成"感知—理解—反馈"闭环。
 
@@ -520,7 +493,7 @@ EchoAgent通过LangChain的\texttt{@tool}装饰器定义了五个工具函数，
 
 以下各节依次详述上述模块所依赖的通信协议、控制命令体系与实体展览环境的具体设计。
 
-\subsection{自定义TCP通信协议}
+\subsection{自定义TCP通信协议设计}
 
 在协议格式的设计过程中，本系统经历了从二进制协议到JSON文本协议的演进历程。
 
@@ -653,7 +626,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 \subsubsection*{第一章：初域·未定之原——自我迷茫与锚定}
 
-本章对应情感状态从“迷茫”到“锚定”的转换，核心目标是引导参展者解锁水滴音符，学会在未定中锚定自我。设计理念借鉴《最后的篝火》的温柔引导机制：全程无惩罚，通过渐进式教学使参展者理解“我的声音可以塑造世界”的核心逻辑。
+本章对应情感状态从“迷茫”到“锚定”的转换，核心目标是引导参展者解锁水滴音符，学会在未定中锚定自我。设计理念借鉴《最后的篝火》的温柔引导机制，全程无惩罚，通过渐进式教学使参展者理解音符塑造世界的核心逻辑。
 
 远景山峦在本章中承担视觉引导与情感暗示的双重职责。半透明、边缘模糊的山峦形态隐喻旅人尚未明晰的方向感——山体的不稳定抖动象征内心的徘徊与探寻；当山峦被音符固化后逐渐变得坚实，则对应旅人在迷茫中逐步锚定自我、找到方向的过程。视觉层面的虚实转换与情感层面的迷茫-锚定转变形成对照，使参展者在潜意识层面感受情绪叙事的递进。
 
@@ -681,32 +654,41 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 \subsection{音乐交互设计}
 
-从应用名称《回声之境》可以看出，本设计的初衷是构建一个音乐驱动的互动体验——\textit{an experimental interactive application where sound shapes the world}。基于整体应用的叙事特性，各场景绑定特定的配乐调式与速度标识：不同场景运用不同调式与曲速的背景音乐，旅人演奏的音符若不在当前调式上会造成和声冲突。因此，每个场景均预设固有的调式与曲速标识，该设计参考了游戏《Songbird Symphony》中的音乐交互机制。
+从应用名称《回声之境》可以看出，本设计的初衷是构建一个音乐驱动的互动体验。在新建项目时，我在项目简介里写下了这样的描述——\textit{an experimental interactive application where sound shapes the world}。基于整体应用的叙事特性，各场景绑定特定的配乐调式与速度标识：不同场景运用不同调式与曲速的背景音乐，旅人演奏的音符若不在当前调式上会造成和声冲突。因此，每个场景均预设固有的调式标识，该设计参考了游戏《Songbird Symphony》中的音乐交互机制。
 
-<待补充一些乐理参考>
+如表\ref{tbl:note-design}所示，旅人在旅程中可依次获得水滴、道路交错、海浪和风这四个音符，通过指引依次获得。音符不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式。每个音符承载着隐喻性的象征意义，其演奏效果对应精神层面的某种能力。
 
-旅人在旅程中可依次获得四个音符。音符不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式。每个音符承载着隐喻性的象征意义，其演奏效果对应精神层面的某种能力。四个音符在交互应用进程中通过指引依次获得，如表\ref{tbl:note-design}所示。
+其中音符的音级分别为一级、五级、二级和六级。这四个音级的设计思路来自于乐理中的五度圈。五度圈是乐理中描述十二个音之间五度关系的圆形图示：从任一音出发，顺时针方向每次上行纯五度，逆时针方向每次下行纯五度。在五度圈上，I—V—II—VI这四级恰好构成顺时针方向上的连续四步——从主音（I）出发，上行五度至属音（V），再上行五度至上主音（II），再上行五度至下中音（VI），如图\ref{fig:circle-of-fifths}所示。
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\linewidth]{pic/Circle_of_fifths_deluxe_4.pdf}
+\caption{五度圈\citing{circle_of_fifths_wikimedia}}
+\label{fig:circle-of-fifths}
+\end{figure}
+
+这种沿五度圈逐步展开的音级选取方式，使得四个音符在和声上既有内在联系，又逐层拓展调性色彩——每一步都引入一个新的调内音，音乐张力与可能性随之递增，与旅人成长的四阶段形成结构上的呼应。
 
 \begin{table}[h]
 \centering
 \caption{音符设计表}
 \begin{tabularx}{\linewidth}{|c|c|c|X|X|}
 \hline
-\textbf{音符} & \textbf{名称} & \textbf{音名} & \textbf{效果} & \textbf{寄语} \\
+\textbf{音符} & \textbf{名称} & \textbf{音级} & \textbf{效果} & \textbf{寄语} \\
 \hline
-水滴 & waterdrop & C & 奏响它，可让流动、未定的世界元素固化成型，为自己锚定前行的路标。 & 并非世界无形，是你的呼唤还未曾抵达。 \\
+水滴 & waterdrop & $\mathrm{I}$ & 奏响它，可让流动、未定的世界元素固化成型，为自己锚定前行的路标。 & 并非世界无形，是你的呼唤还未曾抵达。 \\
 \hline
-道路交错 & crossing & G & 奏响它，可与他人的灵魂产生共鸣，连接彼此的道路；也可划定自己的边界，让自己不受他人情绪与评价的影响。 & 人与人之间是否都有一座眼泪做成的桥？ \\
+道路交错 & crossing & $\mathrm{V}$ & 奏响它，可与他人的灵魂产生共鸣，连接彼此的道路；也可划定自己的边界，让自己不受他人情绪与评价的影响。 & 人与人之间是否都有一座眼泪做成的桥？ \\
 \hline
-海浪 & tide & D & 奏响它，可驾驭知识的潮水，让流动的未知成为你前行的路；也可让你在潮水里保持稳定，不被洪流吞噬。 & 也许恐惧，也许敬畏，也许疲惫，但这是成长。 \\
+海浪 & tide & $\mathrm{II}$ & 奏响它，可驾驭知识的潮水，让流动的未知成为你前行的路；也可让你在潮水里保持稳定，不被洪流吞噬。 & 也许恐惧，也许敬畏，也许疲惫，但这是成长。 \\
 \hline
-风 & breeze & A & 奏响它，可让你的声音传遍整个回声之境，你走过的路，会成为后来者的路标；你也可以化作风，去往任何你想去的地方，无拘无束。 & 原来推动你前进的，不是时间，是那些来不及抓住的风。 \\
+风 & breeze & $\mathrm{VI}$ & 奏响它，可让你的声音传遍整个回声之境，你走过的路，会成为后来者的路标；你也可以化作风，去往任何你想去的地方，无拘无束。 & 原来推动你前进的，不是时间，是那些来不及抓住的风。 \\
 \hline
 \end{tabularx}
 \label{tbl:note-design}
 \end{table}
 
-上述四个音符的设计层层递进，映射了旅人从认识自我、到处理与他人关系、再到汲取知识、最终获得自由的成长路径。在交互应用进程中，四个音符通过指引依次获得——这既是叙事节奏的安排，也隐喻着人生中认知与能力逐步展开的顺序。音符的演奏将触发不同的视觉与音效反馈，同时驱动场景元素的动态变化，使音乐真正成为塑造交互应用世界面貌的核心力量。
+四个音符的设计层层递进，映射了旅人从认识自我、到处理与他人关系、再到汲取知识、最终获得自由的成长路径。在交互应用进程中，四个音符通过指引依次获得——这既是叙事节奏的安排，也隐喻着人生中认知与能力逐步展开的顺序。音符的演奏将触发不同的视觉与音效反馈，同时驱动场景元素的动态变化，使音乐真正成为塑造交互应用世界面貌的核心力量。
 
 
 \subsection{旅人人物形象设计}
@@ -714,17 +696,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 旅人是叙事性质的媒体和游戏作品中常见的意象，例如《最后的篝火》（The Last Campfire）和《风之旅人》等独立游戏，以至《Sky光·遇》《原神》这类商业游戏，均使用了旅人作为由玩家操控的主角形象。本作品《回声之境》作为同样注重叙事和情感化表达的交互应用，也参考这些游戏作品设计了一个旅人形象。
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.8\textwidth]{pic/艺术设计-旅人.jpg}
-  \caption{艺术设计-旅人}
-  \label{fig:traveler-design}
-\end{figure}
-
-
-如图\ref{fig:traveler-design}展示了旅人形象的创作过程，其经历了概念设计、形象设计、3D建模、骨骼+动画实现、输入控制+状态机这五个阶段。本作品在其流程中大量使用了生成式人工智能技术辅助创作。
-
-概念设计阶段主要由ChatGPT辅助完成，得到了如下的诗意化表述：
+《回声之境》的旅人概念事实上源于作者本人在学业和生活上的踌躇与困惑，也就是在ChatGPT聊我的情感困惑的过程中，我和ChatGPT共同完成了下面这样诗意化的旅人形象表述：
 
 \medskip
 \setlength{\fboxsep}{5pt}
@@ -749,11 +721,18 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 }
 \medskip
 
-在确定概念之后，形象设计、3D建模、骨骼绑定与动画状态机的具体实现流程，将在第4章的“旅人角色的建模与动画实现”一节中详细阐述。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.0\textwidth]{pic/旅人形象设计.png}
+  \caption{旅人形象设计}
+  \label{fig:traveler-design}
+\end{figure}
+
+在确定概念之后，本课题借助Google推出的NanoBanana完成了旅人形象设计，如图\ref{fig:traveler-design}所示。
 
 \chapter{交互系统和配套应用实现}
 
-\section{系统TCP通信与并发控制}
+\section{TCP通信与并发控制}
 
 \subsection{长度前缀JSON协议}
 
@@ -844,41 +823,14 @@ def _send_json(self, obj):
 
 除上述基本收发逻辑外，TcpClient 还内置了自动重连机制：当连接因对端关闭或网络异常而断开时，接收循环在清理当前传输层后不会直接退出，而是按指数退避策略（初始 1s，每次翻倍直至上限 30s）延迟后自动发起重连。重连成功后触发 \texttt{on\_connected} 事件，调用方可借此实现自动重新注册等恢复逻辑。该机制使 MediaPipe 感知模块在服务端重启后无需人工干预即可恢复通信。
 
-\section{Unity端应用架构与状态管理}
 
-Unity 交互应用内部以 GameRoot 为单例枢纽进行集中式管理。GameRoot 组件挂载于场景中标记 \texttt{DontDestroyOnLoad} 的持久化对象，其 \texttt{Awake()} 标注 \texttt{[DefaultExecutionOrder(-100)]} 以确保最先执行：若已存在实例则销毁自身，否则将自身赋给静态属性 \texttt{Instance} 并注册跨场景持久化。GameRoot 下辖五个子对象，各携带一个核心脚本，GameRoot 以公开字段持有引用，层级结构如代码\ref{code:gameroot-tree}所示。
-
-\begin{code}
-\caption{GameRoot 层级结构}
-\label{code:gameroot-tree}
-\lstset{style=codeblock}
-\begin{lstlisting}
-Game Root (DontDestroyOnLoad)            -- GameRoot 单例
-├── SaveManager                          -- 存档管理
-├── AgentCommunicator                    -- TCP 通信
-├── MusicNoteController                  -- 音符协调
-├── EchoEventCenter                      -- 事件中转
-└── GameStateManager                     -- 状态编排
-\end{lstlisting}
-\end{code}
-
-场景中任何脚本均可通过 \texttt{GameRoot.Instance} 访问这些全局服务，无需 \texttt{FindObjectOfType} 等开销较大的查找，也避免了模块间直接相互引用的耦合。GameStateManager 是这一架构中的编排中枢，同时实现了 ISaveProvider 接口。其内部维护一个标记 \texttt{[System.Serializable]} 的私有结构体，包含 ChapterState 枚举（Origin / Colony / Deepflow）与 EchoTitleActive 布尔量两个字段，属性 CurrentChapter 与 EchoTitleActive 均直接委托至结构体的对应字段，CaptureState() 直接返回该结构体，RestoreState() 通过类型匹配还原——以单一结构体实例作为唯一序列化后端，消除了字段与状态快照之间的数据冗余。在输入管控方面，GameStateManager 持有 Player\_Actions 的 InputActionAsset 引用，通过只禁用 Player 映射（Move、Sprint、Note*）而保留 UI 映射（Submit、Navigate 等），使系统在标题阶段可屏蔽角色移动等游戏操作，但仍能响应提交键以触发标题消散。在事件编排方面，其于 Start() 中集中完成三项初始化：禁用 Player 输入、订阅 EchoTitle 的 OnDismissComplete 事件（置 EchoTitleActive 为 false 后恢复全局输入）、订阅 AgentCommunicator 的 OnHandSweepGesture 事件（检查 FacePresent 后调用 EchoTitle.Dismiss()），使状态变迁的完整链路可在一处追踪。
-
-\subsection{Unity端AgentCommunicator}
-
-AgentCommunicator 作为 GameRoot 的子组件承担 TCP 客户端角色。启动时异步连接至服务端并发送注册消息，随后在后台 Task 中运行接收循环，按长度前缀协议解析入站消息，根据消息类型分派至对应回调。
-
-在发送侧，\texttt{SendRawAsync} 方法使用 \texttt{SemaphoreSlim(1,1)} 作为发送锁，确保同一时刻仅有一个异步任务持有网络流的写入权，避免多协程并发写入导致的 TCP 数据交错。所接收消息通过 \texttt{SynchronizationContext.Post()} 投递至 Unity 主线程执行回调，符合 Unity 的单线程执行模型。
-
-AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
-
-\section{智能体EchoAgent}
+\section{智能体EchoAgent实现}
 
 \subsection{运行机制}
 
 EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构建，负责整合多源感知数据并做出交互决策。系统启动时按以下顺序初始化各组件：首先创建一个全局的异步消息队列（\texttt{asyncio.Queue}），随后创建 EchoServer 并注入队列引用，最后创建 EchoAgent 实例，使其同时持有队列与 EchoServer 的引用。EchoAgent 与 EchoServer 及消息队列的集成方式如图\ref{fig:agent-server-topology}所示。
 
-智能体的完整交互闭环已在第\ref{sec:module-design}节中详述，此处不再重复。
+智能体的完整交互闭环已在系统总体设计中详述，此处不再重复。
 
 \subsection{Deep Agents 框架集成}
 
@@ -892,7 +844,7 @@ EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一�
 
 这种批量处理模式的设计兼顾了两方面考量：一方面，将多源异步到达的消息聚合后统一推理，使 智能体 能够在同一上下文中综合考虑手势、表情与场景事件的关联；另一方面，5 秒的间隔避免了模型 API 的频繁调用，在交互响应性与资源开销之间取得了平衡。
 
-\section{多模态感知与虚实联动}
+\section{MediaPipe端实现}
 
 \begin{figure}[htbp]
   \centering
@@ -1051,109 +1003,33 @@ def handle_sweep():
 
 TcpClient 在连接建立后通过 \texttt{on\_connected} 事件自动发送注册消息（\texttt{client\_type: "mediapipe", modules: ["hands", "face"]}）；若连接因服务端重启或网络波动断开，TcpClient 以指数退避策略（初始 1s，每次翻倍至上限 30s）自动重连，重连成功后再次触发 \texttt{on\_connected} 完成重新注册，整个过程无需人工干预。MediaPipe 客户端同时持续监听服务端下发的控制指令——例如 \texttt{hand\_direction:on/off} 用于远程开关指向检测功能——通过 \texttt{on\_command} 回调处理。
 
-\subsection{实体灯光控制与场景布置}
+\section{Unity客户端实现}
 
-实体灯光子系统由 WS2812 可寻址 RGB LED 灯条与树莓派5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.32\textwidth]{pic/实体音符装置示意 其中第一个音符所对应的灯条正亮起.jpeg}
-  \caption{实体音符装置示意（第一个音符对应的灯条正亮起）}
-  \label{fig:physical-notes}
-\end{figure}
-
-
-树莓派5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。树莓派与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入树莓派对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
-
-软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
-
-树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
+Unity 交互应用内部以 GameRoot 为单例枢纽进行集中式管理。GameRoot 组件挂载于场景中标记 \texttt{DontDestroyOnLoad} 的持久化对象，其 \texttt{Awake()} 标注 \texttt{[DefaultExecutionOrder(-100)]} 以确保最先执行：若已存在实例则销毁自身，否则将自身赋给静态属性 \texttt{Instance} 并注册跨场景持久化。GameRoot 下辖五个子对象，各携带一个核心脚本，GameRoot 以公开字段持有引用，层级结构如代码\ref{code:gameroot-tree}所示。
 
 \begin{code}
-\caption{音符-灯珠索引映射}
-\label{code:music-notes-pixels}
-\begin{codebox}
-music_notes_pixels_map: dict[str, set[int]] = {
-    "waterdrop": {0, 1, 2, 3, 4, 5, 6, 57, 58, 59, 60, 61, 62, 63},
-    "crossing":  {9, 10, 11, 12, 13, 14, 54, 53, 52, 51, 50, 49},
-    "tide":      {17, 18, 19, 20, 21, 22, 23, 46, 45, 44, 43, 42, 41},
-    "breeze":    {25, 26, 27, 28, 29, 30, 31, 32, 38, 37, 36, 35, 34, 33},
-}
-\end{codebox}
+\caption{GameRoot 层级结构}
+\label{code:gameroot-tree}
+\lstset{style=codeblock}
+\begin{lstlisting}
+Game Root (DontDestroyOnLoad)            -- GameRoot 单例
+    SaveManager                          -- 存档管理
+    AgentCommunicator                    -- TCP 通信
+    MusicNoteController                  -- 音符协调
+    EchoEventCenter                      -- 事件中转
+    GameStateManager                     -- 状态编排
+\end{lstlisting}
 \end{code}
 
-灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
+场景中任何脚本均可通过 \texttt{GameRoot.Instance} 访问这些全局服务，无需 \texttt{FindObjectOfType} 等开销较大的查找，也避免了模块间直接相互引用的耦合。GameStateManager 是这一架构中的编排中枢，同时实现了 ISaveProvider 接口。其内部维护一个标记 \texttt{[System.Serializable]} 的私有结构体，包含 ChapterState 枚举（Origin / Colony / Deepflow）与 EchoTitleActive 布尔量两个字段，属性 CurrentChapter 与 EchoTitleActive 均直接委托至结构体的对应字段，CaptureState() 直接返回该结构体，RestoreState() 通过类型匹配还原——以单一结构体实例作为唯一序列化后端，消除了字段与状态快照之间的数据冗余。在输入管控方面，GameStateManager 持有 Player\_Actions 的 InputActionAsset 引用，通过只禁用 Player 映射（Move、Sprint、Note*）而保留 UI 映射（Submit、Navigate 等），使系统在标题阶段可屏蔽角色移动等游戏操作，但仍能响应提交键以触发标题消散。在事件编排方面，其于 Start() 中集中完成三项初始化：禁用 Player 输入、订阅 EchoTitle 的 OnDismissComplete 事件（置 EchoTitleActive 为 false 后恢复全局输入）、订阅 AgentCommunicator 的 OnHandSweepGesture 事件（检查 FacePresent 后调用 EchoTitle.Dismiss()），使状态变迁的完整链路可在一处追踪。
 
-基础模式中，控制系统利用 HLS 颜色空间来操作色彩变化，而非直接操作 RGB 分量。HSL色彩空间包含色相（Hue）、亮度（Lightness）和饱和度（Saturation）这三个分量，这样就可以将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
+\subsection{Unity端AgentCommunicator}
 
-以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
+AgentCommunicator 作为 GameRoot 的子组件承担 TCP 客户端角色。启动时异步连接至服务端并发送注册消息，随后在后台 Task 中运行接收循环，按长度前缀协议解析入站消息，根据消息类型分派至对应回调。
 
-音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入“灭—亮—灭—亮”的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
+在发送侧，\texttt{SendRawAsync} 方法使用 \texttt{SemaphoreSlim(1,1)} 作为发送锁，确保同一时刻仅有一个异步任务持有网络流的写入权，避免多协程并发写入导致的 TCP 数据交错。所接收消息通过 \texttt{SynchronizationContext.Post()} 投递至 Unity 主线程执行回调，符合 Unity 的单线程执行模型。
 
-\begin{code}
-\caption{LedController 灯光控制器核心实现}
-\label{code:led-controller}
-\begin{codebox}
-class LedController:
-    def __init__(self, pixel_pin=board.D23, num_pixels=64, brightness=0.2):
-        self.pixels = neopixel.NeoPixel(
-            pixel_pin, num_pixels, auto_write=True, brightness=brightness)
-        self._stop_flag = threading.Event()
-
-    def _rainbow_chase_loop(self):
-        num_heads = 5
-        tail_length = 15
-        positions = [0] * num_heads
-        hues = [i / num_heads for i in range(num_heads)]
-        while not self._stop_flag.is_set():
-            self.pixels.fill((0, 0, 0))
-            for head in range(num_heads):
-                for t in range(tail_length, 0, -1):
-                    idx = (positions[head] - t) % self.pixels.n
-                    fade = (1 - t / tail_length) * 0.9 + 0.1
-                    r, g, b = colorsys.hls_to_rgb(hues[head], 0.5 * fade, 0.6)
-                    self.pixels[idx] = (int(r * 255), int(g * 255), int(b * 255))
-            self.pixels.show()
-            time.sleep(0.03)
-            for head in range(num_heads):
-                positions[head] = (positions[head] + 2) % self.pixels.n
-            hues = [(h + 0.008) % 1.0 for h in hues]
-
-    def gain_note(self, note_name, color=(255, 255, 255)):
-        for idx in music_notes_pixels_map.get(note_name, set()):
-            self.pixels[idx] = color
-        self.pixels.show()
-
-    def play_note(self, note_name, color=(255, 255, 255)):
-        indices = [i for i in music_notes_pixels_map.get(note_name, set())
-                   if i < self.pixels.n]
-        for _ in range(2):
-            for idx in indices:
-                self.pixels[idx] = (0, 0, 0)
-            self.pixels.show(); time.sleep(0.1)
-            for idx in indices:
-                self.pixels[idx] = color
-            self.pixels.show(); time.sleep(0.1)
-
-    def _start_effect(self, effect_func):
-        self._stop_flag.clear()
-        t = threading.Thread(target=effect_func)
-        t.daemon = True
-        t.start()
-\end{codebox}
-\end{code}
-
-四个音符的技能图标使用了四块15cm宽、5mm厚的正六边形松木板。首先在计算机上用矢量绘图工具Affinity绘制贝塞尔曲线设计音符图标。使用A4纸打印出这四个图标后，再使用美工刀经手工雕刻出黑色轮廓，然后使用502胶水粘贴于松木板上。最后串以装饰麻绳，并将灯条组成的灯带沿着整体图形的外轮廓包裹，恰好使用了64颗灯珠。其具体的灯珠序号和空间位置如图\ref{fig:led-layout}所示，与 \texttt{music\_notes\_pixels\_map} 中的索引一一对应。灯条原始规格为每米 30 颗、全长共 150 颗灯珠，利用 WS2812 可任意裁剪的特性，可将灯条从第 64 颗灯珠处剪断。最后将这个灯光装置悬挂于展台一侧，形成与交互应用中的虚拟音符UI界面相呼应的实体视觉锚点。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.85\textwidth]{pic/灯珠位置示意图.pdf}
-  \caption{灯珠序号与空间位置示意图}
-  \label{fig:led-layout}
-\end{figure}
-
-
-\section{《回声之境》虚拟场景视觉呈现}
+AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
 
 \subsection{旅人角色的建模与动画实现}
 
@@ -1172,7 +1048,7 @@ class LedController:
 
 完成后的模型与动画通过Blender的FBX导出器导出为单一FBX文件，导出设置中勾选“包含动画”“烘焙动画”与“应用缩放=1.0”，确保坐标系与Unity的Y轴朝上、Z轴朝前约定一致。
 
-FBX文件导入Unity后，引擎自动生成Avatar与Animation Clip资源。由于旅人角色为非人形骨骼结构，Avatar类型设置为Generic（通用），并在Avatar配置中手动指定盆骨为Root Motion的驱动节点。动画控制采用Unity Animator Controller构建有限状态机（Finite State Machine）。
+FBX文件导入Unity后，引擎自动生成Avatar与Animation Clip资源。由于旅人角色为非人形骨骼结构，Avatar类型设置为Generic，并在Avatar配置中手动指定盆骨为Root Motion的驱动节点。动画控制采用Unity Animator Controller构建有限状态机。
 
 \subsection{旅人控制器与虚拟输入设备}
 
@@ -1269,19 +1145,28 @@ EchoEventCenter 组件监听服务端下发的 \texttt{input:move:x,y} 格式指
 
 为防止指令粘滞，即上一次移动指令持续生效，EchoEventCenter 内置了移动超时检测，每 0.2 秒检查距最后一次移动指令的时间，若超过 0.3 秒无新指令则自动清零移动向量，使得角色在通信中断或服务端静默时自动停步。
 
-\subsection{音符系统与UI动效}
+\subsection{基于动态着色器的视觉生成}
 
-四个音符（水滴、道路交错、海浪、风）的 UI 表现由 MusicNote 组件独立管理，每个音符维护获取态与未获取态。音符动效基于 DOTween 补间动画插件实现：获取音符时，执行缩放脉冲序列（交替放大至 1.3 倍与恢复原尺寸），同时从透明渐显至完全可见；水滴音符额外同步播放连接线淡入效果，以视觉化音符间的递进关系。演奏音符时，通过 \texttt{DOTween.Sequence()} 组合颜色过渡（切换为音符主题色）与发光脉冲循环（透明度在 0 与目标强度间交替），形成具有节奏感的演奏视觉反馈。
+场景的视觉风格通过 Unity Shader Graph（URP 管线）构建的非真实感渲染（NPR）着色器实现。
 
-MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取顺序与演奏逻辑。四个音符须按序获得，控制器维护已获取音符计数，依次解锁下一音符。获取与演奏操作均通过 AgentCommunicator 向树莓派发送同步指令（\texttt{gain\_note:<type>}、\texttt{play\_note:<type>}），使实体灯光与虚拟音符动效保持同步。
+着色器（Shader）是运行在 GPU 上可编程的图形程序，分为顶点着色器（Vertex Shader）
+和片元着色器（Fragment Shader）\citing{feng2016unityshader}。如图\ref{fig:gpu-pipeline}所示，GPU 的渲染管线包括下面的工序：顶点着色器处理顶点的坐标转换信息，而片元着色器处理像素颜色数据计算信息。顶点着色程序从GPU 前端模块中获取到图元信息并执行顶点坐标的空间转换、 法向量的空间转换以及光照计算等操作，最终将计算的数据传输到指定的寄存器之中；随后片元着色程序从中提取所需要的数据，通常为纹理、坐标、光照信息等。并根据这些数据以及从应用程序传递而来的纹理信息执行每个片元的颜色计算，最后将处理后的数据信息传送至光栅操作模块。片元着色程序对每个片元进行独立的颜色计算，最终输出的值就是该片元最后呈现的颜色\citing{chen2024u3d}。
 
-\subsection{场景视觉生成}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{pic/Unity Shader入门精要 GPU渲染管线.png}
+  \caption{GPU 渲染管线——顶点着色器与片元着色器的位置与数据流}
+  \label{fig:gpu-pipeline}
+\end{figure}
 
-场景的视觉风格通过 Unity Shader Graph（URP 管线）构建的非真实感渲染（NPR）着色器实现，核心涉及半透明抖动山峦、风格化草地与动态雾效三种效果。
+《回声之境》实现了半透明抖动山峦、风格化草地、体积雾、标题动效和音符UI动效这五种动态视觉表现。
 
-\textbf{半透明抖动山峦}。远景山峦的视觉表现由 GhostMountain 组件与山峦 Shader Graph 协同完成。着色器利用菲涅尔效应控制边缘发光——视线方向与表面法线夹角越大，菲涅尔因子越趋近于 1，使山峦轮廓呈现明亮的发光边缘，而正对视角区域保持较高透明度，整体呈现若隐若现的质感。顶点着色器中引入基于时间的连续噪声函数，对各顶点施加随机微小偏移，形成山峦轮廓的持续微颤效果。
+\subsubsection*{半透明抖动山峦}
+\label{sec:ghost-mountain}
 
-GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个 Uniform 参数：\texttt{\_WobbleSpeed}（抖动速度，控制噪声函数的时间频率）与 \texttt{\_WobbleIntensity}（抖动强度，控制顶点偏移幅度）。当 智能体 根据情绪状态决策调整场景氛围时，可通过下发指令更新这两个参数，使山峦的抖动强度与速度随情绪变化——例如从迷茫态的剧烈抖动渐变为锚定态的轻微起伏乃至完全静止。半透明抖动山峦的实际渲染效果如图\ref{fig:ghost-mountain}所示。
+山峦的视觉表现由 GhostMountain 组件与山峦 Shader Graph 协同完成。着色器利用菲涅尔效应控制边缘发光——视线方向与表面法线夹角越大，菲涅尔因子越趋近于 1，使山峦轮廓呈现明亮的发光边缘，而正对视角区域保持较高透明度，整体呈现若隐若现的质感。顶点着色器中引入基于时间的连续噪声函数，对各顶点施加随机微小偏移，形成山峦轮廓的持续微颤效果。
+
+着色器暴露三个 Uniform 参数：\texttt{\_WobbleSpeed}（抖动速度，控制噪声函数的时间频率）、\texttt{\_WobbleIntensity}（抖动强度，控制顶点偏移幅度）与 \texttt{\_FresnelColor}（菲涅尔边缘光的颜色）。\texttt{\_WobbleIntensity} 与 \texttt{\_FresnelColor} 可随系统情绪状态动态调整——低强度、冷色调对应迷茫氛围，暖色调对应锚定氛围，使山峦外观与情感叙事同步演变。半透明抖动山峦的实际渲染效果如图\ref{fig:ghost-mountain}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -1290,30 +1175,188 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
   \label{fig:ghost-mountain}
 \end{figure}
 
-\textbf{风格化草地}。草地着色器在顶点着色阶段利用二维连续噪声纹理模拟风力驱动：将噪声值线性映射至偏移量，随时间滚动采样以产生持续变化的风向与风力，驱动草丛顶点的周期性摆动。草地区域色彩通过 Uniform 参数暴露，可随情绪倾向在暖色调与冷色调之间动态调整。
+\subsubsection*{风格化草地}
 
-\textbf{体积雾}。Fog 组件通过持续更新雾材质的 \texttt{\_Offset} 向量，叠加正弦/余弦波动（不同频率与相位），产生缓慢漂移的雾气效果，增强场景的层次感与氛围感。
-
-为支撑草地场景中大量植被实体的渲染性能，系统采用了 GPU Instancing优化，即合并相同网格的多次绘制调用以减少 DrawCall 数量，确保在消费级硬件上维持可交互帧率。
-
-\textbf{标题动效}。场景标题 EchoTitle 组件采用两阶段交互设计。初始阶段，标题处于漂浮态（Floating）：利用柏林噪声（Perlin Noise）驱动各子文字对象的独立微动——每个文字在局部位置与旋转上叠加不同种子与频率的噪声扰动，产生有机、自然的漂浮感，呼应《回声之境》的整体美学基调。与此同时，GameStateManager 通过 InputActionAsset 仅禁用 Player 动作映射（Move、Sprint、Note*），保留 UI 动作映射（Submit、Navigate 等），使系统在标题阶段屏蔽角色移动等游戏操作。标题消散由两种同构的交互方式触发：其一为物理输入路径——参展者按下键盘提交键或手柄对应按钮，由 Input System 的 Submit 动作直接触发 EchoTitle.Dismiss()；其二为手势感知路径——MediaPipe 模块在检测到双手均为 Open\_Palm 手势且腕部归一化距离超过 0.4 时判定为挥散动作（\texttt{input:submit}），配有 1.5 秒冷却时间以避免重复触发，经 AgentCommunicator 校验面部已进入摄像头视野后触发。任一条件满足后，标题进入消散态（Dismissing）：各子文字以自身相对于标题中心的 YZ 平面方向为扩散轴，向外位移至 spreadRadius 半径处，叠加 X 轴随机抖动与各轴独立随机旋转，同时通过 URP Lit 材质的透明表面模式（\texttt{\_Surface=1}、\texttt{\_SURFACE\_TYPE\_TRANSPARENT}）与 MaterialPropertyBlock 逐帧降低 \texttt{\_BaseColor} 的 Alpha 通道，实现位置扩散、随机旋转与透明度渐隐的同步过渡，整个消散过程控制在 3 秒左右，视觉效果模拟文字被双手向外挥散的动态。消散完成后，EchoTitle 触发 OnDismissComplete 事件，GameStateManager 随即恢复 Player 映射的全局输入，参展者进入正式交互阶段。这一标题消散机制由 GameStateManager 担任编排中心，AgentCommunicator 提供手势指令事件，EchoTitle 专注动画执行，三者通过 GameRoot 单例协同工作。
-
-\subsection{摄像机系统}
-
-《回声之境》中摄像机的运镜基于 Unity 的 Cinemachine 3.1\citing{unity2024cinemachine} 与 Splines 官方包，以 Spline Dolly Camera 配合 Look At 目标实现。样条线决定相机的空间位置，Look At 目标决定相机的朝向，二者独立配置、组合生效。图\ref{fig:cinemachine-config}展示了实际的 Cinemachine 配置编辑界面。
+草地场景的动态效果本质上是草丛几何体顶点的规律性偏移，需要在顶点着色器上操作。为模拟随风摆动的动态，最核心的工具是连续噪声函数，其数学目标是构造一个连续可导、局部相关、全局随机的函数：$N(x, y, z) \in [-1, 1]$。相比真正的随机数，它满足：$\partial N / \partial x \neq 0$且变化平滑。如图\ref{fig:2d-noise}所示，这是一张满足上述要求的在二维空间上分布的噪声图像，将其灰度值线性映射到$[-1, 1]$区间即可表示风力大小。将噪声函数的位移值随时间移动采样，构建滚动纹理，即可作用于草丛的顶点偏移形成摆动效果。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.6\textwidth]{pic/Cinemachine配置编辑展示.png}
+  \includegraphics[width=0.2\textwidth]{pic/2d-noise.jpg}
+  \caption{一种模拟风的二维连续噪声纹理}
+  \label{fig:2d-noise}
+\end{figure}
+
+草地场景中存在成千上万的渲染实体，如果不加任何优化，将会造成严重的图形 API 调用开销。因此，本课题采用了 GPU Instancing 技术做性能优化。该技术通过合并相同网格的多次绘制调用，能够进一步减少 DrawCall 数量，从而在 CPU 与 GPU 之间实现更高效的任务分工与协作，最终促进整体帧率的提升与渲染流程的稳定。在 Unity 引擎中，可通过打开 Terrian 中的 Draw Instanced 选项、将渲染管线中 GPU Resident Drawer 设置为 Instanced Drawing 以及开启草丛材质的 Enable GPU Instancing 选项启用该技术。
+
+\subsubsection*{体积雾}
+
+Fog 组件通过持续更新雾材质的 \texttt{\_Offset} 向量，叠加正弦/余弦波动（不同频率与相位），产生缓慢漂移的雾气效果，增强场景的层次感与氛围感。
+
+
+\subsection{其他视觉动效}
+
+\subsubsection*{动态场景标题}
+
+场景标题 EchoTitle 组件采用两阶段交互设计。
+
+初始阶段，标题处于漂浮态（Floating）：利用柏林噪声（Perlin Noise）驱动各子文字对象的独立微动——每个文字在局部位置与旋转上叠加不同种子与频率的噪声扰动，产生有机、自然的漂浮感，呼应《回声之境》的整体美学基调。与此同时，GameStateManager 通过 InputActionAsset 仅禁用 Player 动作资产，保留 UI 动作资产，使系统在标题阶段屏蔽角色移动等游戏操作。
+
+标题消散由两种同构的交互方式触发：其一为物理输入路径——参展者按下键盘提交键或手柄对应按钮，由 Input System 的 Submit 动作直接触发 EchoTitle.Dismiss()；其二为手势感知路径——MediaPipe 模块在检测到双手均为 Open\_Palm 手势且腕部归一化距离超过 0.4 时判定为挥散动作（\texttt{input:submit}），配有 1.5 秒冷却时间以避免重复触发，经 AgentCommunicator 校验面部已进入摄像头视野后触发。任一条件满足后，标题进入消散态（Dismissing）：各子文字以自身相对于标题中心的 YZ 平面方向为扩散轴，向外位移至 spreadRadius 半径处，叠加 X 轴随机抖动与各轴独立随机旋转，同时通过 URP Lit 材质的透明表面模式（\texttt{\_Surface=1}、\texttt{\_SURFACE\_TYPE\_TRANSPARENT}）与 MaterialPropertyBlock 逐帧降低 \texttt{\_BaseColor} 的 Alpha 通道，实现位置扩散、随机旋转与透明度渐隐的同步过渡，整个消散过程控制在 3 秒左右，视觉效果模拟文字被双手向外挥散的动态。消散完成后，EchoTitle 触发 OnDismissComplete 事件，GameStateManager 随即恢复 Player 映射的全局输入，参展者进入正式交互阶段。这一标题消散机制由 GameStateManager 担任编排中心，AgentCommunicator 提供手势指令事件，EchoTitle 专注动画执行，三者通过 GameRoot 单例协同工作。
+
+\subsubsection*{音符UI动效}
+
+四个音符（水滴、道路交错、海浪、风）的 UI 表现由 MusicNote 组件独立管理，每个音符维护获取态与未获取态。音符动效基于 DOTween 补间动画插件实现：获取音符时，执行缩放脉冲序列（交替放大至 1.3 倍与恢复原尺寸），同时从透明渐显至完全可见；水滴音符额外同步播放连接线淡入效果，以视觉化音符间的递进关系。演奏音符时，通过 \texttt{DOTween.Sequence()} 组合颜色过渡（切换为音符主题色）与发光脉冲循环（透明度在 0 与目标强度间交替），形成具有节奏感的演奏视觉反馈。
+
+MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取顺序与演奏逻辑。四个音符须按序获得，控制器维护已获取音符计数，依次解锁下一音符。获取与演奏操作均通过 AgentCommunicator 向树莓派发送同步指令（\texttt{gain\_note:<type>}、\texttt{play\_note:<type>}），使实体灯光与虚拟音符动效保持同步。
+
+\subsection{状态驱动与相机控制}
+\label{sec:state-driven-camera}
+
+《回声之境》作为一款交互应用，与电子游戏的区别在于它更注重叙事时的演出表现。因此，为了实现在前文中所描述的章节叙事，我们需要有一套明确的状态路径表。在相机设置上，它也会与电子游戏有所差别。基于其特殊的交互事件和演出需求，本作品没有使用常见的第三人称自由视角转动、也并非完全的固定俯视角跟随，而是更类似于影视拍摄时的分镜脚本，采用了多机位切换与轨道控制来编排了一种状态驱动的相机控制方式。
+
+为了更清楚地展示其实现原理，以第一章《初域·未定之原》为例，表\ref{tbl:chapter1-flow}展示了从应用初始状态到旅人第一次获得水滴音符的完整交互流程。
+
+\begin{table}[htbp]
+\centering
+\caption{第一章《初域·未定之原》交互流程状态表}
+\label{tbl:chapter1-flow}
+\begin{tabularx}{\linewidth}{|c|X|X|X|X|}
+\hline
+序号 & 状态特征 & 旁白 & 向下一状态转换条件 & 底层程序对应 \\
+\hline
+0 & 标题文字浮动、处于不可交互状态 & — & 面部进入画面并做双手向两侧挥散的动作 & face:in；input:submit \\
+\hline
+1 & 标题文字消散，开始接受用户手指输入，但是不启动旅人移动控制，灯条显示一轮淡绿色跑马灯，表示存在感，开始引导用户使用手指指向输入 & — & 第一次接收到正确的手指向右信号时 & hand\_direction:on；raspberry\_pi:chase \\
+\hline
+2 & 播放固定动画：旅人向前迈一步走出出生点六边形，风忽然吹得大了些又渐渐缓和 & 没有人知道旅人从何而来。当他睁开眼时，正立于未定之原的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。 & 用户离开出生点石台 & 石台TriggerExit，连续动画调度 \\
+\hline
+3 & 屏幕显示文字引导“尝试让世界听见你的形状”，此状态下水滴音符物体监测旅人进入自身范围时暂停输入 & 尝试让世界听见你的形状 & 用户处于音符范围并再次挥手 & input:submit；TriggerEnter \\
+\hline
+\end{tabularx}
+\end{table}
+
+有了这张交互状态表，我们就可以从中提炼出不同的机位以及对应的状态机控制参数。在上述交互流程中，一共涉及四种机位，我们在此将它们分别命名为Idle、Following、TopShowing和Showing，同时设置四个参数FacePresent（bool）、IsShowingWaterdrop（bool）、EchoTitleActive（bool）、ExitBornPoint（Trigger）。由这些机位和参数组成的状态机如图\ref{fig:camera-state-machine}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{pic/相机状态机图.pdf}
+  \caption{相机状态机图}
+  \label{fig:camera-state-machine}
+\end{figure}
+
+而有了这个状态机，我们就可以继续着手将交互应用感知到的事件与状态的转移联系起来。如果直接使用C\#脚本来编写不同机位之间的切换，虽然也可行，但会较为繁琐，而更好的办法是利用Unity官方提供的Cinemachine包中的State Driven Camera以及Animator组件提供的状态机编辑器来制作。Cinemachine包允许开发者在主摄像机上挂载一个Cinemachine Brain，然后在场景中可同时建立多个虚拟摄像机。通过将这些虚拟摄像机放在Cinemachine State Driven Camera的子物体下，然后设置各个虚拟摄像机与状态机中状态的绑定，即可用Unity自带的状态机来控制相机。
+
+在上述的四个机位中，Idle、TopShowing和Showing相机都是固定机位，而Following相机以 Spline Dolly Camera 配合 Look At 目标实现。样条线决定相机的空间位置，Look At 目标决定相机的朝向，二者独立配置、组合生效。图\ref{fig:cinemachine-config}展示了实际的 Cinemachine 配置编辑界面。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\textwidth]{pic/Cinemachine配置编辑展示.png}
   \caption{Cinemachine Spline Dolly Camera 配置界面}
   \label{fig:cinemachine-config}
 \end{figure}
 
-具体实现流程为：首先通过 GameObject > Spline > Draw Splines 在场景中绘制样条曲线路径；随后创建 Spline Dolly Camera，将 Spline Container 拖入 Spline Dolly 组件的 Spline 槽位以绑定路径，勾选Automatic Dolly，然后Method选择Nearest Point To Target，再将旅人拖入虚拟相机的 Look At 槽位，由 Rotation Composer 控制跟踪朝向的阻尼与构图偏移。相机的移动控制视场景需求采用两种方式：开场动画使用 Timeline 对 Spline Offset 做关键帧动画；交互过程中的相机跟随则通过样条线路径滑行。此外，部分场景在相机底部的 Noise 选项中叠加了 Basic Multi-Channel Perlin 噪声，模拟摄影师手持跟拍的微颤效果，以增强真实感。
+机位转换在演示中的实际效果将在\ref{sec:state-driven-showcase}一节中展示。
 
-旅人角色的移动方向计算中，TravelerController 脚本引用主摄像机的偏航角将输入向量从局部空间旋转至世界空间，使角色始终依据当前摄像机的方位相对移动。
+\section{树莓派端实现}
 
-在多个虚拟相机之间的切换上，系统利用 Cinemachine 的 Blend 混合机制：不同相机间的过渡并非简单的画面淡入淡出，而是主相机的位置与旋转沿平滑曲线插值移动，使动画序列与实际交互之间的衔接自然流畅，消除了生硬的镜头跳跃感。
+树莓派端负责完成实体灯光控制与场景布置。实体灯光子系统由 WS2812 可寻址 RGB LED 灯条与树莓派5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.32\textwidth]{pic/实体音符装置示意 其中第一个音符所对应的灯条正亮起.jpeg}
+  \caption{实体音符装置示意（第一个音符对应的灯条正亮起）}
+  \label{fig:physical-notes}
+\end{figure}
+
+
+树莓派5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。树莓派与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入树莓派对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
+
+软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
+
+树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
+
+\begin{code}
+\caption{音符-灯珠索引映射}
+\label{code:music-notes-pixels}
+\begin{codebox}
+music_notes_pixels_map: dict[str, set[int]] = {
+    "waterdrop": {0, 1, 2, 3, 4, 5, 6, 57, 58, 59, 60, 61, 62, 63},
+    "crossing":  {9, 10, 11, 12, 13, 14, 54, 53, 52, 51, 50, 49},
+    "tide":      {17, 18, 19, 20, 21, 22, 23, 46, 45, 44, 43, 42, 41},
+    "breeze":    {25, 26, 27, 28, 29, 30, 31, 32, 38, 37, 36, 35, 34, 33},
+}
+\end{codebox}
+\end{code}
+
+灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
+
+基础模式中，控制系统利用 HLS 颜色空间来操作色彩变化，而非直接操作 RGB 分量。HSL色彩空间包含色相（Hue）、亮度（Lightness）和饱和度（Saturation）这三个分量，这样就可以将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
+
+以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
+
+音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入“灭—亮—灭—亮”的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
+
+\begin{code}
+\caption{LedController 灯光控制器核心实现}
+\label{code:led-controller}
+\begin{codebox}
+class LedController:
+    def __init__(self, pixel_pin=board.D23, num_pixels=64, brightness=0.2):
+        self.pixels = neopixel.NeoPixel(
+            pixel_pin, num_pixels, auto_write=True, brightness=brightness)
+        self._stop_flag = threading.Event()
+
+    def _rainbow_chase_loop(self):
+        num_heads = 5
+        tail_length = 15
+        positions = [0] * num_heads
+        hues = [i / num_heads for i in range(num_heads)]
+        while not self._stop_flag.is_set():
+            self.pixels.fill((0, 0, 0))
+            for head in range(num_heads):
+                for t in range(tail_length, 0, -1):
+                    idx = (positions[head] - t) % self.pixels.n
+                    fade = (1 - t / tail_length) * 0.9 + 0.1
+                    r, g, b = colorsys.hls_to_rgb(hues[head], 0.5 * fade, 0.6)
+                    self.pixels[idx] = (int(r * 255), int(g * 255), int(b * 255))
+            self.pixels.show()
+            time.sleep(0.03)
+            for head in range(num_heads):
+                positions[head] = (positions[head] + 2) % self.pixels.n
+            hues = [(h + 0.008) % 1.0 for h in hues]
+
+    def gain_note(self, note_name, color=(255, 255, 255)):
+        for idx in music_notes_pixels_map.get(note_name, set()):
+            self.pixels[idx] = color
+        self.pixels.show()
+
+    def play_note(self, note_name, color=(255, 255, 255)):
+        indices = [i for i in music_notes_pixels_map.get(note_name, set())
+                   if i < self.pixels.n]
+        for _ in range(2):
+            for idx in indices:
+                self.pixels[idx] = (0, 0, 0)
+            self.pixels.show(); time.sleep(0.1)
+            for idx in indices:
+                self.pixels[idx] = color
+            self.pixels.show(); time.sleep(0.1)
+
+    def _start_effect(self, effect_func):
+        self._stop_flag.clear()
+        t = threading.Thread(target=effect_func)
+        t.daemon = True
+        t.start()
+\end{codebox}
+\end{code}
+
+四个音符技能图标以四块宽15 cm、厚5 mm的正六边形松木板为基材。制作时，首先在矢量绘图软件Affinity中使用贝塞尔曲线完成音符图标的设计；将设计稿用A4纸打印后，沿黑色轮廓线以美工刀手工雕刻，再用502胶水粘贴固定于松木板上。各木板之间以装饰麻绳串联，灯条则沿整体图形的外轮廓包裹，恰好使用64颗灯珠。灯珠的序号与空间位置如图\ref{fig:led-layout}所示，标号0至63的灯珠与\texttt{music\_notes\_pixels\_map}中的索引一一对应，标号64的最后一颗为冗余灯珠。灯条原始规格为每米30颗、全长共150颗，利用WS2812可任意裁剪的特性，从第64颗灯珠处剪断即可。最终，该灯光装置悬挂于展台一侧，形成与交互应用中虚拟音符UI界面相呼应的实体视觉锚点。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{pic/灯珠位置示意图.pdf}
+  \caption{灯珠序号与空间位置示意图}
+  \label{fig:led-layout}
+\end{figure}
 
 
 \chapter{应用场景演示与测试}
@@ -1325,27 +1368,36 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 实体装置的核心是四个音符的技能图标，其制作工艺与灯珠布局已在第4.4节详述。在展览现场，四块正六边形松木板图标以麻绳串联悬挂于展台一侧，灯带沿图标外轮廓包裹后与虚拟音符UI在空间与形态上形成呼应；当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效，灯光氛围随章节情绪基调的转换而动态变化，使沉浸感从屏幕内部延伸至物理空间。这一装置既是技术验证的载体，也是展览空间中引人触摸与注视的物理锚点。
 
 \section{交互流程演示}
+\label{sec:state-driven-showcase}
 
-以下以交互应用的第一章“初域·未定之原”为例，完整展示系统从启动、手势交互到智能体决策与多模态反馈的全链路运行过程。
+本系统涉及多个模块之间的复杂交互，单纯以抽象的文字描述难以直观地呈现其完整的交互链路。因此，在讲述系统测试之前，本文首先列举三种典型的交互链路。
 
-交互应用启动后，首先呈现的是如图\ref{fig:start-screen}所示的初始场景：旅人静立于一座白色石块堆砌的六边形祭坛之上；画面右侧是一座深褐色石质容器，其上发光的水滴符号与中心跃动的橙色火苗相互映照；空中悬浮着大小不一的白色立方体，远处延绵的丘陵隐没于浓厚的体积雾中，整体以低多边形风格配合Bloom渲染，营造出空灵、静谧而略带神秘感的世界基调。此时系统屏蔽所有输入，等待入场触发。
-
-当MediaPipe客户端检测到参展者人脸进入摄像头画面后，向Unity端发送开始信号，随后进入开场动画：画面缓缓放大，摄像机穿越层层迷雾进入三维场景——其间迷雾中浮现出蓝色波形图案。摄像机持续前推，最终从云雾中显现出旅人在绵延山峦与旷野前行的画面。摄像机逐渐减速，最终停在旅人斜前方，平视旅人，留出背后辽阔的风景，画面叠加第一章名称”初域·未定之原”。这一序幕以电影化的镜头语言为参展者建立了初步的情感锚点与叙事期待。
+首先介绍状态驱动、相机控制、多模态输入链路。这一交互链路与\ref{sec:state-driven-camera}中的交互状态表\ref{tbl:chapter1-flow}保持一致。如图\ref{fig:state-driven-showcase}所示，当设备前无人时，相机会在Idle机位待命，此时其他的输入信号会被屏蔽。当用户面部进入装置的感知范围时，相机变为TopShowing状态，并提示用户张开双手挥散标题。此时如果用户离开，相机会重新回到Idle状态，而若用户做了挥散动作，标题会随之响应，播放散开的动画。随后，系统提示用户可伸出食指指向希望旅人行走的方向。手指信号会从MediaPipe端采集，经由TCP服务端转发到Unity端，接入统一的Input System管理，可与键盘、手柄无缝切换，驱动旅人向指定方向行走。旅人离开出生点石台后，相机切换为Following机位。Following机位会保证相机在预先定义的Spline曲线上移动，同时保持旅人在画面的中心。当旅人移动到水滴音符附近时，相机会再次切换为Showing状态，拉近并聚焦水滴音符。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth]{pic/screenshot_20260502_135533_4dc56e25-b557-4aac-9b74-b021009da301.jpg}
-  \caption{应用开始界面——旅人立于白色祭坛之上，空中悬浮立方体，画面中浮现回声之境与ECHOESPHERE标题}
-  \label{fig:start-screen}
+  \includegraphics[width=1.0\textwidth]{pic/演示1流程截图.jpg}
+  \caption{状态驱动、相机控制、多模态输入链路演示}
+  \label{fig:state-driven-showcase}
 \end{figure}
 
-进入场景后，参展者面对的是一个开阔却无形变幻的世界。地貌不断变动，柔软的草浪起伏，半透明的山丘若隐若现，石块漂浮又坠落。这里没有威胁，只有弥漫的迷茫——有些地方之所以难走，是因为自己的方向感仍未成形；世界不会惩罚旅人，它只是保持未定，等待旅人决定它的形状。
+其次，是虚实联动音符的交互链路演示，其效果如图\ref{fig:music-note-showcase}所示。由于在设计上除了水滴以外的三个音符均在后面的章节中获取，而本设计仅在Unity中实现了第一章的交互流程，因此音符的交互链路以工程性质呈现。通过Unity内的调试面板或者通过专用调试客户端发送命令，可同时在Unity客户端和树莓派客户端点亮获取特定的音符。获取到的音符在Unity内表现为从隐藏变为显示，在实体灯光装置上表现为对应音符周围的灯珠常亮。当某个音符已被点亮以后，用户使用手柄或键盘按下按键时，对应的音符会做出演奏的反应，在Unity客户端内表现为颜色从深灰渐变为彩色再恢复，而在实体灯光装置上表现为该音符周围的灯珠闪烁两次。这两个分处交互应用的虚实世界内部以及现实中的反馈受同一指令控制，因此会保持严格同步，形成虚实联动的交互体验。
 
-交互从旅人离开出生点开始。参展者通过手势指向控制旅人移动，MediaPipe模块检测到食指方向后，将坐标数据通过TCP中继直接转发至Unity，驱动旅人在场景中行走。当旅人踏出出生点圆圈时，系统触发第一句旁白：“没有人知道旅人从何而来。”随后旅人离开出生点石台，第二句旁白接续响起：“当他睁开眼时，正立于'未定之原'的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。”此时画面中的风忽然吹得大了些又渐渐缓和，伴随呼呼的风声音效——这些细微的视听引导并无显式的操作提示，却自然地牵引着参展者继续向前探索。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.0\textwidth]{pic/演示2流程截图.jpg}
+  \caption{虚实联动音符交互链路演示}
+  \label{fig:music-note-showcase}
+\end{figure}
 
-在旅人到达指定位置后，屏幕浮现文字引导——“尝试让世界听见你的'形状'”——提示参展者按下水滴音符。这一事件同时触发了两条并行的反馈通路：在Unity端，画面中半透明山峦随音符播放而抖动，参展者用手势从画面中间向两侧拨开，山峦在抖动中变得模糊，一条石板路从空中渐显、缓缓下沉；在物理端，EchoAgent通过control\_lights工具向树莓派发送gain\_note指令，LED灯阵以对应颜色亮起，实体空间的灯光氛围与虚拟场景同步变化。参展者需按指定节奏持续奏响音符——若节奏正确，山体从对准的位置开始由半透明流动态逐渐固化为坚实的青青山体，漂浮的碎石同步落定，形成可通行的石阶；若节奏错误，山峦将退回透明，道路再次消失。这一“尝试—反馈—修正”的循环使得水滴音符从单音逐渐发展为完整的旋律短句，风声变得柔和，清脆的水滴声融入环境音，旅人胸口的光核第一次稳定亮起、浮现水滴形印记。
+最后，介绍智能体感知及动态视觉生成链路。此处以\ref{sec:ghost-mountain}的半透明抖动山峦为例展示。如图\ref{fig:agent-perception-showcase}，山峦原本是绿色的。这时候，连接上调试客户端，可向智能体发送自然语言消息。此处发送了消息“将幽灵山改为蓝色”，智能体收到这条消息后，会调用其已有的工具，向Unity发送命令，Unity解析命令后，推送到所有订阅了命令的物体上。山峦脚本也订阅了命令，并且匹配上了山峦色彩变化的格式，于是就会将智能体发送来的颜色代码解析并应用到半透明抖动山峦的着色器暴露出来的Uniform上。由此，山峦成功变为蓝色。通过相同的方式，也可以通过自然语言指挥智能体将山峦再次变成红色以及加大抖动强度。在完成操作后，智能体还可以主动向Unity发送截图请求。Unity收到智能体的截图请求后，会截取当前帧并以base64编码，并发送回智能体。多模态智能体查看Unity返回的截图，可以确认山峦确实已经改变颜色。从上述流程可见，通过将智能体引入交互回路，可以为整个交互系统带来超越固定参数的极大自由度。
 
-完成固化后，系统弹出提示告知参展者已获得水滴音符——“奏响它，可让流动、未定的世界元素固化成型，为自己锚定前行的路标”，旁白随之响起：“并非世界无形，是你的呼唤还未曾抵达。”至此，第一章的核心交互目标达成，参展者经历了从迷茫无措到通过自身行动塑造世界的完整体验，为后续章节的展开做好了情感与能力的铺垫。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=1.0\textwidth]{pic/演示3流程截图.jpg}
+  \caption{虚实联动音符交互链路演示}
+  \label{fig:agent-perception-showcase}
+\end{figure}
 
 \section{系统测试}
 
@@ -1364,7 +1416,7 @@ GhostMountain 组件通过 \texttt{material.SetFloat()} 接口实时调控两个
 
 \begin{enumerate}
 \item 操作系统：macOS 26.4.1
-\item Python 3.14.4（EchoAgent、EchoServer、MediaPipe手势识别与面部表情采集模块均运行于Python环境）
+\item Python >= 3.11（EchoAgent、EchoServer、MediaPipe手势识别与面部表情采集模块均运行于Python环境）
 \item Unity 6000.3.9f1（运行《回声之境》交互应用）
 \item 调试客户端：基于Rust + warp框架的echo\_client，提供WebSocket-to-TCP桥接与浏览器可视化界面
 \item 树莓派运行环境：Raspberry Pi OS，基于rpi-ws281x库驱动WS2812 LED灯带
@@ -1436,7 +1488,7 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 多模态交互系统的调试复杂度远高于传统单模块应用——手势识别、面部采集、智能体推理、Unity渲染和灯光控制分布在不同的进程甚至不同的硬件上，任何一个环节的异常都可能波及整体体验。为此，系统建立了一套从日志记录到链路追踪的完整可观测性体系。
 
-在日志层面，系统基于Python标准库logging模块实现了按模块隔离的分层日志：Server模块负责记录TCP连接建立、客户端注册、消息收发与中继转发等网络事件；智能体模块则记录消息队列的消费节奏、每轮推理的上下文规模、工具调用的类型与参数以及MiniMax TTS的合成结果。两条日志流同时输出至控制台与文件，文件按启动时间自动命名（echoagent\_YYYYMMDD\_HHMMSS.log），统一保存于logs目录。日志格式采用”时间戳 + 模块名 + 级别”的结构，支持事后按时间范围检索与按级别过滤。在开发阶段，可通过命令行参数--log-level DEBUG开启调试级别，此时日志将额外输出完整的消息内容、队列积压状态与异常堆栈，为定位间歇性问题提供更细粒度的信息。
+在日志层面，系统基于Python标准库logging模块实现了按模块隔离的分层日志：服务端模块负责记录TCP连接建立、客户端注册、消息收发与中继转发等网络事件；智能体模块则记录消息队列的消费节奏、每轮推理的上下文规模、工具调用的类型与参数以及MiniMax TTS的合成结果。两条日志流同时输出至控制台与文件，文件按启动时间自动命名（echoagent\_YYYYMMDD\_HHMMSS.log），统一保存于logs目录。日志格式采用”时间戳 + 模块名 + 级别”的结构，支持事后按时间范围检索与按级别过滤。在开发阶段，可通过命令行参数--log-level DEBUG开启调试级别，此时日志将额外输出完整的消息内容、队列积压状态与异常堆栈，为定位间歇性问题提供更细粒度的信息。
 
 在链路追踪层面，系统集成了OpenTelemetry与Phoenix实现端到端的调用可视化。通过OpenTelemetry的LangChain Instrumentor对EchoAgent的推理流程进行自动插桩，每一次ainvoke调用、每一轮工具选择与执行都被完整记录，形成可回溯的调用链。Phoenix追踪面板（如图\ref{fig:phoenix-trace}所示）可在浏览器上通过本地端口访问，开发者能够直观观察VLM的Tool Calling决策过程、上下文窗口的变化曲线以及各工具函数的执行时序与耗时分布。这套追踪体系使原本黑箱化的智能体行为变得透明可分析，在开发阶段极大加速了Prompt调优与工具定义迭代的效率。
 
@@ -1453,7 +1505,7 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.4\textwidth]{pic/定制的调试客户端运行截图.png}
+  \includegraphics[width=0.45\textwidth]{pic/定制的调试客户端运行截图.png}
   \caption{定制调试客户端运行截图}
   \label{fig:debug-client-screenshot}
 \end{figure}
@@ -1536,9 +1588,9 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 \begin{enumerate}
 
-\item 补全交互应用的叙事内容：将第三章中设计的关卡逻辑在Unity中逐一实现，使“水滴”“道路交错”“海浪”“风”四个音符的获得过程成为真正可玩的交互关卡，让技术框架与叙事内容相互匹配。
+\item 补全交互应用的叙事内容：将第三章中设计的关卡逻辑在Unity中逐一实现，使水滴、道路交错、海浪、风四个音符的获得过程成为真正可玩的交互关卡，让技术框架与叙事内容相互匹配。
 
-\item 引入全模态模型作为认知底座：将EchoAgent的语言模型替换为Qwen2.5-Omni等原生全模态模型，使其能够直接处理音频流、视频流等多模态输入，减少预处理环节，提升智能体对参展者整体状态的理解深度。
+\item 引入全模态模型作为认知底座：将EchoAgent的基座模型替换为Qwen3.5-Omni这样的原生全模态模型，使其能够直接处理音频流、视频流等多模态输入，减少预处理环节，提升智能体对参展者整体状态的理解深度。
 
 \item 构建模块编排与容错机制：引入统一的启动编排、健康检查与异常恢复策略，确保MediaPipe、EchoAgent、Unity与树莓派在任意启动顺序下均能建立稳定的通信链路，并能在单个模块故障时优雅降级而非整体崩溃。
 

@@ -19,6 +19,7 @@ ENTRY
   id
   note
   language
+  doi
 }
 { entry.lang entry.is.electronic entry.numbered }
 { label extra.label sort.label short.list entry.mark entry.url }
@@ -515,8 +516,18 @@ FUNCTION {thesis}
     	format.address write$ ": " write$
     } if$
     format.institution write$ add.comma
-    format.year write$ add.comma
-    format.pages write$
+    format.year write$
+    pages missing$
+    'skip$
+    {
+        add.comma
+        format.pages write$
+    } if$
+    doi missing$
+    'skip$
+    {
+        ".DOI:" doi * write$
+    } if$
     newline$
 }
 
