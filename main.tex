@@ -226,7 +226,7 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 \item 用户交互友好性。系统的交互设计需兼顾不同年龄、文化背景与技术熟悉度的参展者，确保交互界面直观易懂，操作流程自然流畅。
 \end{enumerate}
 
-\subsection{用例结构化描述}
+\subsection{用例结构化描述}\label{sec:use-cases}
 
 为明确系统核心功能的参与者角色、交互流程与响应逻辑，此处枚举系统必须的一些交互性和非交互性功能，如图\ref{fig:use-case}所示。
 
@@ -491,6 +491,49 @@ EchoAgent通过LangChain的\texttt{@tool}装饰器定义了五个工具函数，
 \item \textbf{\texttt{speak}}：通过MiniMax TTS服务将文本转为语音并播放。参数\texttt{text}为待朗读文本。内部调用MiniMax\texttt{speech-2.8-turbo}模型，使用Mandarin Warm Girl音色生成MP3音频并播放。
 \end{enumerate}
 
+\subsection{功能模块设计}
+\label{sec:module-design}
+
+以上述三层架构为框架，系统划分为四个核心功能模块：EchoAgent智能体模块、MediaPipe感知模块、Unity客户端模块与树莓派灯光控制模块，另有一个TCP服务端模块承担通信中枢职责。各模块具有明确的职责边界、内部结构与对外接口，其所依赖的关键技术蕴含在模块内部设计之中。本节依次阐述各模块的设计要点。
+
+\subsubsection{EchoAgent智能体模块}
+
+EchoAgent是理解层的认知核心，其设计围绕"观察—推理—行动"的ReACT范式展开：从共享消息队列中批量获取多源感知数据，经大语言模型综合推理后，自主选择并调用工具函数生成控制决策。
+
+智能体的行动能力由五个工具函数定义，覆盖系统全部执行端。send\_to\_client向指定客户端发送通用消息，request\_unity\_screenshot主动获取Unity当前画面以辅助视觉理解，control\_lights驱动实体LED灯阵的模式与色彩切换，play\_music控制交互应用中的音乐播放与情绪切换，speak通过TTS服务将文本转为语音。各工具在初始化时绑定通信层实例，使智能体在推理过程中可直接操作各执行端。
+
+在消息处理方面，感知层各模块的上报消息到达时机不可预测，而大语言模型的推理延迟在秒级，因此模块采用生产者—消费者模式解耦输入与决策：服务端将需处理的消息写入共享消息队列，EchoAgent以固定间隔从队列中一次性取出所有积压消息，批量送入模型推理。这一设计将多源异步到达的消息聚合后统一推理，使智能体能够在同一上下文中综合考虑手势、表情与场景事件的关联，避免碎片化的逐条响应。在提示词层面，系统提示词向模型传递三个层次的信息：交互应用定位（《回声之境》的叙事主题、章节结构与情感目标），客户端角色定义（Unity、MediaPipe、Raspberry Pi三类客户端的身份与能力），以及调试模式指引（如智能体在收到Unity注册消息后主动请求截图以建立场景认知）。提示词是连接交互应用叙事设计与智能体决策行为的关键桥梁，其措辞直接影响工具选择的准确性与回复风格的自然度。
+
+\subsubsection{TCP服务端模块}
+
+TCP服务端与EchoAgent运行于同一进程，是系统的通信中枢。服务端在固定端口上监听连接，每个客户端首次连接时须发送注册消息声明自身类别（unity、mediapipe、raspberry\_pi或debug四种），服务端据此将连接与身份绑定并维护已注册客户端表，后续消息发送时按类型匹配目标连接，无需每条消息携带身份标识。
+
+在消息路由方面，系统定义了两类通路：标记为直转（relay\_to）的消息不经智能体队列，由服务端直接转发至目标客户端，实现毫秒级的客户端间直连——典型场景为MediaPipe将指向方向数据中继至Unity驱动角色移动，要求端到端延迟在100ms以内；普通消息则写入消息队列，交由EchoAgent处理。这一双通路设计在延迟敏感的实时控制与需要语义理解的高层决策之间取得了平衡。在拓扑结构上，所有客户端均以TCP Client身份接入服务端，彼此不直接建立连接，新增感知通道或反馈设备仅需实现协议即可接入，无需修改核心逻辑，保证了系统的可扩展性。
+
+\subsubsection{MediaPipe感知模块}
+
+MediaPipe模块居于感知层，运行于独立进程中，负责实时捕获参展者的手势与面部表情信息。
+
+在手势识别方面，模块利用MediaPipe内置手势分类器识别Open\_Palm、Pointing\_Up、Victory等预定义手势类别。在内置分类器之上，模块叠加了三层自定义检测逻辑：手势变化检测层通过缓存比对实现变更触发上报，避免同一手势持续期间的冗余网络流量；食指指向方向检测层从手部关键点坐标直接计算方向向量，完全独立于内置分类器，为角色移动提供连续的二维方向输入；双手挥散检测层通过双腕距离阈值判定Open\_Palm姿态下的挥散动作，配有冷却时间防止重复触发。三层检测的输出通道各不相同——手势变化事件上报至EchoAgent供高层决策，指向方向经中继通道直发Unity以保证跟手性，挥散动作触发展览开场动画。
+
+在面部识别方面，模块通过MediaPipe FaceLandmarker输出52维面部形变系数。为避免逐帧全量上报带来的网络与处理开销，模块设计了双重节流机制：仅保留置信度高于阈值的形变系数以滤除噪声，同时计算当前帧所有活跃系数的均值，仅当变化幅度超过设定阈值且距上次上报超过最小间隔时才推送。效果是面无表情时几乎不产生推送，表情丰富时约每秒2次，在信息完整性与资源开销之间取得平衡。
+
+在多线程调度方面，模块内部三条线程协同工作：主线程负责预览窗口渲染，摄像机线程以高帧率读取摄像头帧并分发给两个识别器，网络事件循环线程承载全部网络收发。跨线程桥接的关键在于将识别回调线程中产生的发送请求安全调度至网络线程，避免并发操作网络连接。
+
+\subsubsection{Unity客户端模块}
+
+Unity客户端模块同时跨越感知层与反馈层，是系统交互体验的直接载体。模块以GameRoot单例为枢纽，通过五个子模块协同完成通信、输入映射、状态编排、视觉生成与相机控制等功能。
+
+AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化以避免数据交错，同时将接收回调投递至Unity主线程以符合其单线程执行模型；还负责响应EchoAgent的截图请求——在帧末尾截取当前画面并以图像格式回传。VirtualAgentDevice向Unity输入系统注册为独立输入设备，提供二维摇杆与按钮控制元；来自网络的移动指令经解析后注入输入管线，使远程手势与本地键盘、手柄共享同一套控制逻辑，无需在角色控制器中编写网络输入分支；模块同时内置移动超时检测，若超过设定时长无新指令则自动清零移动向量，防止指令粘滞。GameStateManager作为交互流程的编排中枢，维护章节状态、输入管控与事件订阅，通过输入映射的分级禁用实现标题阶段屏蔽角色移动但保留界面响应的精细控制，在初始化阶段集中完成事件订阅与状态变更链路绑定，使状态变迁的全流程可在一处追踪。
+
+在视觉生成方面，模块基于Shader Graph构建非真实感渲染着色器，暴露抖动速度、抖动强度、菲涅尔颜色等Uniform参数，供EchoAgent通过控制指令动态调整。着色器利用菲涅尔效应、顶点噪声偏移与GPU Instancing等技术，在维持交互帧率的前提下实现半透明抖动山峦、风格化草地摆动与体积雾等动态视觉效果。视觉参数可随情绪状态变化而调整——例如低强度冷色调对应迷茫氛围，暖色调对应锚定氛围——使画面风格与情感叙事同步演进。在相机控制方面，模块基于State Driven Camera机制，将交互流程中的不同阶段映射为Idle、Following、TopShowing、Showing四种虚拟相机机位；机位切换由动画状态机驱动，其中Following机位沿预设样条曲线运动并保持注视目标，实现影视化的镜头调度。
+
+\subsubsection{树莓派灯光控制模块}
+
+树莓派模块居于反馈层，负责将智能体的灯光决策转化为实体空间的光影变化。模块运行于树莓派5之上，通过GPIO引脚输出控制信号，驱动64颗WS2812可编程RGB LED灯珠；灯珠沿四个音符图标外轮廓物理排布，各音符对应一段连续灯珠区间，由音符—灯珠索引映射表维护对应关系。
+
+模块支持两类灯光模式。基础模式中，追逐（chase）效果使光点循环移动，利用视觉暂留形成流动观感；呼吸（breathing）效果以三角波函数驱动全带灯珠同步明暗起伏；彩虹追逐（rainbow）效果维护多个色相各异的光点，各自拖曳渐暗拖尾，色相缓慢旋转产生流动的彩虹效果。色彩控制采用HLS颜色空间，将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。音符联动模式直接根据音符—灯珠索引映射定位对应灯珠：gain\_note点亮目标区间，play\_note在点亮基础上叠加短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。动态模式运行于独立线程，每次切换模式时先终止上一线程再启动新效果，保证模式切换即时响应且不阻塞指令接收。
+
 以下各节依次详述上述模块所依赖的通信协议、控制命令体系与实体展览环境的具体设计。
 
 \subsection{自定义TCP通信协议设计}
@@ -596,6 +639,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 
 \section{《回声之境》应用设计}
+\label{sec:application-design}
 
 \subsection{立题立意}
 
@@ -634,6 +678,43 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 本章多模态交互涵盖四个维度：持续捏合手势映射为持续奏响音符；发声音量控制固化范围；山体从半透明流动态渐变为坚实青翠形态；水滴音符从单音发展为完整旋律短句。
 
+\subsubsection*{状态驱动与相机编排设计}
+
+《回声之境》作为一款交互应用，与电子游戏的区别在于它更注重叙事时的演出表现。因此，为了实现在前文中所描述的章节叙事，我们需要有一套明确的状态路径表。在相机设置上，它也会与电子游戏有所差别。基于其特殊的交互事件和演出需求，本作品没有使用常见的第三人称自由视角转动、也并非完全的固定俯视角跟随，而是更类似于影视拍摄时的分镜脚本，采用了多机位切换与轨道控制来编排了一种状态驱动的相机控制方式。
+
+为了更清楚地展示其实现原理，以第一章《初域·未定之原》为例，表\ref{tbl:chapter1-flow}展示了从应用初始状态到旅人第一次获得水滴音符的完整交互流程。
+
+\begin{table}[htbp]
+\centering
+\caption{第一章《初域·未定之原》交互流程状态表}
+\label{tbl:chapter1-flow}
+\begin{tabularx}{\linewidth}{|c|X|X|X|X|}
+\hline
+序号 & 状态特征 & 旁白 & 向下一状态转换条件 & 底层程序对应 \\
+\hline
+0 & 标题文字浮动、处于不可交互状态 & — & 面部进入画面并做双手向两侧挥散的动作 & face:in；input:submit \\
+\hline
+1 & 标题文字消散，开始接受用户手指输入，但是不启动旅人移动控制，灯条显示一轮淡绿色跑马灯，表示存在感，开始引导用户使用手指指向输入 & — & 第一次接收到正确的手指向右信号时 & hand\_direction:on；raspberry\_pi:chase \\
+\hline
+2 & 播放固定动画：旅人向前迈一步走出出生点六边形，风忽然吹得大了些又渐渐缓和 & 没有人知道旅人从何而来。当他睁开眼时，正立于未定之原的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。 & 用户离开出生点石台 & 石台TriggerExit，连续动画调度 \\
+\hline
+3 & 屏幕显示文字引导"尝试让世界听见你的形状"，此状态下水滴音符物体监测旅人进入自身范围时暂停输入 & 尝试让世界听见你的形状 & 用户处于音符范围并再次挥手 & input:submit；TriggerEnter \\
+\hline
+\end{tabularx}
+\end{table}
+
+
+有了这张交互状态表，我们就可以从中提炼出不同的机位以及对应的状态机控制参数。在上述交互流程中，一共涉及四种机位，我们在此将它们分别命名为Idle、Following、TopShowing和Showing，同时设置四个参数FacePresent（bool）、IsShowingWaterdrop（bool）、EchoTitleActive（bool）、ExitBornPoint（Trigger）。当设备前无人时，相机在Idle机位待命并屏蔽输入；面部进入感知范围后切换至TopShowing并提示挥散标题；离开出生点后切换至Following沿预设路径跟随；接近可交互物体时切换至Showing拉近聚焦。由这些机位与参数组成的相机状态机如图\ref{fig:camera-state-machine}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{pic/相机状态机图.pdf}
+  \caption{相机状态机图}
+  \label{fig:camera-state-machine}
+\end{figure}
+
+这一状态驱动的相机编排方式不同于常见游戏中的自由视角或固定俯视角，更类似于影视拍摄的分镜脚本——每个叙事阶段对应特定的机位与镜头运动，使展览体验在视觉呈现上兼具演出感与引导性。后续章节将在实现部分基于Cinemachine阐述具体的落地方法。
+
 \subsubsection*{第二章：聚落群·彼方的光影之城——关系探索与边界}
 
 本章对应情感状态从“碰撞”到“边界”的转换，核心目标是解锁道路交错音符，使参展者学会在关系中保持自我边界。设计理念参考《最后的篝火》“中心枢纽+多分支故事线”结构，四个分支区域各自对应一段社交与情感的隐喻。
@@ -651,6 +732,18 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 完成深潮区挑战后，系统进入自由探索阶段：参展者可自由奏响四个音符，每个音符均会改变整个世界的视觉形态，实现无限的个性化探索。该阶段使参展者充分体验“学以致用”的成就感与“随心所欲不逾矩”的自由状态。
 
 三章的叙事线索层层递进：第一章聚焦自我认知，未定之原是对自我迷茫的具象化；第二章聚焦关系探索，光影之城是对人际边界的具象化；第三章聚焦世界接纳，深流之径是对知识与未知态度的具象化。四个音符作为锚定自我、连接他人、驾驭未知、通达自由的四重能力象征，共同构成了旅人从迷茫走向自由的完整成长弧线。
+
+\subsubsection{交互设计到系统模块的映射}
+
+上述交互场景与关卡流程并非悬浮于技术框架之上的纯概念设计，而是与第\ref{sec:module-design}节所述各功能模块形成了明确的支撑关系。本节以三章为线索，梳理交互设计元素到系统框架模块的映射，以阐明叙事体验是如何经由各模块的协同工作而落地的。
+
+第一章的核心交互——手势指向移动——在系统层面由MediaPipe手势识别子模块、TCP中继通道与Unity VirtualAgentDevice输入子模块三者串联实现：食指指向方向经三层检测逻辑提取后，以\texttt{input:move}指令中继至Unity，注入Input System管线驱动旅人沿指向方向行走，端到端延迟控制在100ms以内。标题消散由双手挥散检测（MediaPipe端）经AgentCommunicator校验面部在场后触发EchoTitle动画，涉及MediaPipe手势与面部两个子模块、TCP服务端中继机制及Unity GameStateManager的状态编排。山峦的半透明抖动与固化视觉效果由Unity动态视觉生成子模块承担——着色器的菲涅尔边缘光与顶点噪声偏移参数随情绪状态变化而调整，固化过程的视觉过渡由GameStateManager的状态变迁事件触发。
+
+第二章的核心交互——情绪折射与共鸣——在系统层面由MediaPipe面部识别子模块与EchoAgent智能体模块协同完成。面部形变系数经双重节流后上报至智能体，EchoAgent结合叙事上下文进行情绪语义推理，判定参展者当前的情绪强度与倾向后，通过\texttt{send\_to\_client}工具向Unity下发视觉参数调整指令，驱动建筑形态的舒展与扭曲。共鸣系统的动作同步率检测由MediaPipe手势识别子模块承担，同步达标后EchoAgent调用\texttt{play\_music}工具触发音乐反馈，同时通过\texttt{control\_lights}工具驱动树莓派灯光控制模块切换灯光氛围。边界保护机制则依赖MusicNoteController协调音符状态，并通过AgentCommunicator同步通知树莓派端触发相应灯光效果。
+
+第三章的核心交互——知识潮渐进与自由探索——在系统层面涉及最完整的模块链。知识碎片的收集进度由Unity GameStateManager追踪，潮水上涨的视觉变化由动态视觉生成子模块执行；海浪音符解锁后，EchoAgent的\texttt{control\_lights}与\texttt{play\_music}工具同时驱动灯光模式切换与音乐变奏；自由探索阶段四个音符的演奏分别触发对应的视觉形态变化（Shader Uniform参数调整）、音效反馈（音乐播放控制工具）与实体灯光伴随效果（树莓派灯光控制模块的\texttt{gain\_note}/\texttt{play\_note}联动），虚拟画面与物理光影在同一指令下保持严格同步，形成虚实联动的完整交互闭环。
+
+综上所述，三章的交互设计既各自侧重不同的模块组合，又共用同一套“感知—理解—反馈”架构：MediaPipe模块持续承担手势与表情的感知角色，EchoAgent模块负责跨模态理解与决策，Unity模块输出虚拟视觉与音效反馈，树莓派模块将变化延伸至实体空间。这种设计使叙事内容与系统框架之间形成了相互支撑而非彼此独立的关系。
 
 \subsection{音乐交互设计}
 
@@ -732,9 +825,11 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 \chapter{交互系统和配套应用实现}
 
-\section{TCP通信与并发控制}
+\section{交互系统框架实现}
 
-\subsection{长度前缀JSON协议}
+\subsection{TCP通信与并发控制}
+
+\subsubsection{长度前缀JSON协议}
 
 系统各模块间通过统一的二进制帧协议进行通信：每帧由 4 字节大端序无符号整数（表示负载长度）与紧随其后的 UTF-8 编码 JSON 负载组成。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type}（消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}）、\texttt{data}（负载内容）、\texttt{client\_type}（发送方身份标识，注册消息使用）、\texttt{request\_id}（UUID 格式请求标识，用于关联请求与响应）及 \texttt{relay\_to}（中继目标，指定消息经服务器直接转发至某类客户端）。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}，覆盖系统全部通信节点。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
 
@@ -743,7 +838,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 \label{code:json-message}
 \begin{codebox}
 class JsonMessage(TypedDict):
-    “””用于存储JSON消息的字典类”””
+    ""用于存储JSON消息的字典类""
     type: str # text | image | command | register
     data: str # 文本内容或base64编码数据，command 时为命令内容
     client_type: NotRequired[ClientType] # 发送这个消息的客户端类型：mediapipe | unity | raspberry_pi | debug
@@ -752,17 +847,17 @@ class JsonMessage(TypedDict):
 \end{codebox}
 \end{code}
 
-\subsection{EchoServer与客户端管理}
+\subsubsection{EchoServer与客户端管理}
 
-TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息（\texttt{\{“type”: “register”, “client\_type”: “...”\}}），服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
+TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息（\texttt{\{"type": "register", "client\_type": "..."\}}），服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
 
 协议层支持中继转发机制：若消息含非空 \texttt{relay\_to} 字段，服务端直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的低延迟直通——典型场景为 MediaPipe 将指向方向数据中继至 Unity 驱动角色移动。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
 
-\subsection{Python端TcpClient实现}
+\subsubsection{Python端TcpClient实现}
 
 服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TcpClient 是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅/退订式的事件回调机制——调用方可按消息类型（text、image、command）分别注册处理函数，当对应类型消息到达时自动分派。
 
-TcpClient内部维护一个 \texttt{\_Event} 辅助类，管理回调函数的添加（+=）、移除（-=）与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节长度前缀（\texttt{struct.unpack(“>I”, ...)}，> 表示大端序），再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
+TcpClient内部维护一个 \texttt{\_Event} 辅助类，管理回调函数的添加（+=）、移除（-=）与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节长度前缀（\texttt{struct.unpack(">I", ...)}，> 表示大端序），再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例（\texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}）。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
 
 \begin{code}
 \caption{简化的TcpClient 客户端核心代码}
@@ -787,26 +882,26 @@ class _Event:
             try:
                 cb(*args, **kwargs)
             except Exception:
-                logger.exception(f”Error in {self._name} handler”)
+                logger.exception(f"Error in {self._name} handler")
 
 # 长度前缀帧接收 + 类型分派（含自动重连）
 async def _receive_loop(self):
     try:
         while self._reader:
             length_prefix = await self._reader.readexactly(4)
-            payload_len = struct.unpack(“>I”, length_prefix)[0]
+            payload_len = struct.unpack(">I", length_prefix)[0]
             json_data = await self._reader.readexactly(payload_len)
-            msg = json.loads(json_data.decode(“utf-8”))
+            msg = json.loads(json_data.decode("utf-8"))
             {
-                “text”:    lambda: self.on_text.dispatch(msg[“data”]),
-                “image”:   lambda: self.on_image.dispatch(
-                                 base64.b64decode(msg[“data”])),
-                “command”: lambda: self.on_command.dispatch(msg),
-            }.get(msg[“type”], lambda: None)()
+                "text":    lambda: self.on_text.dispatch(msg["data"]),
+                "image":   lambda: self.on_image.dispatch(
+                                 base64.b64decode(msg["data"])),
+                "command": lambda: self.on_command.dispatch(msg),
+            }.get(msg["type"], lambda: None)()
     except asyncio.IncompleteReadError:
-        logger.info(“Connection closed by peer”)
+        logger.info("Connection closed by peer")
     except ConnectionResetError:
-        logger.warning(“Connection reset”)
+        logger.warning("Connection reset")
     finally:
         await self._cleanup_transport()
         if self._should_reconnect:
@@ -816,35 +911,35 @@ async def _receive_loop(self):
 
 # 长度前缀帧发送
 def _send_json(self, obj):
-    raw = json.dumps(obj, ensure_ascii=False).encode(“utf-8”)
-    self._writer.write(struct.pack(“>I”, len(raw)) + raw)
+    raw = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+    self._writer.write(struct.pack(">I", len(raw)) + raw)
 \end{lstlisting}
 \end{code}
 
 除上述基本收发逻辑外，TcpClient 还内置了自动重连机制：当连接因对端关闭或网络异常而断开时，接收循环在清理当前传输层后不会直接退出，而是按指数退避策略（初始 1s，每次翻倍直至上限 30s）延迟后自动发起重连。重连成功后触发 \texttt{on\_connected} 事件，调用方可借此实现自动重新注册等恢复逻辑。该机制使 MediaPipe 感知模块在服务端重启后无需人工干预即可恢复通信。
 
 
-\section{智能体EchoAgent实现}
+\subsection{智能体EchoAgent实现}
 
-\subsection{运行机制}
+\subsubsection{运行机制}
 
 EchoAgent 是本系统的理解层中枢，基于 Qwen3.6\citing{qwen36plus} 构建，负责整合多源感知数据并做出交互决策。系统启动时按以下顺序初始化各组件：首先创建一个全局的异步消息队列（\texttt{asyncio.Queue}），随后创建 EchoServer 并注入队列引用，最后创建 EchoAgent 实例，使其同时持有队列与 EchoServer 的引用。EchoAgent 与 EchoServer 及消息队列的集成方式如图\ref{fig:agent-server-topology}所示。
 
 智能体的完整交互闭环已在系统总体设计中详述，此处不再重复。
 
-\subsection{Deep Agents 框架集成}
+\subsubsection{Deep Agents 框架集成}
 
 本系统的智能体基于 Deep Agents 框架构建。Deep Agents 是一个基于 LangGraph 与 LangChain 的智能体框架，通过 \texttt{create\_deep\_agent()} 工厂函数创建编译后的状态图（\texttt{CompiledStateGraph}），提供内置的任务规划、上下文管理与子代理委派能力。智能体 使用 \texttt{InMemorySaver} 作为对话检查点存储器，维持跨轮次推理的状态连续性。
 
 在模型接入方面，框架通过 LangChain 的标准 Chat Model 接口与底层大语言模型交互，支持灵活切换模型提供商。系统的系统提示词（System Prompt）通过结构化自然语言向模型传递《回声之境》的交互应用定位、三类客户端角色（Unity、MediaPipe、Raspberry Pi）、消息类型体系（文本与图像），以及关键的调试模式指引——智能体 在收到 Unity 注册消息后主动请求截图以建立场景认知。
 
-\subsection{批量消息处理与决策流程}
+\subsubsection{批量消息处理与决策流程}
 
 EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一次性排空所有积压消息，将其转换为 LangChain 的 \texttt{HumanMessage} 列表后批量送入 智能体。对于文本类消息，直接将原始 JSON 字符串作为消息内容；对于图像类消息，则构造包含 Base64 编码图像与描述文本的多模态内容结构。智能体 通过 \texttt{deep\_agent.ainvoke()} 执行推理，模型根据系统提示词与当前上下文自主决定是否以及调用哪个工具，工具执行结果以 \texttt{ToolMessage} 形式追加至对话历史，供下一轮推理使用。
 
 这种批量处理模式的设计兼顾了两方面考量：一方面，将多源异步到达的消息聚合后统一推理，使 智能体 能够在同一上下文中综合考虑手势、表情与场景事件的关联；另一方面，5 秒的间隔避免了模型 API 的频繁调用，在交互响应性与资源开销之间取得了平衡。
 
-\section{MediaPipe端实现}
+\subsection{MediaPipe端实现}
 
 \begin{figure}[htbp]
   \centering
@@ -853,7 +948,7 @@ EchoAgent 的决策循环以轮询模式运行：每 5 秒从消息队列中一�
   \label{fig:mediapipe-landmarks}
 \end{figure}
 
-\subsection{手势识别与指向检测}
+\subsubsection{手势识别与指向检测}
 
 手部感知由 HandsRecognizer 类实现，基于 MediaPipe GestureRecognizer 模型（\texttt{gesture\_recognizer.task}）运行于 LIVE\_STREAM 模式。MediaPipe 内置手势分类器可识别 \texttt{Open\_Palm}、\texttt{Pointing\_Up}、\texttt{Victory}、\texttt{Thumb\_Up} 等预定义手势类别，每帧检测结果包含手势标签、置信度与 21 个手部关键点的归一化坐标。
 
@@ -942,7 +1037,7 @@ def _detect_sweep(self, result):
 
 上述三层检测的输出通道各不相同：手势变化结果以 \texttt{omni\_type: "hand\_gesture"} 文本消息发送至 EchoAgent，作为高层交互决策的触发信号；指向方向以 \texttt{input:move} 命令经服务端中继直发 Unity，绕过智能体决策环路以确保低延迟；挥散动作以 \texttt{input:submit} 命令发往 Unity，经 AgentCommunicator 校验面部在场后触发标题消散动画。
 
-\subsection{面部表情数据采集与节流}
+\subsubsection{面部表情数据采集与节流}
 
 面部感知由 FaceRecognizer 类实现，基于 MediaPipe FaceLandmarker 模型（\texttt{face\_landmarker.task}），开启 \texttt{output\_face\_blendshapes=True} 以输出 52 维面部形变系数（blendshapes）——如 \texttt{browInnerUp}（眉心抬起）、\texttt{mouthSmileLeft}（左嘴角上扬）等，每项取值 $[0, 1]$。鼻尖关键点（landmark 1）坐标作为面部空间位置参考，用于后续的面部出现/消失检测。
 
@@ -974,7 +1069,7 @@ if abs(current_mean - self._last_blendshape_mean) > 0.15:
 
 这一设计的效果是：面无表情时几乎不产生推送，表情丰富时约每秒 2 次——在信息完整性与资源开销之间取得了平衡。面部形变数据以 \texttt{omni\_type: "face\_blendshape"} 事件格式发送，交由 EchoAgent 结合叙事上下文进行情绪语义推理。此外，FaceRecognizer 同时监测 \texttt{face\_landmarks} 的有无，在面部进入或离开摄像头视野时触发在场状态变化回调，Unity 端据此控制开场动画的启动时机。
 
-\subsection{多线程事件上报架构}
+\subsubsection{多线程事件上报架构}
 
 感知子系统的OpenCV 的 \texttt{cv2.imshow} 与 \texttt{cv2.waitKey} 必须在主线程调用。而 MediaPipe 的 LIVE\_STREAM 模式将检测结果派发至其内部的回调线程，TCP 通信又依赖 asyncio 事件循环在独立线程中运转。因此系统采用三条线程协同工作：主线程仅负责 OpenCV 预览窗口渲染——调用 \texttt{get\_latest\_frame()} 获取最新帧，叠加手部骨架、手势标签、FPS 计数与面部鼻尖标注后显示。不参与识别或网络操作。摄像机线程以守护线程形式运行，尽可能高的帧率从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳依次分发给所有已注册的帧回调——即 HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法。这种“一帧多发”的设计使两个识别器共享同一路视频源，避免了多摄像头或帧拷贝的开销。TCP 事件循环线程运行 asyncio 事件循环，承载 TcpClient 的全部网络收发。所有 \texttt{send\_text}、\texttt{send\_command} 等操作必须在此线程中串行执行以保证线程安全。
 
@@ -1003,7 +1098,7 @@ def handle_sweep():
 
 TcpClient 在连接建立后通过 \texttt{on\_connected} 事件自动发送注册消息（\texttt{client\_type: "mediapipe", modules: ["hands", "face"]}）；若连接因服务端重启或网络波动断开，TcpClient 以指数退避策略（初始 1s，每次翻倍至上限 30s）自动重连，重连成功后再次触发 \texttt{on\_connected} 完成重新注册，整个过程无需人工干预。MediaPipe 客户端同时持续监听服务端下发的控制指令——例如 \texttt{hand\_direction:on/off} 用于远程开关指向检测功能——通过 \texttt{on\_command} 回调处理。
 
-\section{Unity客户端实现}
+\subsection{Unity框架端实现}
 
 Unity 交互应用内部以 GameRoot 为单例枢纽进行集中式管理。GameRoot 组件挂载于场景中标记 \texttt{DontDestroyOnLoad} 的持久化对象，其 \texttt{Awake()} 标注 \texttt{[DefaultExecutionOrder(-100)]} 以确保最先执行：若已存在实例则销毁自身，否则将自身赋给静态属性 \texttt{Instance} 并注册跨场景持久化。GameRoot 下辖五个子对象，各携带一个核心脚本，GameRoot 以公开字段持有引用，层级结构如代码\ref{code:gameroot-tree}所示。
 
@@ -1023,7 +1118,7 @@ Game Root (DontDestroyOnLoad)            -- GameRoot 单例
 
 场景中任何脚本均可通过 \texttt{GameRoot.Instance} 访问这些全局服务，无需 \texttt{FindObjectOfType} 等开销较大的查找，也避免了模块间直接相互引用的耦合。GameStateManager 是这一架构中的编排中枢，同时实现了 ISaveProvider 接口。其内部维护一个标记 \texttt{[System.Serializable]} 的私有结构体，包含 ChapterState 枚举（Origin / Colony / Deepflow）与 EchoTitleActive 布尔量两个字段，属性 CurrentChapter 与 EchoTitleActive 均直接委托至结构体的对应字段，CaptureState() 直接返回该结构体，RestoreState() 通过类型匹配还原——以单一结构体实例作为唯一序列化后端，消除了字段与状态快照之间的数据冗余。在输入管控方面，GameStateManager 持有 Player\_Actions 的 InputActionAsset 引用，通过只禁用 Player 映射（Move、Sprint、Note*）而保留 UI 映射（Submit、Navigate 等），使系统在标题阶段可屏蔽角色移动等游戏操作，但仍能响应提交键以触发标题消散。在事件编排方面，其于 Start() 中集中完成三项初始化：禁用 Player 输入、订阅 EchoTitle 的 OnDismissComplete 事件（置 EchoTitleActive 为 false 后恢复全局输入）、订阅 AgentCommunicator 的 OnHandSweepGesture 事件（检查 FacePresent 后调用 EchoTitle.Dismiss()），使状态变迁的完整链路可在一处追踪。
 
-\subsection{Unity端AgentCommunicator}
+\subsubsection{Unity端AgentCommunicator}
 
 AgentCommunicator 作为 GameRoot 的子组件承担 TCP 客户端角色。启动时异步连接至服务端并发送注册消息，随后在后台 Task 中运行接收循环，按长度前缀协议解析入站消息，根据消息类型分派至对应回调。
 
@@ -1031,11 +1126,106 @@ AgentCommunicator 作为 GameRoot 的子组件承担 TCP 客户端角色。启�
 
 AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
 
-\subsection{旅人角色的建模与动画实现}
+
+\subsection{树莓派灯光控制端实现}
+
+树莓派端负责完成实体灯光控制与场景布置。实体灯光子系统由 WS2812 可寻址 RGB LED 灯条与树莓派5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.32\textwidth]{pic/实体音符装置示意 其中第一个音符所对应的灯条正亮起.jpeg}
+  \caption{实体音符装置示意（第一个音符对应的灯条正亮起）}
+  \label{fig:physical-notes}
+\end{figure}
+
+
+树莓派5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。树莓派与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入树莓派对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
+
+软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
+
+树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
+
+\begin{code}
+\caption{音符-灯珠索引映射}
+\label{code:music-notes-pixels}
+\begin{codebox}
+music_notes_pixels_map: dict[str, set[int]] = {
+    "waterdrop": {0, 1, 2, 3, 4, 5, 6, 57, 58, 59, 60, 61, 62, 63},
+    "crossing":  {9, 10, 11, 12, 13, 14, 54, 53, 52, 51, 50, 49},
+    "tide":      {17, 18, 19, 20, 21, 22, 23, 46, 45, 44, 43, 42, 41},
+    "breeze":    {25, 26, 27, 28, 29, 30, 31, 32, 38, 37, 36, 35, 34, 33},
+}
+\end{codebox}
+\end{code}
+
+灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
+
+基础模式中，控制系统利用 HLS 颜色空间来操作色彩变化，而非直接操作 RGB 分量。HSL色彩空间包含色相（Hue）、亮度（Lightness）和饱和度（Saturation）这三个分量，这样就可以将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
+
+以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
+
+音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入“灭—亮—灭—亮”的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
+
+\begin{code}
+\caption{LedController 灯光控制器核心实现}
+\label{code:led-controller}
+\begin{codebox}
+class LedController:
+    def __init__(self, pixel_pin=board.D23, num_pixels=64, brightness=0.2):
+        self.pixels = neopixel.NeoPixel(
+            pixel_pin, num_pixels, auto_write=True, brightness=brightness)
+        self._stop_flag = threading.Event()
+
+    def _rainbow_chase_loop(self):
+        num_heads = 5
+        tail_length = 15
+        positions = [0] * num_heads
+        hues = [i / num_heads for i in range(num_heads)]
+        while not self._stop_flag.is_set():
+            self.pixels.fill((0, 0, 0))
+            for head in range(num_heads):
+                for t in range(tail_length, 0, -1):
+                    idx = (positions[head] - t) % self.pixels.n
+                    fade = (1 - t / tail_length) * 0.9 + 0.1
+                    r, g, b = colorsys.hls_to_rgb(hues[head], 0.5 * fade, 0.6)
+                    self.pixels[idx] = (int(r * 255), int(g * 255), int(b * 255))
+            self.pixels.show()
+            time.sleep(0.03)
+            for head in range(num_heads):
+                positions[head] = (positions[head] + 2) % self.pixels.n
+            hues = [(h + 0.008) % 1.0 for h in hues]
+
+    def gain_note(self, note_name, color=(255, 255, 255)):
+        for idx in music_notes_pixels_map.get(note_name, set()):
+            self.pixels[idx] = color
+        self.pixels.show()
+
+    def play_note(self, note_name, color=(255, 255, 255)):
+        indices = [i for i in music_notes_pixels_map.get(note_name, set())
+                   if i < self.pixels.n]
+        for _ in range(2):
+            for idx in indices:
+                self.pixels[idx] = (0, 0, 0)
+            self.pixels.show(); time.sleep(0.1)
+            for idx in indices:
+                self.pixels[idx] = color
+            self.pixels.show(); time.sleep(0.1)
+
+    def _start_effect(self, effect_func):
+        self._stop_flag.clear()
+        t = threading.Thread(target=effect_func)
+        t.daemon = True
+        t.start()
+\end{codebox}
+\end{code}
+
+\section{《回声之境》应用实现}
+
+\subsection{旅人角色建模与动画}
 
 第\ref{sec:traveler-design}节已从设计角度阐述了旅人形象的创作理念与概念设定。本节将从实现角度，完整描述旅人角色从二维概念图到Unity中可操控三维角色的技术流程，涵盖AI辅助3D建模、Blender骨骼绑定与关键帧动画、以及Unity动画状态机的构建。
 
-旅人形象实现的第一步是将概念设计阶段的平面形象转化为三维模型。首先使用Google推出的NanoBanana图像生成模型，以第3.3.4节中ChatGPT生成的诗意概念描述为提示词，生成旅人的多视角的图片；随后将该图片输入字节跳动推出的Seed 3D模型，生成带PBR（Physically Based Rendering）材质的OBJ格式三维模型。Seed 3D能够从图像中推断几何结构与表面材质属性，输出的OBJ模型包含网格数据、UV映射以及漫反射、法线与粗糙度贴图，可直接导入Unity呈现正确的效果。
+旅人形象实现的第一步是将概念设计阶段的平面形象转化为三维模型。首先使用Google推出的NanoBanana图像生成模型，以第\ref{sec:traveler-design}节中ChatGPT生成的诗意概念描述为提示词，生成旅人的多视角的图片；随后将该图片输入字节跳动推出的Seed 3D模型，生成带PBR（Physically Based Rendering）材质的OBJ格式三维模型。Seed 3D能够从图像中推断几何结构与表面材质属性，输出的OBJ模型包含网格数据、UV映射以及漫反射、法线与粗糙度贴图，可直接导入Unity呈现正确的效果。
 
 为了让旅人能够在世界中行走，需要为其制作一段行走动画。制作动画的前提是需要为其制作一套骨骼并绘制权重。由于该旅人为非标准人形，没有标准的手臂和手部，也没有脚部，且由于其3D模型为AI一次性生成，没有传统的分部建模过程，所其斗篷部分与身体黏合在一起无法简单地分开，这也导致了无法直接套用通用人形骨骼模板，也难以使用通用工具一键生成骨骼绑定。因此本设计在Blender中手工完成了从骨骼绑定和动画制作。其中，权重绘制是确保蒙皮变形自然的关键步骤，如图\ref{fig:blender-weight}所示。
 
@@ -1050,7 +1240,7 @@ AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screen
 
 FBX文件导入Unity后，引擎自动生成Avatar与Animation Clip资源。由于旅人角色为非人形骨骼结构，Avatar类型设置为Generic，并在Avatar配置中手动指定盆骨为Root Motion的驱动节点。动画控制采用Unity Animator Controller构建有限状态机。
 
-\subsection{旅人控制器与虚拟输入设备}
+\subsection{旅人控制器实现}
 
 旅人角色的移动由 TravelerController 组件驱动，该组件依赖 Unity 的 CharacterController 进行物理位移计算。在 \texttt{FixedUpdate} 中按固定时间步长执行重力施加、输入解析、旋转平滑与位移更新：读取 Input System 的 Move 动作获取二维输入向量，结合主摄像机的偏航角计算世界空间移动方向，通过 \texttt{Mathf.SmoothDampAngle} 实现角色朝向的平滑过渡；垂直方向累计重力加速度，着地时清零。TravelerController 的核心移动逻辑所示。
 
@@ -1193,7 +1383,7 @@ EchoEventCenter 组件监听服务端下发的 \texttt{input:move:x,y} 格式指
 Fog 组件通过持续更新雾材质的 \texttt{\_Offset} 向量，叠加正弦/余弦波动（不同频率与相位），产生缓慢漂移的雾气效果，增强场景的层次感与氛围感。
 
 
-\subsection{其他视觉动效}
+\subsection{交互场景视觉动效}
 
 \subsubsection*{动态场景标题}
 
@@ -1209,155 +1399,40 @@ Fog 组件通过持续更新雾材质的 \texttt{\_Offset} 向量，叠加正弦
 
 MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取顺序与演奏逻辑。四个音符须按序获得，控制器维护已获取音符计数，依次解锁下一音符。获取与演奏操作均通过 AgentCommunicator 向树莓派发送同步指令（\texttt{gain\_note:<type>}、\texttt{play\_note:<type>}），使实体灯光与虚拟音符动效保持同步。
 
-\subsection{状态驱动与相机控制}
+\subsection{状态驱动相机控制}
 \label{sec:state-driven-camera}
 
-《回声之境》作为一款交互应用，与电子游戏的区别在于它更注重叙事时的演出表现。因此，为了实现在前文中所描述的章节叙事，我们需要有一套明确的状态路径表。在相机设置上，它也会与电子游戏有所差别。基于其特殊的交互事件和演出需求，本作品没有使用常见的第三人称自由视角转动、也并非完全的固定俯视角跟随，而是更类似于影视拍摄时的分镜脚本，采用了多机位切换与轨道控制来编排了一种状态驱动的相机控制方式。
+第\ref{sec:application-design}节已从设计角度阐述了状态驱动的相机编排方案，以第一章为例的状态表\ref{tbl:chapter1-flow}与相机状态机图\ref{fig:camera-state-machine}定义了四个机位及其切换条件。本节聚焦于这一设计方案在Unity中的实现方式。
 
-为了更清楚地展示其实现原理，以第一章《初域·未定之原》为例，表\ref{tbl:chapter1-flow}展示了从应用初始状态到旅人第一次获得水滴音符的完整交互流程。
+如果直接使用C\#脚本来编写不同机位之间的切换，虽然也可行，但会较为繁琐，而更好的办法是利用Unity官方提供的Cinemachine包中的State Driven Camera以及Animator组件提供的状态机编辑器来制作。Cinemachine包允许开发者在主摄像机上挂载一个Cinemachine Brain，然后在场景中可同时建立多个虚拟摄像机。通过将这些虚拟摄像机放在Cinemachine State Driven Camera的子物体下，然后设置各个虚拟摄像机与状态机中状态的绑定，即可用Unity自带的状态机来控制相机。
 
-\begin{table}[htbp]
-\centering
-\caption{第一章《初域·未定之原》交互流程状态表}
-\label{tbl:chapter1-flow}
-\begin{tabularx}{\linewidth}{|c|X|X|X|X|}
-\hline
-序号 & 状态特征 & 旁白 & 向下一状态转换条件 & 底层程序对应 \\
-\hline
-0 & 标题文字浮动、处于不可交互状态 & — & 面部进入画面并做双手向两侧挥散的动作 & face:in；input:submit \\
-\hline
-1 & 标题文字消散，开始接受用户手指输入，但是不启动旅人移动控制，灯条显示一轮淡绿色跑马灯，表示存在感，开始引导用户使用手指指向输入 & — & 第一次接收到正确的手指向右信号时 & hand\_direction:on；raspberry\_pi:chase \\
-\hline
-2 & 播放固定动画：旅人向前迈一步走出出生点六边形，风忽然吹得大了些又渐渐缓和 & 没有人知道旅人从何而来。当他睁开眼时，正立于未定之原的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。 & 用户离开出生点石台 & 石台TriggerExit，连续动画调度 \\
-\hline
-3 & 屏幕显示文字引导“尝试让世界听见你的形状”，此状态下水滴音符物体监测旅人进入自身范围时暂停输入 & 尝试让世界听见你的形状 & 用户处于音符范围并再次挥手 & input:submit；TriggerEnter \\
-\hline
-\end{tabularx}
-\end{table}
-
-有了这张交互状态表，我们就可以从中提炼出不同的机位以及对应的状态机控制参数。在上述交互流程中，一共涉及四种机位，我们在此将它们分别命名为Idle、Following、TopShowing和Showing，同时设置四个参数FacePresent（bool）、IsShowingWaterdrop（bool）、EchoTitleActive（bool）、ExitBornPoint（Trigger）。由这些机位和参数组成的状态机如图\ref{fig:camera-state-machine}所示。
+在上述的四个机位中，Idle、TopShowing和Showing相机都是固定机位，而
+Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定相机的空间位置，Look At目标决定相机的朝向，二者独立配置、组合生效，使相机在跟随旅人移动时保持平滑的轨道运动。图\ref{fig:cinemachine-config}和图\ref{fig:state-driven-workspace}展示了实际的Cinemachine配置编辑界面。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{pic/相机状态机图.pdf}
-  \caption{相机状态机图}
-  \label{fig:camera-state-machine}
-\end{figure}
-
-而有了这个状态机，我们就可以继续着手将交互应用感知到的事件与状态的转移联系起来。如果直接使用C\#脚本来编写不同机位之间的切换，虽然也可行，但会较为繁琐，而更好的办法是利用Unity官方提供的Cinemachine包中的State Driven Camera以及Animator组件提供的状态机编辑器来制作。Cinemachine包允许开发者在主摄像机上挂载一个Cinemachine Brain，然后在场景中可同时建立多个虚拟摄像机。通过将这些虚拟摄像机放在Cinemachine State Driven Camera的子物体下，然后设置各个虚拟摄像机与状态机中状态的绑定，即可用Unity自带的状态机来控制相机。
-
-在上述的四个机位中，Idle、TopShowing和Showing相机都是固定机位，而Following相机以 Spline Dolly Camera 配合 Look At 目标实现。样条线决定相机的空间位置，Look At 目标决定相机的朝向，二者独立配置、组合生效。图\ref{fig:cinemachine-config}展示了实际的 Cinemachine 配置编辑界面。
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.7\textwidth]{pic/Cinemachine配置编辑展示.png}
+  \includegraphics[width=1.0\textwidth]{pic/Cinemachine配置编辑展示.png}
   \caption{Cinemachine Spline Dolly Camera 配置界面}
   \label{fig:cinemachine-config}
 \end{figure}
 
-机位转换在演示中的实际效果将在\ref{sec:state-driven-showcase}一节中展示。
-
-\section{树莓派端实现}
-
-树莓派端负责完成实体灯光控制与场景布置。实体灯光子系统由 WS2812 可寻址 RGB LED 灯条与树莓派5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
-
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.32\textwidth]{pic/实体音符装置示意 其中第一个音符所对应的灯条正亮起.jpeg}
-  \caption{实体音符装置示意（第一个音符对应的灯条正亮起）}
-  \label{fig:physical-notes}
+  \includegraphics[width=1.0\textwidth]{pic/Unity内相机状态机实现.png}
+  \caption{Unity内相机状态机实现}
+  \label{fig:state-driven-workspace}
 \end{figure}
 
-
-树莓派5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。树莓派与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入树莓派对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
-
-软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
-
-树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
-
-\begin{code}
-\caption{音符-灯珠索引映射}
-\label{code:music-notes-pixels}
-\begin{codebox}
-music_notes_pixels_map: dict[str, set[int]] = {
-    "waterdrop": {0, 1, 2, 3, 4, 5, 6, 57, 58, 59, 60, 61, 62, 63},
-    "crossing":  {9, 10, 11, 12, 13, 14, 54, 53, 52, 51, 50, 49},
-    "tide":      {17, 18, 19, 20, 21, 22, 23, 46, 45, 44, 43, 42, 41},
-    "breeze":    {25, 26, 27, 28, 29, 30, 31, 32, 38, 37, 36, 35, 34, 33},
-}
-\end{codebox}
-\end{code}
-
-灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
-
-基础模式中，控制系统利用 HLS 颜色空间来操作色彩变化，而非直接操作 RGB 分量。HSL色彩空间包含色相（Hue）、亮度（Lightness）和饱和度（Saturation）这三个分量，这样就可以将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
-
-以上动态模式均运行在独立守护线程（daemon thread）中：每次切换模式时，先通过 \texttt{threading.Event} 终止上一线程，再为新效果启动新线程，保证模式切换即时响应且不阻塞 TCP 指令接收。
-
-音符联动模式直接利用 \texttt{music\_notes\_pixels\_map} 定位对应灯珠。\texttt{gain\_note} 遍历映射中的索引集合并点亮目标灯珠；\texttt{play\_note} 在此基础上加入“灭—亮—灭—亮”的短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。LedController 的核心结构如代码\ref{code:led-controller}所示。
-
-\begin{code}
-\caption{LedController 灯光控制器核心实现}
-\label{code:led-controller}
-\begin{codebox}
-class LedController:
-    def __init__(self, pixel_pin=board.D23, num_pixels=64, brightness=0.2):
-        self.pixels = neopixel.NeoPixel(
-            pixel_pin, num_pixels, auto_write=True, brightness=brightness)
-        self._stop_flag = threading.Event()
-
-    def _rainbow_chase_loop(self):
-        num_heads = 5
-        tail_length = 15
-        positions = [0] * num_heads
-        hues = [i / num_heads for i in range(num_heads)]
-        while not self._stop_flag.is_set():
-            self.pixels.fill((0, 0, 0))
-            for head in range(num_heads):
-                for t in range(tail_length, 0, -1):
-                    idx = (positions[head] - t) % self.pixels.n
-                    fade = (1 - t / tail_length) * 0.9 + 0.1
-                    r, g, b = colorsys.hls_to_rgb(hues[head], 0.5 * fade, 0.6)
-                    self.pixels[idx] = (int(r * 255), int(g * 255), int(b * 255))
-            self.pixels.show()
-            time.sleep(0.03)
-            for head in range(num_heads):
-                positions[head] = (positions[head] + 2) % self.pixels.n
-            hues = [(h + 0.008) % 1.0 for h in hues]
-
-    def gain_note(self, note_name, color=(255, 255, 255)):
-        for idx in music_notes_pixels_map.get(note_name, set()):
-            self.pixels[idx] = color
-        self.pixels.show()
-
-    def play_note(self, note_name, color=(255, 255, 255)):
-        indices = [i for i in music_notes_pixels_map.get(note_name, set())
-                   if i < self.pixels.n]
-        for _ in range(2):
-            for idx in indices:
-                self.pixels[idx] = (0, 0, 0)
-            self.pixels.show(); time.sleep(0.1)
-            for idx in indices:
-                self.pixels[idx] = color
-            self.pixels.show(); time.sleep(0.1)
-
-    def _start_effect(self, effect_func):
-        self._stop_flag.clear()
-        t = threading.Thread(target=effect_func)
-        t.daemon = True
-        t.start()
-\end{codebox}
-\end{code}
+\subsection{实体灯光装置制作}\label{sec:physical-device}
 
 四个音符技能图标以四块宽15 cm、厚5 mm的正六边形松木板为基材。制作时，首先在矢量绘图软件Affinity中使用贝塞尔曲线完成音符图标的设计；将设计稿用A4纸打印后，沿黑色轮廓线以美工刀手工雕刻，再用502胶水粘贴固定于松木板上。各木板之间以装饰麻绳串联，灯条则沿整体图形的外轮廓包裹，恰好使用64颗灯珠。灯珠的序号与空间位置如图\ref{fig:led-layout}所示，标号0至63的灯珠与\texttt{music\_notes\_pixels\_map}中的索引一一对应，标号64的最后一颗为冗余灯珠。灯条原始规格为每米30颗、全长共150颗，利用WS2812可任意裁剪的特性，从第64颗灯珠处剪断即可。最终，该灯光装置悬挂于展台一侧，形成与交互应用中虚拟音符UI界面相呼应的实体视觉锚点。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.85\textwidth]{pic/灯珠位置示意图.pdf}
+  \includegraphics[width=0.9\textwidth]{pic/灯珠位置示意图.pdf}
   \caption{灯珠序号与空间位置示意图}
   \label{fig:led-layout}
 \end{figure}
-
 
 \chapter{应用场景演示与测试}
 
@@ -1365,7 +1440,7 @@ class LedController:
 
 为验证系统在真实展览环境中的可用性，本文在实验室环境中搭建了一套完整的实体展览装置。整个部署环境由一台运行EchoAgent与MediaPipe模块的开发机、一台显示Unity交互应用的显示屏、一套树莓派驱动的WS2812可编程RGB LED灯阵，以及用于手势与面部捕捉的摄像头模块组成。树莓派作为LED控制中枢，通过TCP协议连接至EchoAgent服务端，接收实时灯光控制指令。
 
-实体装置的核心是四个音符的技能图标，其制作工艺与灯珠布局已在第4.4节详述。在展览现场，四块正六边形松木板图标以麻绳串联悬挂于展台一侧，灯带沿图标外轮廓包裹后与虚拟音符UI在空间与形态上形成呼应；当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效，灯光氛围随章节情绪基调的转换而动态变化，使沉浸感从屏幕内部延伸至物理空间。这一装置既是技术验证的载体，也是展览空间中引人触摸与注视的物理锚点。
+实体装置的核心是四个音符的技能图标，其制作工艺与灯珠布局已在第\ref{sec:physical-device}节详述。在展览现场，四块正六边形松木板图标以麻绳串联悬挂于展台一侧，灯带沿图标外轮廓包裹后与虚拟音符UI在空间与形态上形成呼应；当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效，灯光氛围随章节情绪基调的转换而动态变化，使沉浸感从屏幕内部延伸至物理空间。这一装置既是技术验证的载体，也是展览空间中引人触摸与注视的物理锚点。
 
 \section{交互流程演示}
 \label{sec:state-driven-showcase}
@@ -1436,7 +1511,7 @@ class LedController:
 
 \subsection{测试过程}
 
-表\ref{tbl:test-cases}为此次测试的测试用例表，各用例与第3.1.2节中的结构化用例一一对应。
+表\ref{tbl:test-cases}为此次测试的测试用例表，各用例与第\ref{sec:use-cases}节中的结构化用例一一对应。
 
 \begin{table}[h]
 \centering
@@ -1482,13 +1557,13 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 \label{tbl:test-cases}
 \end{table}
 
-以上八个测试用例与第3.1.2节中列举的用例一一对应，覆盖了系统从感知层（用例1--3）、理解层（用例4--5）到反馈层（用例6--7）及可观测性（用例8）的全链路功能。经逐一验证，所有用例均通过，系统运行稳定，未出现连接异常、消息丢失或状态不同步等问题。
+以上八个测试用例与第\ref{sec:use-cases}节中列举的用例一一对应，覆盖了系统从感知层（用例1--3）、理解层（用例4--5）到反馈层（用例6--7）及可观测性（用例8）的全链路功能。经逐一验证，所有用例均通过，系统运行稳定，未出现连接异常、消息丢失或状态不同步等问题。
 
 \subsection{可观测性}
 
 多模态交互系统的调试复杂度远高于传统单模块应用——手势识别、面部采集、智能体推理、Unity渲染和灯光控制分布在不同的进程甚至不同的硬件上，任何一个环节的异常都可能波及整体体验。为此，系统建立了一套从日志记录到链路追踪的完整可观测性体系。
 
-在日志层面，系统基于Python标准库logging模块实现了按模块隔离的分层日志：服务端模块负责记录TCP连接建立、客户端注册、消息收发与中继转发等网络事件；智能体模块则记录消息队列的消费节奏、每轮推理的上下文规模、工具调用的类型与参数以及MiniMax TTS的合成结果。两条日志流同时输出至控制台与文件，文件按启动时间自动命名（echoagent\_YYYYMMDD\_HHMMSS.log），统一保存于logs目录。日志格式采用”时间戳 + 模块名 + 级别”的结构，支持事后按时间范围检索与按级别过滤。在开发阶段，可通过命令行参数--log-level DEBUG开启调试级别，此时日志将额外输出完整的消息内容、队列积压状态与异常堆栈，为定位间歇性问题提供更细粒度的信息。
+在日志层面，系统基于Python标准库logging模块实现了按模块隔离的分层日志：服务端模块负责记录TCP连接建立、客户端注册、消息收发与中继转发等网络事件；智能体模块则记录消息队列的消费节奏、每轮推理的上下文规模、工具调用的类型与参数以及MiniMax TTS的合成结果。两条日志流同时输出至控制台与文件，文件按启动时间自动命名（echoagent\_YYYYMMDD\_HHMMSS.log），统一保存于logs目录。日志格式采用“时间戳 + 模块名 + 级别”的结构，支持事后按时间范围检索与按级别过滤。在开发阶段，可通过命令行参数--log-level DEBUG开启调试级别，此时日志将额外输出完整的消息内容、队列积压状态与异常堆栈，为定位间歇性问题提供更细粒度的信息。
 
 在链路追踪层面，系统集成了OpenTelemetry与Phoenix实现端到端的调用可视化。通过OpenTelemetry的LangChain Instrumentor对EchoAgent的推理流程进行自动插桩，每一次ainvoke调用、每一轮工具选择与执行都被完整记录，形成可回溯的调用链。Phoenix追踪面板（如图\ref{fig:phoenix-trace}所示）可在浏览器上通过本地端口访问，开发者能够直观观察VLM的Tool Calling决策过程、上下文窗口的变化曲线以及各工具函数的执行时序与耗时分布。这套追踪体系使原本黑箱化的智能体行为变得透明可分析，在开发阶段极大加速了Prompt调优与工具定义迭代的效率。
 
@@ -1639,7 +1714,7 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 最后感谢我的家人。有时候我觉得大学生活十分漫长，却也有时候我发现这四年的时光转瞬即逝。这四年，整个世界都相当不平凡。记得刚走入大学的那会儿，疫情还欲止未止，我也像这《回声之境》中的旅人，既憧憬着未来又小心翼翼地在迷雾中前行。在那些在迷雾中迷惘的时候，家仍是港湾。
 
-本论文采用基于 LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
+本论文采用基于 \LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
 
 \thesisloadbibliography[nocite]{reference}
 
