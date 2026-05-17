@@ -9,8 +9,8 @@
 \studentclass{B227103}
 \studentid{B22710323}
 \graduateyear{2026}
-\begindate{2026年3月11日}
-\finishdate{2026年6月14日}
+\begindate{2025年12月29日}
+\finishdate{2026年5月29日}
 
 \begin{document}
 
@@ -65,7 +65,7 @@ With the rapid development of digital technologies such as virtual reality and a
   \label{fig:teamlab-exhibition}
 \end{figure}
 
-国内方面，博物馆等文化机构也在积极探索虚实联动的交互装置应用。如图\ref{fig:liangzhu-interactive}所示，位于浙江省杭州市余杭区的良渚博物馆内交互装置允许参观者通过操作实体装置与虚拟场景互动，体现了实体展览中虚实联动的交互理念。
+国内博物馆也在积极探索虚实联动的交互装置应用。如图\ref{fig:liangzhu-interactive}所示，位于浙江省杭州市余杭区的良渚博物馆内交互装置允许参观者通过操作实体装置与虚拟场景互动，体现了实体展览中虚实联动的交互理念。
 
 然而，此类装置多是参观者执行特定操作后触发预设的视觉或听觉反馈，系统尚不能根据参观者的情绪状态、交互历史或行为特征进行动态的、个性化的响应调整。
 
@@ -167,40 +167,37 @@ Epic Games公司在《堡垒之夜》中举办的虚拟演唱会是一个虚拟�
 
 \section{多模态智能体技术}
 
-ReACT范式\citing{yao2023react}奠定了现代智能体的核心工作模式。其关键洞察在于将推理（thought）本身也视为一种动作——将语言空间$\mathcal{L}$与原始动作空间$\mathcal{A}$合并为增强动作空间$\hat{\mathcal{A}} = \mathcal{A} \cup \mathcal{L}$，使得模型可以在推理与行动之间自由切换，如公式(\ref{eq:react})所示：
+ReACT范式\citing{yao2023react}奠定了现代智能体的工作模式，它最核心的想法在于将推理（thought）本身也视为一种动作。将语言空间$\mathcal{L}$与原始动作空间$\mathcal{A}$合并为增强动作空间$\hat{\mathcal{A}} = \mathcal{A} \cup \mathcal{L}$，这样模型就能推理与行动之间自由切换，具体公式(\ref{eq:react})所示：
 
 \begin{equation}
 \hat{a}_t \sim \pi(\hat{a}_t \mid c_t), \quad c_t = (o_1, a_1, \cdots, o_{t-1}, a_{t-1}, o_t)
 \label{eq:react}
 \end{equation}
 
-其中$c_t$为截至时刻$t$的交互上下文，包含所有历史观测与动作；$\hat{a}_t \in \hat{\mathcal{A}}$为策略$\pi$输出的增强动作，当$\hat{a}_t \in \mathcal{L}$时为推理思维（不影响外部环境但向上下文中注入分析信息），当$\hat{a}_t \in \mathcal{A}$时为外部动作。上下文随交互推进而累积更新：$c_{t+1} = (c_t, \hat{a}_t, o_{t+1})$。这一范式使智能体形成了“感知—推理—行动—反馈”的闭环。然而，早期智能体的交互范围主要局限于文本层面，而真实世界的展览交互系统通过图形界面运行，智能体若不能理解视觉界面，其行动能力便极为受限。
+其中$c_t$为截至时刻$t$的交互上下文，包含所有历史观测与动作；$\hat{a}_t \in \hat{\mathcal{A}}$为策略$\pi$输出的增强动作，当$\hat{a}_t \in \mathcal{L}$时为推理思维，当$\hat{a}_t \in \mathcal{A}$时为外部动作。上下文随交互推进而累积更新：$c_{t+1} = (c_t, \hat{a}_t, o_{t+1})$。这一范式使智能体形成了“思考 - 行动 - 观察”的行动循环。然而，早期智能体的交互范围局限于文本，而实际展览交互系统通过图形界面运行，智能体如无法理解视觉界面，能够就会极大受限。
 
-而近两年兴起的GUI智能体突破了这一限制，如CogAgent\citing{hong2024cogagent}。作为一个180亿参数的视觉语言模型，它直接从屏幕截图中理解GUI元素——包括微小图标、文本标签与空间布局——而无需HTML等结构化元数据。其核心设计是高低分辨率双分支架构：224×224低分辨率分支负责整体场景理解，1120×1120高分辨率分支通过交叉注意力模块精确识别细小文本与界面组件，从而在不显著增加计算开销的前提下兼顾全局感知与局部精度。在PC端Mind2Web与安卓端AITW基准上，仅使用屏幕截图的CogAgent超越了使用提取文本的纯语言模型方法，证明了智能体可以通过与人类相同的视觉通道感知数字世界。
+而近两年兴起的GUI智能体解决了这一问题，如CogAgent\citing{hong2024cogagent}。作为一个180亿参数的视觉语言模型，它直接从屏幕截图中理解GUI元素而无需HTML等结构化元数据。其核心是高低分辨率双分支架构：224×224低分辨率分支负责整体场景理解，1120×1120高分辨率分支通过交叉注意力精确识别细小文本与界面组件，在不显著增加计算开销的前提下兼顾全局感知与局部精度。在PC端Mind2Web与安卓端AITW基准上，仅使用屏幕截图的CogAgent超越了使用提取文本的纯语言模型方法，证明了智能体可以通过与人类相同的视觉通道感知数字世界。
 
-如果说GUI智能体的挑战在于理解平面界面，那么三维交互环境中的实时多模态决策则是更高的门槛——决策延迟与交互流畅性之间存在天然张力。Lumine\citing{tan2025lumine}首次实现了在这一约束下的突破：作为一个端到端的视觉-语言-动作模型，它在《原神》中以5Hz频率接收屏幕像素、30Hz频率输出键盘与鼠标操作，完成了小时级主线任务的实时通关。其关键创新是混合思考（hybrid thinking）策略——受认知科学双过程理论启发，智能体仅在遇到复杂决策或异常状态时才进入显式推理模式，在多数常规场景中直接输出动作，从而带来25.3倍的端到端延迟优化。Lumine采用三阶段递进式训练（1731小时人类数据预训练→200小时指令跟随→15小时推理数据），且仅在《原神》上训练的模型即可零样本泛化至《鸣潮》和《崩坏：星穹铁道》，证明了其习得的是真正的场景理解能力而非记忆。Game-TARS\citing{wang2025gametars}从大规模预训练维度提供了独立验证：在超过5000亿token的跨游戏数据上预训练后，其在Minecraft开放世界任务上的成功率约为先前最佳方法的两倍。
+三维空间的场景会比GUI更复杂，能够理解视觉元素和执行动作未必意味着能在三维空间中进行决策，由于三维空间决策要求模型具备空间理解和记忆能力，且三维空间中的动作也比GUI点击复杂得多。Lumine\citing{tan2025lumine}是一个解决该问题的重要实践。它是一个端到端视觉语言动作模型，在《原神》中以5Hz接收画面、30Hz输出键鼠操作，能实时通关小时级主线任务。其关键创新是混合思考（hybrid thinking）策略，受认知科学双过程理论启发，智能体仅在遇到复杂决策或异常状态时才进入显式推理模式，常规场景中直接输出动作，带来25.3倍的端到端延迟优化。Lumine采用三阶段递进式训练（1731小时人类数据预训练→200小时指令跟随→15小时推理数据），且仅在《原神》上训练的模型即可零样本泛化至《鸣潮》和《崩坏：星穹铁道》，证明其习得的是真正的场景理解能力而非记忆。Game-TARS\citing{wang2025gametars}从大规模预训练维度提供了独立验证：在超过5000亿token的跨游戏数据上预训练后，其在Minecraft开放世界任务上的成功率约为先前最佳方法的两倍。
 
-上述工作共同验证了一个对本课题具有支撑意义的命题：经过适当设计与训练的智能体，确实能够理解交互应用中的复杂视觉场景并在实时约束下做出多模态决策。
-
-在确立了智能体的感知与决策能力之后，如何将其嵌入有结构的交互流程是展览场景面临的下一个问题——展览互动不是无目的漫游，而需沿着预设的情感叙事线索推进。Phillips等人提出的目标导向交互框架\citing{phillips2025goal}为此提供了一种值得借鉴的思路：将交互场景建模为拼图图（puzzle graph）$G = (V, E)$，节点代表关键的情境里程碑，边代表合法的状态转移路径，状态转换由设计者为每条边预设的封闭式问题集$Q_{v \rightarrow v'}$驱动，如公式(\ref{eq:state})所示：
+这些工作共同验证了经过适当设计与训练的智能体能够理解复杂视觉场景并在实时约束下做出多模态决策。而交互应用场景不同于开放世界，系统状态需沿着预设的情感叙事线索推进。接下来的问题就是怎样将智能体的感知和决策能力嵌入有结构的交互流程。Phillips等人提出的目标导向交互框架\citing{phillips2025goal}提供了值得借鉴的思路：将交互场景建模为拼图图（puzzle graph）$G = (V, E)$，节点代表关键的情境里程碑，边代表合法的状态转移路径，状态转换由设计者为每条边预设的封闭式问题集$Q_{v \rightarrow v'}$驱动，如公式(\ref{eq:state})所示：
 
 \begin{equation}
 s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mid q \in Q_{v \rightarrow v'}\big\}\Big) = \text{True}
 \label{eq:state}
 \end{equation}
 
-其中$H_t$为截至当前的完整对话历史，QALM作为问答语言模型对问题集中的各项逐一评估，$\mathcal{L}$为设计者指定的逻辑聚合函数。该框架的核心思想在于将对话生成与状态追踪解耦，使叙事推进独立于自由对话。这一思路启发了本课题的系统架构：《回声之境》中，MediaPipe承担感知任务，VLM集中于推理与决策，情感状态图（迷茫$\rightarrow$锚定、碰撞$\rightarrow$边界、敬畏$\rightarrow$自由）则提供了结构化的叙事引导框架，其节点与边的组织方式与拼图图逻辑一致。
+其中$H_t$为截至当前的完整对话历史，QALM作为问答语言模型逐一评估问题集各项，$\mathcal{L}$为设计者指定的逻辑聚合函数。该框架的核心思想是将对话生成与状态追踪解耦，使叙事推进独立于自由对话。
 
-在多模态感知维度上，情感计算是展览交互中不可或缺的组成部分——智能体不仅需要理解“参展者做了什么”，还需感知“参展者处于何种情绪状态”。Thebaud等人\citing{thebaud2024multimodal}的实验表明，语音、文本与视觉三种模态的融合在所有核心情感维度上均一致优于单一模态。MiSTER-E等框架进一步采用专家混合架构\citing{durante2024agent}，通过门控机制根据信号可靠性动态调整模态权重，使系统在复杂环境中维持情感推断的稳定性。大语言模型还能结合交互历史推理情感的深层语义，从而在表层表情识别之上提供更精准的交互策略调整。
+在展览交互中，智能体不仅需要理解参展者所做行为，还要感知其情绪状态。Thebaud等人\citing{thebaud2024multimodal}的实验表明，语音、文本与视觉三种模态的融合在所有核心情感维度上均一致优于单一模态。MiSTER-E等框架进一步采用专家混合架构\citing{durante2024agent}，通过门控机制根据信号可靠性动态调整模态权重，使系统在复杂环境中维持情感推断的稳定性。大语言模型还能结合交互历史推理情感的深层语义，从而在表层表情识别之上提供更精准的交互策略调整。
 
-总体而言，从ReACT奠定的推理-行动范式，到CogAgent实现的视觉界面理解，再到Lumine与Game-TARS在实时三维交互中验证的多模态决策能力，最后到目标导向交互框架提供的结构化叙事设计方法，这些研究逐步让智能体成为感知、理解并回应参展者情感状态的交互伙伴。
 
 \chapter{需求分析与总体设计}
 
 \section{系统需求分析}
 
 \subsection{项目需求概述}
-随着多模态感知技术与大语言模型的快速发展，实体展览正从传统的静态展示向沉浸式交互体验转型。本课题旨在构建一套沉浸式多模态交互系统以及名为《回声之境》的交互应用。该系统融合手势识别、面部情绪分析与智能体，以情感状态变化驱动虚拟场景与物理装置的联动响应，引导参展者经历叙事化展览体验。 
+本课题旨在构建一套沉浸式多模态交互系统以及名为《回声之境》的交互应用。该系统融合手势识别、面部情绪分析与智能体，以情感状态变化驱动虚拟场景与物理装置的联动响应，引导参展者经历叙事化展览体验。 
 
 在功能性需求方面，该系统需要具有以下功能：
 
@@ -212,7 +209,7 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 在非功能性需求方面，该系统需要达到以下要求：
 
 \begin{enumerate}
-\item 架构灵活性与可扩展性。系统应采用松耦合的模块化架构，各功能模块通过统一的自定义JSON协议和TCP连接进行通信。当需要接入新的输入或输出模块时，例如语音、深度摄像头、MIDI键盘等，仅需实现协议即可完成扩展，无需大规模修改核心逻辑，从而降低迭代维护和推广到其他应用场景的成本。
+\item 架构灵活性与可扩展性。系统应采用松耦合的模块化架构，各功能模块通过统一的连接和协议进行通信。当需要接入新的输入或输出模块时，例如语音、深度摄像头、MIDI键盘等，仅需实现协议即可完成扩展，无需大规模修改核心逻辑，从而降低迭代维护和推广到其他应用场景的成本。
 \item 完善的调试工具。鉴于多模态链路长且包含模型黑盒，系统需内置完善的运行状态监控与调试工具，支持实时追踪智能体推理逻辑、回溯关键决策日志，并应提供专用的调试客户端进行指令模拟，以增强系统的鲁棒性。
 \item 延迟和性能要求。展览交互系统的沉浸感与流畅性直接依赖于系统的响应速度。多模态输入和输出的反馈应控制在100ms以内，而智能体推理决策的反馈应控制在10s以内，以提供流畅、即时的交互体验。
 \item 用户交互友好性。系统的交互设计需兼顾不同年龄、文化背景与技术熟悉度的参展者，确保交互界面直观易懂，操作流程自然流畅。
@@ -230,7 +227,8 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
   \label{fig:use-case}
 \end{figure}
 
-(1) 手势控制移动角色
+\begin{enumerate}
+\item 手势控制移动角色
 
 首先介绍手势交互控制旅人移动的用例。在人们日常生活中，手势往往是语言以外高效的信息传递方式——点名、问路时人们会下意识地用手指向所指代的物体，“所指”一词本身就包含了“指”这个字。因此，为发挥实体展览身体在场性的优势，手势输入必不可少。通过手指指向控制旅人行走，能够达成非常直观的交互感受。系统应在参展者食指伸直时，识别食指所指方向，并控制旅人沿此方向行走。其用例结构化描述如表\ref{tbl:usecase-gesture}所示。
 
@@ -239,15 +237,15 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 \caption{手势交互控制角色移动用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & 参展者、MediaPipe模块、Unity \\
+Actors & 参展者、交互系统 \\
 \hline
 Trigger & 参展者伸直食指指向某一方向 \\
 \hline
-Preconditions & 各模块已启动并处于正常工作状态，Unity交互应用处于可自由移动模式 \\
+Preconditions & 各模块已启动并处于正常工作状态，交互应用处于可自由移动模式 \\
 \hline
-Description & 参展者伸出食指指向目标方向；系统识别指向手势并解析所指方向；旅人角色沿参展者所指方向持续行走；摄像机平滑跟随角色移动 \\
+Description & 参展者伸出食指指向目标方向；系统识别指向手势并解析所指方向；角色沿参展者所指方向持续行走；摄像机平滑跟随角色移动 \\
 \hline
-Postconditions & 旅人角色位置持续更新至参展者所指方向 \\
+Postconditions & 角色位置持续更新至参展者所指方向 \\
 \hline
 Notes & 移动速度恒定，方向随手势连续变化实时更新；仅当食指伸直且其余四指弯曲时识别为指向手势；手势识别到角色响应的端到端延迟在100ms以内 \\
 \hline
@@ -255,22 +253,22 @@ Notes & 移动速度恒定，方向随手势连续变化实时更新；仅当食
 \label{tbl:usecase-gesture}
 \end{table}
 
-(2) 表情输入
+\item 表情输入
 
-在参观者和系统交互的过程中，随着叙事的走向或关卡的进展，参观者自然而然地会有各种各样的表情变化。最直观的例子是参观者表现出积极情绪时，交互应用的环境也可以相应地呈现出更多暖色，而当参观者沮丧的时候环境也可以变为冷色。更深入来看，当参观者困惑时，智能体如果也能感知到，那就可以释放更多的引导，交互体验更上一层楼。由此可见，将表情输入纳入输入模态之一，虽然没有涉及参观直接和系统之间的主动交互，但是其在塑造整个系统的沉浸式体验中至关重要。其用例描述如表\ref{tbl:usecase-expression}所示。
+在参观者和系统交互的过程中，随着叙事的走向或关卡的进展，参观者自然而然地会有各种各样的表情变化。最直观的例子是参观者表现出积极情绪时，交互应用的环境也可以相应地呈现出更多暖色，而当参观者沮丧的时候环境也可以变为冷色。更深入来看，当参观者困惑时，系统如果也能感知到，那就可以释放更多的引导，交互体验更上一层楼。由此可见，将表情输入纳入输入模态之一，虽然没有涉及参观直接和系统之间的主动交互，但是其在塑造整个系统的沉浸式体验中至关重要。其用例描述如表\ref{tbl:usecase-expression}所示。
 
 \begin{table}[h]
 \centering
 \caption{表情输入用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & 参展者、MediaPipe面部识别模块、EchoAgent \\
+Actors & 参展者、交互系统 \\
 \hline
 Trigger & 参展者面部处于摄像头视野内 \\
 \hline
-Preconditions & 摄像头与面部识别模块已初始化并正常工作 \\
+Preconditions & 已安装摄像头；交互系统的面部识别模块已启动 \\
 \hline
-Description & 参展者面部处于摄像头视野内，其自然表情变化被持续捕获；当表情发生显著变化时，系统将面部状态数据上报至EchoAgent；智能体据此更新对参展者当前情绪状态的内部表征 \\
+Description & 参展者面部处于摄像头视野内，其自然表情变化被持续捕获；当表情发生显著变化时，系统将面部状态数据更新对参展者当前情绪状态的内部表征 \\
 \hline
 Postconditions & 智能体获得参展者当前面部状态数据，更新内部情感上下文 \\
 \hline
@@ -280,22 +278,22 @@ Notes & 面部检测帧率不低于15fps；仅当表情变化幅度超过阈值�
 \label{tbl:usecase-expression}
 \end{table}
 
-(3) 与场景物体交互
+\item 与场景物体交互
 
-作为一款交互应用，参观者与场景物体交互是一项最基础的功能。参展者引导旅人接近场景中的可交互物体时，Unity应针对不同的物体做出反应。同时，交互系统自身也应该能够在智能体的命令控制下，主动与场景物体发起交互。应用中其用例描述如表\ref{tbl:usecase-interaction}所示。
+作为一款交互应用，参观者与场景物体交互是一项最基础的功能。交互应用内角色接近场景中的可交互物体时，交互应用应针对不同的物体做出不同反应。同时，交互系统自身也应该能够在智能体的命令控制下，主动与场景物体发起交互。应用中其用例描述如表\ref{tbl:usecase-interaction}所示。
 
 \begin{table}[h]
 \centering
 \caption{与场景物体交互用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & 参展者、Unity交互应用、EchoAgent \\
+Actors & 参展者、交互系统 \\
 \hline
 Trigger & 旅人角色进入场景中可交互物体的触发范围或智能体判断情境满足主动发起物体交互条件 \\
 \hline
-Preconditions & Unity交互应用正常运行，旅人角色处于可移动状态，场景物体已加载 \\
+Preconditions & 交互应用正常运行，旅人角色处于可移动状态，场景物体已加载 \\
 \hline
-Description & 参展者引导旅人接近场景中的可交互物体；系统检测角色与物体接触后触发对应的交互效果，如收集音符、激活机关或触发叙事事件；场景状态与交互进度随之更新；EchoAgent主动发送命令与场景物体交互 \\
+Description & 参展者引导旅人接近场景中的可交互物体；系统检测角色与物体接触后触发对应的交互效果，如收集音符、激活机关或触发叙事事件；场景状态与交互进度随之更新；交互系统主动发送命令与场景物体交互 \\
 \hline
 Postconditions & 场景物体交互状态更新 \\
 \hline
@@ -305,49 +303,49 @@ Notes & 不同物体触发不同的交互效果，所有交互事件通过统一
 \label{tbl:usecase-interaction}
 \end{table}
 
-(4) 智能体场景理解
+\item 智能体场景理解
 
-上述感知输入最终汇聚至EchoAgent，由智能体完成跨模态的语义整合与意图推理。智能体将多源感知数据与当前叙事状态统一考量，综合判断参展者的行为意图与情感趋向，生成结构化的决策输出。其用例描述如表\ref{tbl:usecase-understanding}所示。
+为了使交互系统能够对参观者的行为以及当前交互应用内部的状态做出动态反馈，应该有一个智能体可以接收应用内的场景截图和摄像头的画面，然后给出对场景内容的语义描述。其用例描述如表\ref{tbl:usecase-understanding}所示。
 
 \begin{table}[h]
 \centering
 \caption{智能体场景理解用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & EchoAgent、MediaPipe模块、Unity交互应用 \\
+Actors & 交互系统 \\
 \hline
-Trigger & 智能体接收到来自感知层的多源数据更新（手势、表情、场景事件） \\
+Trigger & 智能体接收到场景画面 \\
 \hline
-Preconditions & 感知层各模块正常运行，智能体通信链路畅通，叙事状态机已初始化 \\
+Preconditions & 智能体通信链路畅通 \\
 \hline
-Description & 智能体汇集手势指向、表情变化与场景交互事件等多源信息；综合当前叙事状态进行意图推理与情感判断，评估是否触发状态转移；根据推理结果确定交互策略——调整场景视觉参数、切换灯光氛围或推进叙事状态；生成结构化的决策输出供执行端使用 \\
+Description & 系统向智能体发送当前场景画面；智能体对画面内容进行语义理解，输出场景中可交互物体、空间布局等结构化描述 \\
 \hline
-Postconditions & 智能体完成场景状态理解，生成决策输出（目标视觉参数、灯光模式、叙事状态更新） \\
+Postconditions & 智能体输出场景内容的语义描述 \\
 \hline
-Notes & 智能体基于VLM的视觉--语言联合推理完成多模态理解；内部保留近期关键交互历史作为上下文 \\
+Notes & 智能体基于VLM的视觉语言能力完成场景理解 \\
 \hline
 \end{tabularx}
 \label{tbl:usecase-understanding}
 \end{table}
 
-(5) 发送控制命令
+\item 发送控制命令
 
-发送控制命令这个用例由开发者和交互系统共享。对于智能体而言，其完成场景理解与决策后，需将决策结果转化为各反馈端可解析的控制指令。指令分别下发至Unity交互应用与灯光控制器，Unity据此更新场景渲染参数与叙事状态，灯光控制器据此更新实体灯阵的模式与颜色。而为了系统可调试，也应该允许开发者手动发送控制命令以介入交互系统的状态控制。其用例描述如表\ref{tbl:usecase-command}所示。
+发送控制命令这个用例由开发者和交互系统共享。对于智能体而言，其完成场景理解与决策后，需将决策结果转化为各反馈端可解析的控制指令。指令分别下发至交互应用与灯光控制端，交互应用据此更新场景渲染参数与叙事状态，灯光控制端据此更新实体灯阵的模式与颜色。而为了系统可调试，也应该允许开发者手动发送控制命令以介入交互系统的状态控制。其用例描述如表\ref{tbl:usecase-command}所示。
 
 \begin{table}[h]
 \centering
 \caption{发送控制命令用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & EchoAgent、Unity交互应用、树莓派灯光控制器 \\
+Actors & 交互系统 \\
 \hline
 Trigger & 智能体生成决策输出，需要向反馈端下发指令 \\
 \hline
 Preconditions & 智能体与各反馈端通信链路正常，决策输出已生成 \\
 \hline
-Description & 智能体将决策结果转化为各反馈端可解析的控制指令；指令分别下发至Unity与灯光控制器；Unity据此更新场景渲染参数与叙事状态；灯光控制器据此更新LED灯阵的模式与颜色 \\
+Description & 系统将决策结果转化为各反馈端可解析的控制指令；指令分别下发至交互应用与灯光控制端；交互应用据此更新场景渲染参数与叙事状态；灯光控制端据此更新LED灯阵的模式与颜色 \\
 \hline
-Postconditions & Unity场景状态与灯光控制器状态按指令更新 \\
+Postconditions & 场景状态与灯光状态按指令更新 \\
 \hline
 Notes & 指令采用统一的结构化格式，各执行端按约定字段解析 \\
 \hline
@@ -355,22 +353,22 @@ Notes & 指令采用统一的结构化格式，各执行端按约定字段解析
 \label{tbl:usecase-command}
 \end{table}
 
-(6) 动态视觉生成
+\item 动态视觉生成
 
-Unity场景设计有山峦的抖动与固化、建筑的舒展与扭曲、潮水的涨落与光点浮动这些视觉元素会随参数变化而动态演变；画面色调与后期效果也可根据情绪倾向相应调整，使整体氛围与当前情感基调保持一致。所有视觉变化以平滑过渡方式呈现，避免突变造成的视觉割裂。其用例描述如表\ref{tbl:usecase-visual}所示。
+交互应用场景设计有山峦的抖动与固化、建筑的舒展与扭曲、潮水的涨落，这些视觉元素会随参数变化而动态演变；画面后期效果也可根据情绪倾向相应调整，使整体氛围与当前情感基调一致。其用例描述如表\ref{tbl:usecase-visual}所示。
 
 \begin{table}[h]
 \centering
 \caption{动态视觉生成用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & Unity交互应用、EchoAgent \\
+Actors & 交互系统 \\
 \hline
-Trigger & Unity接收到智能体下发的视觉参数更新指令 \\
+Trigger & 系统接收到视觉参数更新指令 \\
 \hline
-Preconditions & Unity交互应用正常运行，场景资源已加载 \\
+Preconditions & 交互应用正常运行，场景资源已加载 \\
 \hline
-Description & Unity接收智能体下发的视觉参数更新；实时驱动场景视觉元素的动态变化——山峦色彩改变、建筑扭曲等；画面色调与后期效果根据情绪倾向相应调整；所有视觉变化以平滑过渡方式呈现，避免突变 \\
+Description & 系统接收视觉参数更新；实时驱动场景视觉元素的动态变化——山峦色彩改变、建筑扭曲等；画面色调与后期效果根据情绪倾向相应调整；所有视觉变化以平滑过渡方式呈现，避免突变 \\
 \hline
 Postconditions & 虚拟场景视觉呈现更新至与当前情绪状态和叙事进度匹配 \\
 \hline
@@ -380,20 +378,20 @@ Notes & 视觉过渡过程平滑自然，画面帧率保持在可交互水平；
 \label{tbl:usecase-visual}
 \end{table}
 
-(7) 虚实联动灯光控制
+\item 虚实联动灯光控制
 
-实体空间中的灯光设计上与虚拟场景保持一致的变化。灯光控制器运行在树莓派上，应当根据控制命令做出对应的灯光变化。其用例描述如表\ref{tbl:usecase-light}所示。
+实体空间中的灯光设计上与虚拟场景保持一致的变化。灯光控制端根据控制命令做出对应的灯光变化。其用例描述如表\ref{tbl:usecase-light}所示。
 
 \begin{table}[h]
 \centering
 \caption{虚实联动灯光控制用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & EchoAgent、树莓派灯光控制器、WS2812 LED灯阵 \\
+Actors & 交互系统 \\
 \hline
-Trigger & 树莓派灯光控制器收到控制命令 \\
+Trigger & 灯光控制端收到控制命令 \\
 \hline
-Preconditions & 树莓派通信正常，LED灯阵电源接通 \\
+Preconditions & 通信正常，LED灯阵电源接通 \\
 \hline
 Description & 开发者主动发送灯光控制命令；灯光控制器接收指令并驱动LED灯阵执行对应效果；实体展览空间的灯光氛围与虚拟场景保持协调一致 \\
 \hline
@@ -405,7 +403,7 @@ Notes & 灯光变化延迟在200ms以内 \\
 \label{tbl:usecase-light}
 \end{table}
 
-(8) 调取日志记录
+\item 调取日志记录
 
 多模态链路长且包含模型黑盒，系统需内置完善的调试与监控能力。因此系统在运行时保留所有的日志记录以便开发者随时调取，可在系统运行出现错误时溯源，也用于展览运行期间的状态监控。其用例描述如表\ref{tbl:usecase-log}所示。
 
@@ -414,7 +412,7 @@ Notes & 灯光变化延迟在200ms以内 \\
 \caption{调取日志记录用例结构化描述}
 \begin{tabularx}{\linewidth}{|c|X|}
 \hline
-Actors & 开发者/调试客户端、EchoAgent \\
+Actors & 开发者、交互系统 \\
 \hline
 Trigger & 开发者调取日志记录 \\
 \hline
@@ -429,10 +427,19 @@ Notes & 日志按模块和时间戳索引 \\
 \end{tabularx}
 \label{tbl:usecase-log}
 \end{table}
+\end{enumerate}
 
 \section{系统概要设计}
 
 \subsection{总体架构}
+
+整个系统分为多个部分，首先是最基本的，也就是整个交互应用内部的设计，这其实和传统的电子游戏的设计是一脉相承的。经由前期的调查，本设计选用了Unity引擎作为交互应用载体。
+
+而由于多模态交互是整个课题核心，智能体在其中也非常重要。本设计在前期评估了Smolagents、LlamaIndex和DeepAgents三种AI智能体框架，并选用了DeepAgents框架。DeepAgents基于LangChain开发，但更易于使用、且含内置工具和自动记忆管理能力，选用它既利用了LangChain的强大生态，也简化了智能体的开发实现。
+
+手势和表情识别的部分，本系统选用Google推出的MediaPipe解决方案。通过调用计算机连接的摄像头连续捕捉画面帧，每一帧同时送给负责手势和表情识别的轻量化端侧模型识别出关键点、手势类别、面部混合形状预测系数。
+
+实体灯光装置部分设计采用WS2812B可编程灯带。这款灯带可以接入PWM控制器，以高帧率刷新，且每一个灯珠都可以分别控制RGB色彩值，非常适合作为实时可控的灯光输出。而笔者正好有一个Raspberry Pi 5开发板，而Raspberry Pi的GPIO也正好也支持PWM输出，且生态成熟，因此就使用Raspberry Pi作为灯光控制客户端。
 
 \begin{figure}[htbp]
   \centering
@@ -441,33 +448,28 @@ Notes & 日志按模块和时间戳索引 \\
   \label{fig:system-arch}
 \end{figure}
 
-以上述需求为指导，本系统最终形成了如图\ref{fig:system-arch}所示的“感知—理解—反馈”三层架构。理解层由EchoAgent与TCP服务端组成，是系统的通信中枢与决策核心，感知层与反馈层均以TCP客户端接入。感知层负责采集多源数据并上报，反馈层负责接收决策指令并执行。MediaPipe客户端归属感知层，树莓派客户端归属反馈层，Unity客户端则同时属于感知与反馈两层。
+由此，本系统形成了如图\ref{fig:system-arch}所示的“感知—理解—反馈”三层架构。理解层由EchoAgent与TCP服务端组成，是系统的通信中枢与决策核心，感知层与反馈层均以TCP客户端接入。感知层负责采集多源数据并上报，反馈层负责接收决策指令并执行。MediaPipe客户端归属感知层，Raspberry Pi客户端归属反馈层，Unity客户端则同时属于感知与反馈两层。
 
-感知层、TCP服务端和EchoAgent之间以生产者-消费者模式设计，即感知层的每个模块各自的TCP客户端都会把实时产生的交互数据发送到TCP服务端。EchoAgent每隔一个固定间隔（默认设置5s）查阅一次消息，而TCP服务端同时也可以跳过EchoAgent直接处理一些简单的命令转发。
+感知层、TCP服务端和EchoAgent之间以生产者-消费者模式设计，即感知层的每个模块各自的TCP客户端都会把实时产生的交互数据发送到TCP服务端。EchoAgent每隔固定间隔查阅消息，而TCP服务端同时也可以跳过EchoAgent直接处理一些简单的命令转发。
 
 系统以理解层为中枢构成星型拓扑，新增感知或反馈模块也只需以相同协议的TCP客户端接入，无需修改系统的核心逻辑。
 
 
-
 \subsection{自定义TCP通信协议设计}
 
-在协议格式的设计过程中，本系统经历了从二进制协议到JSON文本协议的演进历程。
+前文所述的整体架构实现了很好的职能分离，却也带来了一个很大的问题。系统的不同模块分处不同的逻辑循环中，甚至灯光控制模块由于要使用Raspberry Pi运行，而Raspberry Pi的性能不可能足以支撑高性能三维图形渲染，因此与Unity客户端必定分处不同硬件。所以要想真正实现这套架构，就必须设计一种与硬件平台和编程语言都无关的通信协议。在总体架构中所设计的TCP服务端和TCP客户端就是为了统一地实现这些模块之间的通信。
 
-\textbf{（1）二进制协议方案}：早期设计采用长度前缀结合消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。该方案在理论上具有最高的解析效率，但在实际开发中暴露出两个问题：其一，图片数据与文本数据采用完全不同的编码路径，处理混合类型消息时需要额外的类型判断与解码逻辑，增加了开发复杂度；其二，二进制格式无法在开发阶段直接阅读，调试与问题定位均较为困难。
+在前期开发和测试中，笔者对比了 TCP Socket 和 Websocket，发现TCP Socket更多运用在后端、游戏服务器等、且性能较高，而Websocket是基于HTTP协议升级而来的应用层协议，为浏览器环境设计。考虑到交互系统中包含Unity以及Raspberry Pi这样的特殊设备，就最终使用了TCP Socket实现各模块的统一通信。
 
-\textbf{（2）JSON文本协议方案}：基于上述实践经验，本系统最终采用“4字节大端序长度前缀 + UTF-8编码JSON载荷”的协议格式。发送端将JSON对象序列化为UTF-8字节序列，计算其长度并以大端序写入前4字节，随后写入载荷；接收端据此解析，确保TCP流式传输中消息边界的正确划分。该协议将所有数据统一封装为JSON对象，核心字段定义如下：
+光确定TCP Socket还不够，要实现通信，我们还需要约定一种消息的格式。
 
-\begin{itemize}
-\item \texttt{type}：消息类型，取值为 \texttt{text}（普通文本消息）、\texttt{image}（Base64编码的图片数据）、\texttt{command}（控制命令）、\texttt{register}（客户端注册）
-\item \texttt{data}：载荷内容——文本消息时为UTF-8字符串，图片消息时为Base64编码的二进制数据，command类型时为具体命令名称
-\item \texttt{client\_type}：发送者身份标识，取值包括 \texttt{unity}、\texttt{mediapipe}、\texttt{raspberry\_pi}、\texttt{debug} 四种。客户端在注册时通过此字段声明自身类别，服务端据此维护已连接客户端的注册表
-\item \texttt{request\_id}：请求追踪标识，采用UUID格式。当命令需要响应时，发起方携带此字段，响应方须原样回传以关联请求—响应对
-\item \texttt{relay\_to}：直接转发标识。若消息中包含此字段，服务端不再将消息投入智能体队列，而是直接转发至目标客户端，实现低延迟的客户端间直连通信
-\end{itemize}
+在最初的原型验证中，设计采用长度前缀结合消息类型的二进制协议格式，具体结构为：4字节大端序无符号整数表示载荷长度，1字节无符号整数表示消息类型（\texttt{0x00=TEXT}、\texttt{0x01=IMAGE}、\texttt{0x02=COMMAND}、\texttt{0x03=REGISTER}），其后为载荷数据。
 
-其中，\texttt{register}类型具有特定的语义约定：该类型仅由客户端向服务端发起。当客户端首次连接到服务端时，须发送一条\texttt{register}类型消息并携带\texttt{client\_type}字段标识自身类别。服务端在收到注册消息后记录该连接的身份信息，后续该连接发送的消息无需重复携带\texttt{client\_type}，服务端将自动补充发送者身份。
+这种架构看似十分优雅，然则在实际使用中，由于图片消息和文本消息采用了完全不同的编码格式，导致智能体搭建以及后期处理变得十分繁琐，且使得调试难度较大。因此在正式的实现中，本系统弃用了二进制协议，转而采用“长度前缀 + UTF-8编码JSON”的协议格式。发送端将JSON对象序列化为UTF-8字节序列，计算其长度并以大端序写入前4字节，随后写入载荷；接收端据此解析，确保TCP流式传输中消息边界的正确划分。由于使用了统一的JSON对象，所以图片消息也要编码为Base64。Base64虽然会给图片数据带来约33\%的数据膨胀，但在本机和局域网环境下带宽和延迟都不是瓶颈。
 
-JSON文本协议具有三方面优势：文本形式便于开发阶段的调试与日志分析；统一的数据封装方式简化了协议解析逻辑；Base64编码虽然增加了约33\%的数据体积，但换取了协议的一致性与可维护性。考虑到本系统运行于本机与局域网环境下，网络带宽充足且延迟极低（通常低于5ms），上述开销在实际使用中完全可接受。表\ref{tbl:protocol-examples}按消息类型给出了四种典型场景下的协议使用实例。
+JSON对象中一共设计有五个字段，分别为\texttt{type}、\texttt{data}、\texttt{client\_type}、\texttt{request\_id}和\texttt{relay\_to}。其中，\texttt{type}取值可选text、image、command、register。text用于发送普通的信息或对话，image用于发送base64编码的数据，command用于发送一些特定请求，例如智能体请求Unity客户端发送截图，register用于其他客户端向 TCP服务器请求注册。\texttt{client\_type}用来标明发送者身份。当type为register时，必须携带\texttt{client\_type}；当type为command时，必须携带\texttt{request\_id}；当text或image携带\texttt{request\_id}时，表示其是回应某个之前的command。
+
+表\ref{tbl:protocol-examples}按消息类型给出了四种典型场景下的协议使用实例。
 
 \begin{table}[h]
 \centering
@@ -480,7 +482,7 @@ JSON文本协议具有三方面优势：文本形式便于开发阶段的调试�
 \hline
 Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
 \hline
-截图响应（带请求追踪） & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
+截图响应 & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
 \hline
 客户端间直接转发 & \texttt{\{"type": "text", "client\_type": "mediapipe", "data": "hand\_pos:0.5,0.3", "relay\_to": "unity"\}} \\
 \hline
@@ -492,7 +494,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 \subsection{功能模块设计}
 \label{sec:module-design}
 
-以上述三层架构为框架，系统划分为四个核心功能模块：EchoAgent智能体模块、MediaPipe感知模块、Unity客户端模块与树莓派灯光控制模块，另有一个TCP服务端模块承担通信中枢职责。各模块具有明确的职责边界、内部结构与对外接口，其所依赖的关键技术蕴含在模块内部设计之中。本节依次阐述各模块的设计要点。
+系统划分为四个核心功能模块：EchoAgent智能体和TCP服务端模块、MediaPipe感知模块、Unity客户端模块与Raspberry Pi灯光控制模块。各模块具有明确的职责边界、内部结构与对外接口，其所依赖的关键技术蕴含在模块内部设计之中。本节依次阐述各模块的设计要点。
 
 
 \subsubsection{EchoAgent智能体和TCP服务端模块}
@@ -501,7 +503,7 @@ TCP服务端与EchoAgent运行于同一进程，也是统一设计的。
 
 首先，服务端在固定端口上监听连接，每个客户端首次连接时须发送注册消息声明自身类别（unity、mediapipe、raspberry\_pi或debug四种），服务端据此将连接与身份绑定并维护已注册客户端表，后续消息发送时按类型匹配目标连接，无需每条消息携带身份标识。
 
-标记为直转（relay\_to）的消息不经智能体队列，由服务端直接转发至目标客户端，实现毫秒级的客户端间直连——典型场景为MediaPipe将指向方向数据中继至Unity驱动角色移动，要求端到端延迟在100ms以内；普通消息则写入消息队列，交由EchoAgent处理。这一双通路设计在延迟敏感的实时控制与需要语义理解的高层决策之间取得了平衡。在拓扑结构上，所有客户端均以TCP Client身份接入服务端，彼此不直接建立连接，新增感知通道或反馈设备仅需实现协议即可接入，无需修改核心逻辑，保证了系统的可扩展性。
+标记为直转（relay\_to）的消息不经智能体队列，由服务端直接转发至目标客户端，实现毫秒级的客户端间直连——典型场景为MediaPipe将指向方向数据中继至Unity驱动角色移动，要求端到端延迟在100ms以内；普通消息则写入消息队列，交由EchoAgent处理。这一双通路设计在延迟敏感的实时控制与需要语义理解的高层决策之间取得了平衡。在拓扑结构上，所有客户端均以TCP Client身份接入服务端，新增感知通道或反馈设备仅需实现协议即可接入，无需修改核心逻辑，保证了系统的可扩展性。
 
 EchoAgent是理解层的认知核心，从共享消息队列中批量获取多源感知数据，经大语言模型综合推理后，自主选择并调用工具函数生成控制决策。
 
@@ -530,7 +532,7 @@ EchoAgent通过LangChain的\texttt{@tool}装饰器定义了五个工具函数，
 
 \item \textbf{\texttt{request\_unity\_screenshot}}：请求Unity客户端截取当前画面并回传。无参数，内部向Unity客户端发送\texttt{request:screenshot}指令，Unity端执行截图后以Base64编码的JPEG图像回传至智能体，智能体在下一轮轮询中将其作为多模态上下文的一部分进行分析。
 
-\item \textbf{\texttt{control\_lights}}：控制实体LED灯阵。参数为\texttt{mode}（灯光模式：\texttt{chase}循环点亮、\texttt{solid}实色、\texttt{rainbow}彩虹渐变、\texttt{breathing}呼吸，以及\texttt{gain\_note}/\texttt{play\_note}音符联动反馈）、\texttt{color}（\texttt{solid}模式的颜色，如\texttt{warm\_amber}、\texttt{cool\_blue}等）与\texttt{note}（音符反馈模式下的音符名称：\texttt{waterdrop}、\texttt{crossing}、\texttt{tide}、\texttt{breeze}）。内部构造\texttt{lights:mode[:color][:note]}格式指令，经TCP发送至树莓派。
+\item \textbf{\texttt{control\_lights}}：控制实体LED灯阵。参数为\texttt{mode}（灯光模式：\texttt{chase}循环点亮、\texttt{solid}实色、\texttt{rainbow}彩虹渐变、\texttt{breathing}呼吸，以及\texttt{gain\_note}/\texttt{play\_note}音符联动反馈）、\texttt{color}（\texttt{solid}模式的颜色，如\texttt{warm\_amber}、\texttt{cool\_blue}等）与\texttt{note}（音符反馈模式下的音符名称：\texttt{waterdrop}、\texttt{crossing}、\texttt{tide}、\texttt{breeze}）。内部构造\texttt{lights:mode[:color][:note]}格式指令，经TCP发送至Raspberry Pi。
 
 \item \textbf{\texttt{play\_music}}：控制交互应用中的音乐与音频播放。参数\texttt{action}为\texttt{"类别:操作"}格式字符串——演奏音符（\texttt{play\_note:waterdrop}等）或切换情绪背景音乐（\texttt{set\_mood:calm/tense/warm}）。内部封装为\texttt{music:action}指令发送至Unity。
 
@@ -559,9 +561,9 @@ AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化�
 
 在视觉生成方面，模块基于Shader Graph构建非真实感渲染着色器，暴露抖动速度、抖动强度、菲涅尔颜色等Uniform参数，供EchoAgent通过控制指令动态调整。着色器利用菲涅尔效应、顶点噪声偏移与GPU Instancing等技术，在维持交互帧率的前提下实现半透明抖动山峦、风格化草地摆动与体积雾等动态视觉效果。视觉参数可随情绪状态变化而调整——例如低强度冷色调对应迷茫氛围，暖色调对应锚定氛围——使画面风格与情感叙事同步演进。在相机控制方面，模块基于State Driven Camera机制，将交互流程中的不同阶段映射为Idle、Following、TopShowing、Showing四种虚拟相机机位；机位切换由动画状态机驱动，其中Following机位沿预设样条曲线运动并保持注视目标，实现影视化的镜头调度。
 
-\subsubsection{树莓派灯光控制模块}
+\subsubsection{Raspberry Pi灯光控制模块}
 
-树莓派模块居于反馈层，负责将智能体的灯光决策转化为实体空间的光影变化。模块运行于树莓派5之上，通过GPIO引脚输出控制信号，驱动64颗WS2812可编程RGB LED灯珠；灯珠沿四个音符图标外轮廓物理排布，各音符对应一段连续灯珠区间，由音符—灯珠索引映射表维护对应关系。
+Raspberry Pi模块居于反馈层，负责将智能体的灯光决策转化为实体空间的光影变化。模块运行于Raspberry Pi 5之上，通过GPIO引脚输出控制信号，驱动64颗WS2812B可编程RGB LED灯珠；灯珠沿四个音符图标外轮廓物理排布，各音符对应一段连续灯珠区间，由音符—灯珠索引映射表维护对应关系。
 
 模块支持两类灯光模式。基础模式中，追逐（chase）效果使光点循环移动，利用视觉暂留形成流动观感；呼吸（breathing）效果以三角波函数驱动全带灯珠同步明暗起伏；彩虹追逐（rainbow）效果维护多个色相各异的光点，各自拖曳渐暗拖尾，色相缓慢旋转产生流动的彩虹效果。色彩控制采用HLS颜色空间，将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。音符联动模式直接根据音符—灯珠索引映射定位对应灯珠：gain\_note点亮目标区间，play\_note在点亮基础上叠加短暂闪烁序列，形成与虚拟场景中音符演奏同步的视觉伴随反馈。动态模式运行于独立线程，每次切换模式时先终止上一线程再启动新效果，保证模式切换即时响应且不阻塞指令接收。
 
@@ -616,7 +618,7 @@ AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化�
 \label{tbl:command-table}
 \end{table}
 
-从表\ref{tbl:command-table}可见，命令体系完整覆盖了四类客户端之间的交互需求：MediaPipe与Unity之间通过\texttt{input:}前缀命令实现手势到输入的映射；EchoAgent通过\texttt{request:screenshot}主动感知系统运行状态，并通过\texttt{input:cancel}与\texttt{input:navigate}干预交互流程；灯光控制命令以无前缀的简洁形式直接驱动树莓派；音符反馈命令（\texttt{gain\_note}、\texttt{drop\_note}、\texttt{play\_note}）则实现了Unity虚拟事件到物理灯光的实时联动。
+从表\ref{tbl:command-table}可见，命令体系完整覆盖了四类客户端之间的交互需求：MediaPipe与Unity之间通过\texttt{input:}前缀命令实现手势到输入的映射；EchoAgent通过\texttt{request:screenshot}主动感知系统运行状态，并通过\texttt{input:cancel}与\texttt{input:navigate}干预交互流程；灯光控制命令以无前缀的简洁形式直接驱动Raspberry Pi；音符反馈命令（\texttt{gain\_note}、\texttt{drop\_note}、\texttt{play\_note}）则实现了Unity虚拟事件到物理灯光的实时联动。
 
 \subsection{实体展览环境设计}
 
@@ -624,10 +626,9 @@ AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化�
 
 \textbf{技能图标实体化}：将交互应用中的四个音符图标实体化，使用松木板制作展览实物。图标图案采用矢量绘图工具Affinity绘制贝塞尔曲线构建流畅的音符轮廓线条粘贴至木板上，配合装饰性麻绳串联固定于展台。实体图标与交互应用内的点亮状态保持同步，当参展者在交互应用中演奏音符时，对应图标同步亮起LED灯效。
 
-\textbf{灯光控制系统}：灯条采用WS2812可编程RGB LED灯带，具有单点可控、色彩丰富、响应速度快的特点。灯带由树莓派通过PWM（脉冲宽度调制）信号控制，树莓派作为TCP Client连接至智能体服务端，接收来自智能体的灯光控制指令，改变颜色、亮度和闪烁模式，实时驱动灯带产生与虚拟场景同步的动态光影效果。
+\textbf{灯光控制系统}：灯条采用WS2812B可编程RGB LED灯带，具有单点可控、色彩丰富、响应速度快的特点。灯带由Raspberry Pi通过PWM（脉冲宽度调制）信号控制，Raspberry Pi作为TCP Client连接至智能体服务端，接收来自智能体的灯光控制指令，改变颜色、亮度和闪烁模式，实时驱动灯带产生与虚拟场景同步的动态光影效果。
 
-\textbf{信号传递流程}：实体装置的信号链路为：MediaPipe/Unity感知模块 → TCP上报 → 智能体决策 → TCP下发控制指令 → 树莓派PWM驱动LED。树莓派接收到控制指令后，通过Python的rpi-ws281x库将PWM信号转换为LED灯带的显示效果，实现从虚拟场景到实体空间的跨媒介联动。
-
+\textbf{信号传递流程}：实体装置的信号链路为：MediaPipe/Unity感知模块 → TCP上报 → 智能体决策 → TCP下发控制指令 → Raspberry PiPWM驱动LED。Raspberry Pi接收到控制指令后，通过Python的rpi-ws281x库将PWM信号转换为LED灯带的显示效果，实现从虚拟场景到实体空间的跨媒介联动。
 
 
 \section{《回声之境》应用设计}
@@ -635,7 +636,7 @@ AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化�
 
 \subsection{立题立意}
 
-《回声之境》以叙事性交互为核心特征，伴随参展者情绪变化与章节推进，在不同阶段营造差异化的场景情绪基调。各场景内，旅人的音符音色、音阶与背景音乐的调式保持和声协调，力求营造富有诗意的沉浸式参观体验。
+《回声之境》交互应用为叙事性质，伴随着玩家情绪变化和游戏节奏的推进，我在游戏的不同阶段设计了不同情绪基调的场景。在每一个场景内，旅人的音符音色和音阶会适应场景而变化。力求做到富有诗意的参观体验，题名沉浸感即从此而来。
 
 叙事结构与手法方面，《回声之境》以旅人的旅程为叙事主线，隐喻个体从自我迷茫走向全然自由的成长历程，围绕自我认知、人际边界与知识接纳三层命题展开。交互应用依此设置三个章节——初域·未定之原、聚落群·彼方的光影之城、深流之径·未被触及的知识海——三者在情感基调与交互机制上层层递进。
 
@@ -729,15 +730,15 @@ AgentCommunicator承担Unity端的TCP客户端角色，确保发送侧串行化�
 
 第一章的核心交互——手势指向移动——在系统层面由MediaPipe手势识别子模块、TCP中继通道与Unity VirtualAgentDevice输入子模块三者串联实现：食指指向方向经三层检测逻辑提取后，以\texttt{input:move}指令中继至Unity，注入Input System管线驱动旅人沿指向方向行走，端到端延迟控制在100ms以内。标题消散由双手挥散检测（MediaPipe端）经AgentCommunicator校验面部在场后触发EchoTitle动画，涉及MediaPipe手势与面部两个子模块、TCP服务端中继机制及Unity GameStateManager的状态编排。山峦的半透明抖动与固化视觉效果由Unity动态视觉生成子模块承担——着色器的菲涅尔边缘光与顶点噪声偏移参数随情绪状态变化而调整，固化过程的视觉过渡由GameStateManager的状态变迁事件触发。
 
-第二章的核心交互——情绪折射与共鸣——在系统层面由MediaPipe面部识别子模块与EchoAgent智能体模块协同完成。面部形变系数经双重节流后上报至智能体，EchoAgent结合叙事上下文进行情绪语义推理，判定参展者当前的情绪强度与倾向后，通过\texttt{send\_to\_client}工具向Unity下发视觉参数调整指令，驱动建筑形态的舒展与扭曲。共鸣系统的动作同步率检测由MediaPipe手势识别子模块承担，同步达标后EchoAgent调用\texttt{play\_music}工具触发音乐反馈，同时通过\texttt{control\_lights}工具驱动树莓派灯光控制模块切换灯光氛围。边界保护机制则依赖MusicNoteController协调音符状态，并通过AgentCommunicator同步通知树莓派端触发相应灯光效果。
+第二章的核心交互——情绪折射与共鸣——在系统层面由MediaPipe面部识别子模块与EchoAgent智能体模块协同完成。面部形变系数经双重节流后上报至智能体，EchoAgent结合叙事上下文进行情绪语义推理，判定参展者当前的情绪强度与倾向后，通过\texttt{send\_to\_client}工具向Unity下发视觉参数调整指令，驱动建筑形态的舒展与扭曲。共鸣系统的动作同步率检测由MediaPipe手势识别子模块承担，同步达标后EchoAgent调用\texttt{play\_music}工具触发音乐反馈，同时通过\texttt{control\_lights}工具驱动Raspberry Pi灯光控制模块切换灯光氛围。边界保护机制则依赖MusicNoteController协调音符状态，并通过AgentCommunicator同步通知Raspberry Pi端触发相应灯光效果。
 
-第三章的核心交互——知识潮渐进与自由探索——在系统层面涉及最完整的模块链。知识碎片的收集进度由Unity GameStateManager追踪，潮水上涨的视觉变化由动态视觉生成子模块执行；海浪音符解锁后，EchoAgent的\texttt{control\_lights}与\texttt{play\_music}工具同时驱动灯光模式切换与音乐变奏；自由探索阶段四个音符的演奏分别触发对应的视觉形态变化（Shader Uniform参数调整）、音效反馈（音乐播放控制工具）与实体灯光伴随效果（树莓派灯光控制模块的\texttt{gain\_note}/\texttt{play\_note}联动），虚拟画面与物理光影在同一指令下保持严格同步，形成虚实联动的完整交互闭环。
+第三章的核心交互——知识潮渐进与自由探索——在系统层面涉及最完整的模块链。知识碎片的收集进度由Unity GameStateManager追踪，潮水上涨的视觉变化由动态视觉生成子模块执行；海浪音符解锁后，EchoAgent的\texttt{control\_lights}与\texttt{play\_music}工具同时驱动灯光模式切换与音乐变奏；自由探索阶段四个音符的演奏分别触发对应的视觉形态变化（Shader Uniform参数调整）、音效反馈（音乐播放控制工具）与实体灯光伴随效果（Raspberry Pi灯光控制模块的\texttt{gain\_note}/\texttt{play\_note}联动），虚拟画面与物理光影在同一指令下保持严格同步，形成虚实联动的完整交互闭环。
 
-综上所述，三章的交互设计既各自侧重不同的模块组合，又共用同一套“感知—理解—反馈”架构：MediaPipe模块持续承担手势与表情的感知角色，EchoAgent模块负责跨模态理解与决策，Unity模块输出虚拟视觉与音效反馈，树莓派模块将变化延伸至实体空间。这种设计使叙事内容与系统框架之间形成了相互支撑而非彼此独立的关系。
+综上所述，三章的交互设计既各自侧重不同的模块组合，又共用同一套“感知—理解—反馈”架构：MediaPipe模块持续承担手势与表情的感知角色，EchoAgent模块负责跨模态理解与决策，Unity模块输出虚拟视觉与音效反馈，Raspberry Pi模块将变化延伸至实体空间。这种设计使叙事内容与系统框架之间形成了相互支撑而非彼此独立的关系。
 
 \subsection{音乐交互设计}
 
-从应用名称《回声之境》可以看出，本设计的初衷是构建一个音乐驱动的互动体验。在新建项目时，我在项目简介里写下了这样的描述——\textit{an experimental interactive application where sound shapes the world}。基于整体应用的叙事特性，各场景绑定特定的配乐调式与速度标识：不同场景运用不同调式与曲速的背景音乐，旅人演奏的音符若不在当前调式上会造成和声冲突。因此，每个场景均预设固有的调式标识，该设计参考了游戏《Songbird Symphony》中的音乐交互机制。
+从应用名称《回声之境》可以看出，本设计的初衷是构建一个音乐驱动的互动体验。在新建项目时，我在项目简介里写下了这样的描述——\textit{an experimental interactive application where sound shapes the world}。因此，基于整体应用的叙事特性，场景会绑定配乐的调式和速度标识。由于不同场景会运用不同调式和曲速的背景音乐，如果人物发出的音符不在背景音乐的调式上，会造成不协和。因此，每个游戏场景会带有一个固有的调式和曲速标识，参考游戏：Songbird Symphony的设置。
 
 如表\ref{tbl:note-design}所示，旅人在旅程中可依次获得水滴、道路交错、海浪和风这四个音符，通过指引依次获得。音符不仅是演奏与视觉反馈的载体，更是旅人理解世界、塑造世界的方式。每个音符承载着隐喻性的象征意义，其演奏效果对应精神层面的某种能力。
 
@@ -1117,9 +1118,9 @@ AgentCommunicator 作为 GameRoot 的子组件承担 TCP 客户端角色。启�
 AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screenshot} 指令时，在帧末尾调用 \texttt{ScreenCapture.CaptureScreenshotAsTexture()} 获取当前画面，编码为 JPEG 并以 Base64 字符串回传，同时将截图缓存至本地持久化路径供调试使用。
 
 
-\subsection{树莓派灯光控制端实现}
+\subsection{Raspberry Pi灯光控制端实现}
 
-树莓派端负责完成实体灯光控制与场景布置。实体灯光子系统由 WS2812 可寻址 RGB LED 灯条与树莓派5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
+Raspberry Pi端负责完成实体灯光控制与场景布置。实体灯光子系统由 WS2812B 可寻址 RGB LED 灯条与Raspberry Pi 5（4GB）构成。整体效果如图\ref{fig:physical-notes}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -1129,11 +1130,11 @@ AgentCommunicator 还负责处理截图请求：当收到 \texttt{request:screen
 \end{figure}
 
 
-树莓派5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。树莓派与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入树莓派对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
+Raspberry Pi 5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令（格式见表\ref{tbl:command-table}），经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。Raspberry Pi与灯带之间通过 40 针 GPIO（通用输入输出）排针连接：WS2812B 灯带采用三线制——VCC（5V 供电）、GND（地线）与 DIN（数据输入）——其中 VCC 与 GND 分别接入Raspberry Pi对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 23（BCM 编号，即物理引脚 16 号），该引脚支持硬件 PWM 输出，是 rpi-ws281x 库的默认数据通道。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
 
-软件开发与调试均在树莓派5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将树莓派与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至树莓派，直接编辑树莓派上的脚本、运行灯光测试、查看日志。
+软件开发与调试均在Raspberry Pi 5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将Raspberry Pi与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至Raspberry Pi，直接编辑Raspberry Pi上的脚本、运行灯光测试、查看日志。
 
-树莓派端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
+Raspberry Pi端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 23 引脚输出的 64 颗 WS2812B 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
 
 \begin{code}
 \caption{音符-灯珠索引映射}
@@ -1148,7 +1149,7 @@ music_notes_pixels_map: dict[str, set[int]] = {
 \end{codebox}
 \end{code}
 
-灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
+灯光模式分为基础模式与音符联动模式两类，均由 LedController 类统一封装。LedController 在初始化时通过 \texttt{neopixel.NeoPixel} 接管 GPIO 23 引脚上的 64 颗 WS2812B 灯珠，对外暴露模式切换与音符联动两类接口。NeoPixel 库提供了像素级的 RGB 色彩控制能力——\texttt{pixels[i] = (r, g, b)} 可单独设置第 $i$ 颗灯珠的颜色，\texttt{pixels.fill(color)} 则将全部灯珠统一置色，\texttt{pixels.show()} 将缓冲区刷入硬件。
 
 基础模式中，控制系统利用 HLS 颜色空间来操作色彩变化，而非直接操作 RGB 分量。HSL色彩空间包含色相（Hue）、亮度（Lightness）和饱和度（Saturation）这三个分量，这样就可以将色相与亮度解耦，使色彩渐变逻辑的表达更为自然。具体而言：\texttt{chase}（追逐）模式循环遍历灯珠索引，每次仅点亮当前一颗灯珠后清空全带，利用视觉暂留形成光点移动的观感；\texttt{breathing}（呼吸）模式使用三角波函数 $b = 1 - |2x - 1|$（$x$ 在 $[0,1]$ 间线性推进）生成亮度曲线，将平滑变化的亮度与固定的低饱和度色相一同送入 \texttt{colorsys.hls\_to\_rgb}，使全带灯珠同步呈现柔和的明暗起伏；\texttt{rainbow}（彩虹追逐）模式同时维护 5 个色相各异的移动光点，每个光点后方拖曳 15 颗渐暗的灯珠——拖尾的亮度通过 \texttt{fade} 系数从近到远递减，光点位置每帧前进 2 颗灯珠，同时所有色相缓慢旋转，产生流动的彩虹拖尾效果。
 
@@ -1387,7 +1388,7 @@ Fog 组件通过持续更新雾材质的 \texttt{\_Offset} 向量，叠加正弦
 
 四个音符（水滴、道路交错、海浪、风）的 UI 表现由 MusicNote 组件独立管理，每个音符维护获取态与未获取态。音符动效基于 DOTween 补间动画插件实现：获取音符时，执行缩放脉冲序列（交替放大至 1.3 倍与恢复原尺寸），同时从透明渐显至完全可见；水滴音符额外同步播放连接线淡入效果，以视觉化音符间的递进关系。演奏音符时，通过 \texttt{DOTween.Sequence()} 组合颜色过渡（切换为音符主题色）与发光脉冲循环（透明度在 0 与目标强度间交替），形成具有节奏感的演奏视觉反馈。
 
-MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取顺序与演奏逻辑。四个音符须按序获得，控制器维护已获取音符计数，依次解锁下一音符。获取与演奏操作均通过 AgentCommunicator 向树莓派发送同步指令（\texttt{gain\_note:<type>}、\texttt{play\_note:<type>}），使实体灯光与虚拟音符动效保持同步。
+MusicNoteController 作为四个 MusicNote 的协调器，管理音符的获取顺序与演奏逻辑。四个音符须按序获得，控制器维护已获取音符计数，依次解锁下一音符。获取与演奏操作均通过 AgentCommunicator 向Raspberry Pi发送同步指令（\texttt{gain\_note:<type>}、\texttt{play\_note:<type>}），使实体灯光与虚拟音符动效保持同步。
 
 \subsection{状态驱动相机控制}
 \label{sec:state-driven-camera}
@@ -1415,7 +1416,7 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
 
 \subsection{实体灯光装置制作}\label{sec:physical-device}
 
-四个音符技能图标以四块宽15 cm、厚5 mm的正六边形松木板为基材。制作时，首先在矢量绘图软件Affinity中使用贝塞尔曲线完成音符图标的设计；将设计稿用A4纸打印后，沿黑色轮廓线以美工刀手工雕刻，再用502胶水粘贴固定于松木板上。各木板之间以装饰麻绳串联，灯条则沿整体图形的外轮廓包裹，恰好使用64颗灯珠。灯珠的序号与空间位置如图\ref{fig:led-layout}所示，标号0至63的灯珠与\texttt{music\_notes\_pixels\_map}中的索引一一对应，标号64的最后一颗为冗余灯珠。灯条原始规格为每米30颗、全长共150颗，利用WS2812可任意裁剪的特性，从第64颗灯珠处剪断即可。最终，该灯光装置悬挂于展台一侧，形成与交互应用中虚拟音符UI界面相呼应的实体视觉锚点。
+四个音符技能图标以四块宽15 cm、厚5 mm的正六边形松木板为基材。制作时，首先在矢量绘图软件Affinity中使用贝塞尔曲线完成音符图标的设计；将设计稿用A4纸打印后，沿黑色轮廓线以美工刀手工雕刻，再用502胶水粘贴固定于松木板上。各木板之间以装饰麻绳串联，灯条则沿整体图形的外轮廓包裹，恰好使用64颗灯珠。灯珠的序号与空间位置如图\ref{fig:led-layout}所示，标号0至63的灯珠与\texttt{music\_notes\_pixels\_map}中的索引一一对应，标号64的最后一颗为冗余灯珠。灯条原始规格为每米30颗、全长共150颗，利用WS2812B可任意裁剪的特性，从第64颗灯珠处剪断即可。最终，该灯光装置悬挂于展台一侧，形成与交互应用中虚拟音符UI界面相呼应的实体视觉锚点。
 
 \begin{figure}[htbp]
   \centering
@@ -1440,7 +1441,7 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
   \label{fig:state-driven-showcase}
 \end{figure}
 
-其次，是虚实联动音符的交互链路演示，其效果如图\ref{fig:music-note-showcase}所示。由于在设计上除了水滴以外的三个音符均在后面的章节中获取，而本设计仅在Unity中实现了第一章的交互流程，因此音符的交互链路以工程性质呈现。通过Unity内的调试面板或者通过专用调试客户端发送命令，可同时在Unity客户端和树莓派客户端点亮获取特定的音符。获取到的音符在Unity内表现为从隐藏变为显示，在实体灯光装置上表现为对应音符周围的灯珠常亮。当某个音符已被点亮以后，用户使用手柄或键盘按下按键时，对应的音符会做出演奏的反应，在Unity客户端内表现为颜色从深灰渐变为彩色再恢复，而在实体灯光装置上表现为该音符周围的灯珠闪烁两次。这两个分处交互应用的虚实世界内部以及现实中的反馈受同一指令控制，因此会保持严格同步，形成虚实联动的交互体验。
+其次，是虚实联动音符的交互链路演示，其效果如图\ref{fig:music-note-showcase}所示。由于在设计上除了水滴以外的三个音符均在后面的章节中获取，而本设计仅在Unity中实现了第一章的交互流程，因此音符的交互链路以工程性质呈现。通过Unity内的调试面板或者通过专用调试客户端发送命令，可同时在Unity客户端和Raspberry Pi客户端点亮获取特定的音符。获取到的音符在Unity内表现为从隐藏变为显示，在实体灯光装置上表现为对应音符周围的灯珠常亮。当某个音符已被点亮以后，用户使用手柄或键盘按下按键时，对应的音符会做出演奏的反应，在Unity客户端内表现为颜色从深灰渐变为彩色再恢复，而在实体灯光装置上表现为该音符周围的灯珠闪烁两次。这两个分处交互应用的虚实世界内部以及现实中的反馈受同一指令控制，因此会保持严格同步，形成虚实联动的交互体验。
 
 \begin{figure}[htbp]
   \centering
@@ -1468,7 +1469,7 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
 \item 设备：MacBook Pro (Mac14,9)
 \item 处理器：Apple M2 Pro
 \item 机带RAM：16GB
-\item 网络连接：各模块间通过localhost回环TCP通信，开发机与树莓派之间通过局域网WiFi连接
+\item 网络连接：各模块间通过localhost回环TCP通信，开发机与Raspberry Pi之间通过局域网WiFi连接
 \end{enumerate}
 
 \subsection{软件环境}
@@ -1478,7 +1479,7 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
 \item Python >= 3.11（EchoAgent、EchoServer、MediaPipe手势识别与面部表情采集模块均运行于Python环境）
 \item Unity 6000.3.9f1（运行《回声之境》交互应用）
 \item 调试客户端：基于Rust + warp框架的echo\_client，提供WebSocket-to-TCP桥接与浏览器可视化界面
-\item 树莓派运行环境：Raspberry Pi OS，基于rpi-ws281x库驱动WS2812 LED灯带
+\item Raspberry Pi运行环境：Raspberry Pi OS，基于rpi-ws281x库驱动WS2812B LED灯带
 \end{enumerate}
 
 \subsection{测试目的}
@@ -1490,7 +1491,7 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
 \item 验证手势识别与指向控制功能的完好：确保MediaPipe手势识别模块能够实时检测食指指向方向，并通过TCP中继驱动Unity中旅人角色沿正确方向移动。
 \item 验证面部表情数据采集与节流机制：确保FaceRecognizer能够按变化阈值与最小间隔约束正确上报面部形变系数。
 \item 验证智能体工具调用能力：确保EchoAgent能够根据上下文自主选择并调用工具，工具执行结果正确。
-\item 验证虚实联动灯光控制：确保EchoAgent下发灯光指令后，树莓派驱动LED灯阵在200ms内完成模式切换。
+\item 验证虚实联动灯光控制：确保EchoAgent下发灯光指令后，Raspberry Pi驱动LED灯阵在200ms内完成模式切换。
 \end{enumerate}
 
 \subsection{测试过程}
@@ -1522,14 +1523,14 @@ Following相机以Spline Dolly Camera配合Look At目标实现：样条线决定
 智能体汇集多源信息完成意图推理，输出结构化决策结果（视觉参数/灯光模式/叙事状态） \\
 \hline
 用例5 & 智能体发送控制命令 & 智能体已生成决策，各执行端在线 &
-(1) 查看Phoenix面板中Tool Calling记录；(2) 分别检查Unity与树莓派接收日志 &
-Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各执行端返回确认 \\
+(1) 查看Phoenix面板中Tool Calling记录；(2) 分别检查Unity与Raspberry Pi接收日志 &
+Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；各执行端返回确认 \\
 \hline
 用例6 & 动态视觉生成 & Unity接收智能体下发的视觉参数 &
 (1) 调试客户端模拟下发视觉参数变更；(2) 观察Unity场景画面变化 &
 场景视觉元素随参数变化而动态演变；过渡平滑，帧率维持在可交互水平 \\
 \hline
-用例7 & 虚实联动灯光控制 & 树莓派已连接，LED灯阵通电 &
+用例7 & 虚实联动灯光控制 & Raspberry Pi已连接，LED灯阵通电 &
 (1) 调试客户端依次发送chase、solid、breathing、gain\_note指令；(2) 观察灯阵 &
 灯阵模式切换<200ms；追逐、实色、呼吸、音符联动四种效果均正确呈现 \\
 \hline
@@ -1592,13 +1593,13 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 \begin{enumerate}
 
-\item 系统架构设计与实现：设计了“感知层—理解层—反馈层”的三层星型拓扑架构。感知层整合了MediaPipe手势识别、面部形变系数采集与Unity交互应用状态上报三个独立感知通道；理解层基于大语言模型构建了EchoAgent智能体，通过Deep Agents框架实现Tool Calling能力；反馈层由Unity虚拟场景渲染与树莓派LED灯阵物理装置构成，实现了虚拟与现实的双重输出。
+\item 系统架构设计与实现：设计了“感知层—理解层—反馈层”的三层星型拓扑架构。感知层整合了MediaPipe手势识别、面部形变系数采集与Unity交互应用状态上报三个独立感知通道；理解层基于大语言模型构建了EchoAgent智能体，通过Deep Agents框架实现Tool Calling能力；反馈层由Unity虚拟场景渲染与Raspberry PiLED灯阵物理装置构成，实现了虚拟与现实的双重输出。
 
-\item 自定义通信协议与并发服务：设计并实现了基于长度前缀的JSON TCP通信协议，支持文本、图像、命令与注册四种消息类型，以及客户端间中继转发机制。基于Python asyncio实现了EchoServer并发服务端，统一管理Unity、MediaPipe、树莓派与调试四类客户端的连接与消息路由。
+\item 自定义通信协议与并发服务：设计并实现了基于长度前缀的JSON TCP通信协议，支持文本、图像、命令与注册四种消息类型，以及客户端间中继转发机制。基于Python asyncio实现了EchoServer并发服务端，统一管理Unity、MediaPipe、Raspberry Pi与调试四类客户端的连接与消息路由。
 
 \item 智能体工具调用体系：为EchoAgent定义了五个工具函数——通用消息发送、Unity截图请求、LED灯光控制、音乐播放控制与MiniMax TTS语音合成——覆盖了从设备控制到多模态输出的完整能力集。智能体以5秒轮询间隔从共享消息队列批量获取感知数据，交由大语言模型综合推理后自主调用工具。
 
-\item 物理灯光联动装置：基于树莓派与WS2812可编程LED灯阵实现了实体灯光控制，支持追逐、常亮、彩虹渐变、呼吸四种预设模式以及音符联动反馈，将虚拟场景的氛围变化延伸至物理展览空间。
+\item 物理灯光联动装置：基于Raspberry Pi与WS2812B可编程LED灯阵实现了实体灯光控制，支持追逐、常亮、彩虹渐变、呼吸四种预设模式以及音符联动反馈，将虚拟场景的氛围变化延伸至物理展览空间。
 
 \item 交互应用原型开发：在Unity引擎中完成了《回声之境》交互应用的基础框架，实现了旅人角色的移动控制、场景切换、音符触发与状态机管理，以及手势指向驱动的输入映射。
 
@@ -1651,7 +1652,7 @@ Unity收到视觉/叙事参数指令；树莓派收到灯光控制指令；各�
 
 \item 引入全模态模型作为认知底座：将EchoAgent的基座模型替换为Qwen3.5-Omni这样的原生全模态模型，使其能够直接处理音频流、视频流等多模态输入，减少预处理环节，提升智能体对参展者整体状态的理解深度。
 
-\item 构建模块编排与容错机制：引入统一的启动编排、健康检查与异常恢复策略，确保MediaPipe、EchoAgent、Unity与树莓派在任意启动顺序下均能建立稳定的通信链路，并能在单个模块故障时优雅降级而非整体崩溃。
+\item 构建模块编排与容错机制：引入统一的启动编排、健康检查与异常恢复策略，确保MediaPipe、EchoAgent、Unity与Raspberry Pi在任意启动顺序下均能建立稳定的通信链路，并能在单个模块故障时优雅降级而非整体崩溃。
 
 \item 建立快慢双通道情绪感知架构：在感知层增加一个基于规则映射的轻量级快通路，从形变系数直接计算情绪倾向（如积极/中性/消极）并低延迟推送至灯光与着色器；同时保留EchoAgent的深度理解慢通路用于叙事推进与音乐切换等高层决策。
 \end{enumerate}
@@ -1770,12 +1771,12 @@ MediaPipe感知客户端的运行需要摄像头采集画面，请确保您的�
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.4\textwidth]{pic/raspberrypi-setup.jpg}
-\caption{树莓派加装散热器}
+\caption{Raspberry Pi加装散热器}
 \end{figure}
 
-树莓派的系统安装和初始化可前往官方文档（\url{https://www.raspberrypi.com/documentation/computers/getting-started.html}）查阅，此处不再赘述。
+Raspberry Pi的系统安装和初始化可前往官方文档（\url{https://www.raspberrypi.com/documentation/computers/getting-started.html}）查阅，此处不再赘述。
 
-需要注意的是，为了能够调用树莓派自带的GPIO模块，在创建环境的时候必须使用系统Python环境来创建虚拟环境。与上文中提到的其他模块使用\texttt{uv}一键同步不同，此模块可使用\texttt{python3 -m venv .venv}命令手动在当前目录下创建虚拟环境，激活虚拟环境后使用下面的命令安装必要库：
+需要注意的是，为了能够调用Raspberry Pi自带的GPIO模块，在创建环境的时候必须使用系统Python环境来创建虚拟环境。与上文中提到的其他模块使用\texttt{uv}一键同步不同，此模块可使用\texttt{python3 -m venv .venv}命令手动在当前目录下创建虚拟环境，激活虚拟环境后使用下面的命令安装必要库：
 
 \begin{verbatim}
 sudo apt update
@@ -1801,7 +1802,7 @@ dtoverlay=pwm-2chan
 sudo reboot
 \end{verbatim}
 
-WS2812 灯带在每一端都会有 3 根线，红色是+5V电源（VCC）、白色是GND（地）、绿色是数据线（DIN/DOUT）。并且一端是输入 DIN，另一端是输出 DOUT，用于串接下一条灯带。灯带的 +5V 连接外部 5V 电源，灯带的 GND 与外部电源 GND 与树莓派 GND 都必须共地，树莓派 GPIO18 需串联 330$\Omega$电阻后连接灯带的绿色数据线。对于本文正文中所展示的64颗灯珠组成的小规模灯带，若暂时无外部5V电源，也可以接在树莓派的5V引脚上，但树莓派5V引脚的输出电流有限，灯珠全亮时可能超出其承载范围，存在烧路、电源跌压、树莓派重启等风险，因此建议不要同时点亮太多灯珠，也不要将灯珠的亮度设置得较高。另外，在使用外接电源时如果需要防止灯闪烁或损坏，也可在外接电源的+5V和GND之间并联一个1000$\mu$F 电容。
+WS2812B 灯带在每一端都会有 3 根线，红色是+5V电源（VCC）、白色是GND（地）、绿色是数据线（DIN/DOUT）。并且一端是输入 DIN，另一端是输出 DOUT，用于串接下一条灯带。灯带的 +5V 连接外部 5V 电源，灯带的 GND 与外部电源 GND 与Raspberry Pi GND 都必须共地，Raspberry Pi GPIO18 需串联 330$\Omega$电阻后连接灯带的绿色数据线。对于本文正文中所展示的64颗灯珠组成的小规模灯带，若暂时无外部5V电源，也可以接在Raspberry Pi的5V引脚上，但5V引脚的输出电流有限，灯珠全亮时可能超出其承载范围，存在烧路、电源跌压、Raspberry Pi重启等风险，因此建议不要同时点亮太多灯珠，也不要将灯珠的亮度设置得较高。另外，在使用外接电源时如果需要防止灯闪烁或损坏，也可在外接电源的+5V和GND之间并联一个1000$\mu$F 电容。
 
 \section{使用说明}
 
@@ -1827,7 +1828,7 @@ uv run main.py --preview
 
 Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后会自动连接至同网段的TCP服务端，无需额外配置网络参数。
 
-灯光控制模块运行在树莓派上，需先完成接线与PWM通道配置，然后在项目目录中激活虚拟环境并运行灯光控制脚本。
+灯光控制模块运行在Raspberry Pi上，需先完成接线与PWM通道配置，然后在项目目录中激活虚拟环境并运行灯光控制脚本。
 
 \subsection{调试观测}
 
@@ -1839,7 +1840,7 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 在链路追踪层面，系统集成了OpenTelemetry与Phoenix实现端到端调用可视化。通过OpenTelemetry的LangChain Instrumentor对EchoAgent推理流程自动插桩，每次\texttt{ainvoke}调用、工具选择与执行均被完整记录，形成可回溯的调用链。Phoenix追踪面板在浏览器中通过本地端口访问，可观察VLM的Tool Calling决策过程、上下文窗口变化以及各工具函数的执行时序与耗时分布。
 
-在专用工具层面，基于Rust开发的调试客户端\texttt{echo\_client}提供了可编程的Rust库与基于warp框架的WebSocket-to-TCP桥接服务器。配套的浏览器调试界面支持选择客户端类型、构造自定义消息内容、指定中继目标，并实时展示所有收发日志。开发者可通过调试客户端向系统内任意模块发送命令或模拟消息，无需依赖完整的硬件环境即可验证通信逻辑。此外，在树莓派端可通过WiringPi库的\texttt{gpio readall}命令查看全部40个引脚的BCM编号、物理引脚号及输入输出状态，排查接线问题；通过\texttt{lsof -i :65432}命令可查看当前TCP服务端的连接状态。
+在专用工具层面，基于Rust开发的调试客户端\texttt{echo\_client}提供了可编程的Rust库与基于warp框架的WebSocket-to-TCP桥接服务器。配套的浏览器调试界面支持选择客户端类型、构造自定义消息内容、指定中继目标，并实时展示所有收发日志。开发者可通过调试客户端向系统内任意模块发送命令或模拟消息，无需依赖完整的硬件环境即可验证通信逻辑。此外，在Raspberry Pi端可通过WiringPi库的\texttt{gpio readall}命令查看全部40个引脚的BCM编号、物理引脚号及输入输出状态，排查接线问题；通过\texttt{lsof -i :65432}命令可查看当前TCP服务端的连接状态。
 
 \subsection{拓展新模块}
 
@@ -1861,7 +1862,7 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 \subsection{体验前准备}
 
-在开始体验前，请确保各模块已按A.3.1节所述完成启动：EchoAgent智能体、Unity客户端、MediaPipe感知模块均已正常运行，灯光控制模块（树莓派+WS2812灯带）已就绪。硬件方面，请检查摄像头正对体验区域，显示屏画面正常输出，LED灯带已按接线要求连接。
+在开始体验前，请确保各模块已按A.3.1节所述完成启动：EchoAgent智能体、Unity客户端、MediaPipe感知模块均已正常运行，灯光控制模块（Raspberry Pi+WS2812B灯带）已就绪。硬件方面，请检查摄像头正对体验区域，显示屏画面正常输出，LED灯带已按接线要求连接。
 
 体验区域建议预留约1m $\times$ 2m的站立空间，使摄像头能够稳定捕捉参展者的上半身动作与面部。四个音符实体木牌悬挂于展台一侧，参展者在体验过程中可随时触摸以参考音符形状。
 
@@ -1892,6 +1893,6 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 \subsection{注意事项}
 
-手势识别在均匀光照条件下效果最佳，请避免摄像头正对强光源或处于完全逆光位置。体验过程中请保持与摄像头约0.5--2m的距离，超出此范围可能导致手势识别精度下降。捏合手势需保持0.5秒以上方可触发音符奏响，避免短促的误触。LED灯带在灯珠全亮时发热明显，连续运行超过2小时后建议暂停散热；若使用树莓派5V引脚直接供电，请勿长时间保持灯珠全白高亮状态，以免超出引脚输出电流承载能力。
+手势识别在均匀光照条件下效果最佳，请避免摄像头正对强光源或处于完全逆光位置。体验过程中请保持与摄像头约0.5--2m的距离，超出此范围可能导致手势识别精度下降。捏合手势需保持0.5秒以上方可触发音符奏响，避免短促的误触。LED灯带在灯珠全亮时发热明显，连续运行超过2小时后建议暂停散热；若使用Raspberry Pi 5V引脚直接供电，请勿长时间保持灯珠全白高亮状态，以免超出引脚输出电流承载能力。
 
 肢体活动范围请控制在摄像头视野内，尤其在做出挥散和指向动作时，手部尽量不超出画面边界。如遇旅人行走卡顿或方向偏移，可缩回手指等待片刻后重新伸出，系统将自动重新校准指向基准。\end{document}
