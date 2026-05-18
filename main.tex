@@ -17,13 +17,13 @@
 \makecover
 
 \begin{chineseabstract}
-随着虚拟现实、人工智能等数字技术的快速发展，人机交互正逐步从以键盘、鼠标为主的单一输入范式，转向融合多感知通道的沉浸式交互形态。然而，当前实体展览中的公共交互装置仍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。本文针对上述问题，设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity引擎为核心交互平台，整合了手势识别、面部情绪识别、交互应用状态感知等多源信息，并基于大语言模型智能体构建中央决策模块，实现对虚拟场景与物理LED灯阵装置的协同控制。本文详细阐述了系统的总体架构、网络通信协议、智能体工具调用机制、关键视觉与交互模块的实现方法，并展示了实体装置的设计与集成。本系统为构建更具情感连接与沉浸感的公共展览交互体验提供了可行的技术路径与设计参考。
+随着虚拟现实与人工智能技术的快速发展，人机交互正从以键盘、鼠标为主的单一输入范式向融合多感知通道的沉浸式交互形态演进。然而，当前实体展览中的公共交互装置仍普遍存在交互方式趋同、情感反馈缺失、体验深度不足等问题。针对上述问题，本文设计并实现了一套面向实体展览的沉浸式多模态交互系统。系统以Unity引擎为虚拟场景载体，采用感知—理解—反馈三层架构：感知层负责手势识别与面部表情数据采集，理解层以大语言模型智能体为决策中枢，反馈层由虚拟场景渲染与实体灯光装置协同构成。各模块间通过自定义通信协议实现消息传输与指令转发，形成统一的分布式交互框架。在此框架基础上，本文进一步开发了配套交互应用《回声之境》。本系统为构建具备情感连接与虚实协同的展览交互体验提供了可行的技术方案与设计参考。
 
 \chinesekeyword{多模态交互；游戏引擎；智能体；情感计算；实体展览}
 \end{chineseabstract}
 
 \begin{englishabstract}
-With the rapid development of digital technologies such as virtual reality and artificial intelligence, human-computer interaction is gradually shifting from a single input paradigm dominated by keyboards and mice to an immersive interaction paradigm that integrates multiple sensory channels. However, current public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient experience depth. To address these issues, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system uses Unity engine as the core interaction platform, integrating multi-source information such as gesture recognition, facial emotion recognition, and application state perception, and constructs a central decision-making module based on large language model agents to achieve coordinated control of virtual scenes and physical devices of LED arrays. This thesis elaborates on the system's overall architecture, network communication protocols, agent tool-calling mechanisms, implementation methods of key visual and interaction modules, and demonstrates the design and integration of physical devices. This system provides a feasible technical path and design reference for constructing more emotionally connected and immersive public exhibition interactive experiences.
+With the rapid advancement of virtual reality and artificial intelligence technologies, human-computer interaction is evolving from single-input paradigms dominated by keyboards and mice toward immersive interaction that integrates multiple sensory channels. However, public interactive installations in physical exhibitions still suffer from homogenized interaction methods, lack of emotional feedback, and insufficient depth of experience. To address these challenges, this thesis designs and implements an immersive multimodal interaction system for physical exhibitions. The system employs the Unity engine as the virtual scene platform, built upon a three-layer architecture of perception, understanding, and feedback. The perception layer handles gesture recognition and facial expression data acquisition. The understanding layer employs a large language model agent as the central decision-making module. The feedback layer integrates virtual scene rendering with physical lighting devices for coordinated output. A custom communication protocol unifies message transmission and command relay across all modules, forming a cohesive distributed interaction framework. Building upon this framework, a companion interactive application titled \textit{Echoesphere} is developed. This work provides a feasible technical approach and design reference for constructing emotionally engaging and virtually-physically coordinated interactive experiences in physical exhibitions.
 
 \englishkeyword{Multimodal Interaction; Game Engine; Agent; Affective Computing; Physical Exhibition}
 \end{englishabstract}
@@ -793,7 +793,7 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 
 \subsubsection{长度前缀JSON协议}
 
-系统各模块间通过统一的二进制帧协议进行通信。每帧由 4 字节大端序无符号整数与其后的 UTF-8 编码 JSON 负载组成。4字节无符号整数表示负载长度。接收方先读取 4 字节长度前缀，再按长度读取完整 JSON 数据，以此实现帧边界划分。JSON 消息体包含以下字段：\texttt{type} 为消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}；\texttt{data} 为负载内容；\texttt{client\_type} 为发送方身份标识，供注册消息使用；\texttt{request\_id} 为 UUID 格式的请求标识，用于关联请求与响应；\texttt{relay\_to} 为中继目标，指定消息经服务器直接转发至某类客户端。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
+系统各模块间通过统一的二进制帧协议通信。每帧由 4 字节大端序长度前缀和其后的 UTF-8 编码 JSON 负载构成，接收方先读前缀获知负载长度，再读取完整 JSON 数据，以此划定帧边界。JSON 消息体包含以下字段：\texttt{type} 为消息类型，可选 \texttt{text}、\texttt{image}、\texttt{command}、\texttt{register}；\texttt{data} 为负载内容；\texttt{client\_type} 为发送方身份标识，供注册消息使用；\texttt{request\_id} 为 UUID 格式的请求标识，用于关联请求与响应；\texttt{relay\_to} 为中继目标，指定消息经服务器直接转发至某类客户端。客户端类型包括 \texttt{mediapipe}、\texttt{unity}、\texttt{raspberry\_pi} 与 \texttt{debug}。其 TypedDict 结构定义如代码\ref{code:json-message}所示。
 
 \begin{code}
 \caption{JsonMessage 消息结构定义}
@@ -873,7 +873,7 @@ class LengthPrefixProtocol(asyncio.Protocol):
 
 \subsubsection{EchoServer与客户端管理}
 
-TCP 服务端定义为 EchoServer 类，基于 Python \texttt{asyncio} 在固定端口上监听连接，默认为65432，后文中也默认以65432端口讲述。
+TCP 服务端定义为 EchoServer 类，基于 Python \texttt{asyncio} 在固定端口（默认 65432）上监听连接。
 
 在EchoServer类中维护一个消息队列、一个asyncio服务端、以及多个连接组成的集合，集合中每一项对应一个 LengthPrefixProtocol 实例。客户端首次连接时须发送注册消息，内容如 \texttt{\{"type": "register", "client\_type": "..."\}}，服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
 
@@ -881,7 +881,7 @@ TCP 服务端定义为 EchoServer 类，基于 Python \texttt{asyncio} 在固定
 
 \subsubsection{Python端TCP服务端实现}
 
-服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TCP服务端是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅式的事件回调机制，调用方可按 text、image、command 三种消息类型分别注册处理函数，当对应类型消息到达时自动分派。
+服务端负责消息汇总与路由，各感知模块通过统一的 TCP 客户端接入系统。Python 端的实现基于 asyncio 异步 IO，封装了长度前缀帧的编解码逻辑，并提供订阅式事件回调——调用方可按 text、image、command 三种消息类型分别注册处理函数，消息到达时自动分派。
 
 订阅式的回调管理的思路借鉴自Unity客户端中常用的Action的实现方式。TCP服务端内部维护一个 \texttt{\_Event} 辅助类，通过 +=、-= 运算符管理回调函数的添加、移除与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节大端序长度前缀，再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例，即 \texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
 
@@ -1003,7 +1003,7 @@ if changed:
 \end{lstlisting}
 \end{code}
 
-这一设计使手势数据的网络上报频率与参展者的手势变化节奏一致：维持同一手势时零流量，切换手势时即时响应。
+这样一来，手势数据的网络上报频率就和手势变化节奏对上了：同一手势持续时零流量，一切换就立刻上报。
 
 \textbf{食指指向方向检测}。该算法完全独立于 MediaPipe 的内置分类器，直接从手部关键点坐标计算方向向量。首先进行手部选择：若画面中仅检测到一只手则直接选用，若检测到两只手则按 MediaPipe 的 handedness 分类优先选取左手。随后判定食指是否伸直，计算食指尖 landmark 8 至食指掌骨基部 MCP 关节 landmark 5 的归一化欧氏距离，超过阈值 0.07 即视为伸直。此阈值基于经验设定，可过滤掉手指微弯或握拳状态下的误触发。最后计算方向向量：将归一化坐标乘以当前帧的实际像素尺寸，该尺寸从每次 \texttt{recognize\_async} 传入的图像 shape 中提取，可自适应不同摄像头分辨率；得到像素空间向量后做 L2 归一化，其中 y 轴取反以符合屏幕坐标系向上为正的惯例。核心实现如代码\ref{code:pointing-direction}所示。
 
@@ -1071,7 +1071,7 @@ def _detect_sweep(self, result):
 
 面部感知由 FaceRecognizer 类实现，基于 MediaPipe FaceLandmarker 模型 \texttt{face\_landmarker.task}，开启 \texttt{output\_face\_blendshapes=True} 以输出 52 维面部形变系数 blendshapes，如 \texttt{browInnerUp} 眉心抬起、\texttt{mouthSmileLeft} 左嘴角上扬等，每项取值 $[0, 1]$。鼻尖关键点 landmark 1 坐标作为面部空间位置参考，用于后续的面部出现/消失检测。
 
-52 维形变系数若以 30 fps 逐帧全量上报，将产生极大的网络与智能体处理开销。FaceRecognizer 的核心设计在于双重节流机制，使推送频率自适应于表情变化的实际节奏。第一重为信号过滤：仅保留置信度高于 0.1 的形变系数，滤除低置信度噪声；第二重为变化阈值：计算当前帧所有活跃形变系数的均值，仅当该均值相较上次上报值的变化幅度超过 0.15 时才进入候选；第三重为最小间隔：两次上报之间至少间隔 500 ms。仅当后两重条件同时满足时，才将形变数据通过回调向外发送。双重节流的核心逻辑如代码\ref{code:face-throttle}所示。
+52 维形变系数若以 30 fps 逐帧全量上报，将产生极大的网络与智能体处理开销。FaceRecognizer 的双重节流机制使推送频率自适应于表情变化的实际节奏。第一重为信号过滤：仅保留置信度高于 0.1 的形变系数，滤除低置信度噪声；第二重为变化阈值：计算当前帧所有活跃形变系数的均值，仅当该均值相较上次上报值的变化幅度超过 0.15 时才进入候选；第三重为最小间隔：两次上报之间至少间隔 500 ms。仅当后两重条件同时满足时，才将形变数据通过回调向外发送。双重节流的核心逻辑如代码\ref{code:face-throttle}所示。
 
 \begin{code}
 \caption{面部形变系数双重节流}
@@ -1097,7 +1097,7 @@ if abs(current_mean - self._last_blendshape_mean) > 0.15:
 \end{lstlisting}
 \end{code}
 
-如此一来，在面无表情时就几乎不产生推送，表情丰富时约每秒 2 次，在信息完整性与资源开销之间取得了平衡。面部形变数据以 \texttt{omni\_type: "face\_blendshape"} 事件格式发送，交由 EchoAgent 结合叙事上下文进行情绪语义推理。此外，FaceRecognizer 同时监测 \texttt{face\_landmarks}，在面部进入或离开摄像头视野时触发在场状态变化回调，Unity 端据此控制开场动画的启动时机。
+面部形变数据以 \texttt{omni\_type: "face\_blendshape"} 事件格式发送，交由 EchoAgent 结合叙事上下文进行情绪语义推理。此外，FaceRecognizer 同时监测 \texttt{face\_landmarks}，在面部进入或离开摄像头视野时触发在场状态变化回调，Unity 端据此控制开场动画的启动时机。
 
 
 \subsubsection{MediaPipe端三线程模型}
@@ -1171,7 +1171,7 @@ Raspberry Pi端负责完成实体灯光控制与场景布置。实体灯光子�
 
 Raspberry Pi 5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令，格式见表\ref{tbl:command-table}，经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。Raspberry Pi与灯带之间通过 40 针 GPIO排针连接。WS2812B 灯带采用三线制：VCC 为 5V 供电，GND 为地线，DIN 为数据输入；其中 VCC 与 GND 分别接入Raspberry Pi对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 18，该引脚支持硬件 PWM 输出。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
 
-软件开发与调试均在Raspberry Pi 5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将Raspberry Pi与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至Raspberry Pi，直接编辑Raspberry Pi上的脚本、运行灯光测试、查看日志。
+软件开发和调试都在 Raspberry Pi 5 上完成。先安装 rpi-ws281x、adafruit 这些 Python 库，再弃用 SPI 和 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将Raspberry Pi与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至Raspberry Pi，直接编辑Raspberry Pi上的脚本、运行灯光测试、查看日志。
 
 Raspberry Pi端由 LedController 类统一管理灯光硬件，其用 \texttt{neopixel.NeoPixel} 驱动 GPIO 18 引脚输出的 64 颗 WS2812B 灯珠。根据灯带沿四个音符图标外轮廓的物理走向，各音符对应一段连续灯珠区间，由此得出音符到灯珠索引的映射字典 \texttt{music\_notes\_pixels\_map}：
 
@@ -1619,7 +1619,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 \begin{enumerate}
 
-\item 系统架构设计与实现：设计了”感知层、理解层、反馈层”的三层星型拓扑架构。感知层整合了MediaPipe手势识别、面部形变系数采集与Unity交互应用状态上报三个独立感知通道；理解层基于大语言模型构建了EchoAgent智能体，通过Deep Agents框架实现Tool Calling能力；反馈层由Unity虚拟场景渲染与Raspberry PiLED灯阵物理装置构成，实现了虚拟与现实的双重输出。
+\item 系统架构设计与实现：设计了“感知层、理解层、反馈层”的三层星型拓扑架构。感知层整合了MediaPipe手势识别、面部形变系数采集与Unity交互应用状态上报三个独立感知通道；理解层基于大语言模型构建了EchoAgent智能体，通过Deep Agents框架实现Tool Calling能力；反馈层由Unity虚拟场景渲染与Raspberry PiLED灯阵物理装置构成，实现了虚拟与现实的双重输出。
 
 \item 自定义通信协议与并发服务：设计并实现了基于长度前缀的JSON TCP通信协议，支持文本、图像、命令与注册四种消息类型，以及客户端间中继转发机制。基于Python asyncio实现了EchoServer并发服务端，统一管理Unity、MediaPipe、Raspberry Pi与调试四类客户端的连接与消息路由。
 
@@ -1640,7 +1640,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 \begin{enumerate}
 
-\item 以智能体为认知核心的展览交互范式：不同于传统展览装置中”触发到响应”的预设规则模式，本系统将大语言模型智能体置于决策中枢位置，使其统一接收多源感知信息、综合推理并自主调用工具，形成”感知、理解、反馈”的认知闭环。这使得系统能够根据参展者的手势、表情与交互历史做出情境化的动态响应，而非机械地执行固定脚本。
+\item 以智能体为认知核心的展览交互范式：不同于传统展览装置中“触发到响应”的预设规则模式，本系统将大语言模型智能体置于决策中枢位置，使其统一接收多源感知信息、综合推理并自主调用工具，形成“感知、理解、反馈”的认知闭环。这使得系统能够根据参展者的手势、表情与交互历史做出情境化的动态响应，而非机械地执行固定脚本。
 
 \item 虚实双重输出的协同反馈机制：同一智能体决策指令同时驱动虚拟场景的视觉变化与实体LED灯阵的灯光效果，使屏幕内的渲染与物理空间的光影协调一致，将沉浸感从画面内部延伸至参展者的身体周边。
 
@@ -1655,7 +1655,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 \begin{enumerate}
 
-\item 交互应用内容深度不足：本课题虽然完成了技术框架的搭建，但其配套交互应用《回声之境》的叙事内容与交互关卡远未达到设计预期。前期规划的不同章节的交互逻辑，包括其中的锚点谜题和分支区域仅完成了初步的概念设计，而并未在Unity中实际实现。系统当前能够完成手势输入、场景切换与灯光联动等基础交互，但缺乏真正的叙事推进与关卡挑战。更深层的问题在于，可玩性并非纯粹的技术问题。巧妙的谜题设计、有节奏的关卡推进、对参观者情绪的引导，以及如何在数十秒内让路人产生好奇心，这些面向体验的能力恰恰是数字媒体技术专业区别于一般工程技术工作的关键，却未能在本课题中得到充分体现。这使得整个系统的技术价值缺乏内容上的承托，多模态交互机制也未能得到充分的场景验证。
+\item 交互应用内容深度不足：本课题虽然完成了技术框架的搭建，但其配套交互应用《回声之境》的叙事内容与交互关卡远未达到设计预期。前期规划的不同章节的交互逻辑，包括其中的锚点谜题和分支区域仅完成了初步的概念设计，而并未在Unity中实际实现。系统当前能够完成手势输入、场景切换与灯光联动等基础交互，但缺乏真正的叙事推进与关卡挑战。这使得整个系统的技术价值缺乏内容上的承托，多模态交互机制也未能得到充分的场景验证。
 
 \item 模块间耦合松散：系统由多个独立运行的子模块组成，模块间的通信协议虽然定义完备，但各模块的启动时序、异常恢复与状态同步缺乏统一的编排机制。这导致整套系统虽然能够在开发者的手动配置下跑通演示流程，却难以打包迁移至其他设备环境，也难以在外快速启动。此外，系统在无人值守的展览场景下所需的鲁棒性机制，如手势识别过程中的中断与重置、关卡进度的持久化与回溯也尚未完整实现。若要真正将本系统部署到实际的博物馆等实体展览场景中，仍需大量外围的开发和调试工作。
 
@@ -1691,7 +1691,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 在结束本文之前，我想聊一个话题：“在AI技术不断突破的今天，你心中的下一代游戏体验？”这个问题来自米哈游（上海米哈游科技股份有限公司）创始人刘伟2026年4月在上海交通大学的演讲。
 
-尽管我做的这个课题并非游戏，但如果你有心认真读完，一定能感受到我其实只是在借实体展览这个由头来讲述，而我真正想做的，就是一款个性化的自我表达的叙事游戏。游戏里的这个所谓旅人，其实就是大学本科的我的一个化身。旅人在初域·未定之原的迷茫，其实就是我在初入大学时的感受，带着些对高中时候残留的迷惘；旅人在聚落群·彼方的光影之城感受到的错乱，其实也是我在加入社团、组织、参加合唱团，遇到了许多的人，也结交了许多朋友，谈了一场恋爱，又经历了分手，这些种种，都像嘈杂、交错的十字路口，来往者行色匆匆。我逐渐在这些复杂的感受中流浪，在这些交错的道路中寻找到自己的方向，也慢慢学会了感受自己和他人的情绪。最后我终于走出这片混沌，开始迈向人生的下一个阶段。我开始复习408和高数准备考研、开始参加暑期活动，又开始结交新的一批来自不同圈子的朋友，最后我莫名其妙地成功保研，就连我自己都觉得十分神奇。这一部分就对应了《回声之境》中的深流之径·未被触及的知识海。我发现，我学得越多，未知也越多。其实这整个毕设都是用来回答这个问题的，我在这里杂糅了来自很多不同学科领域的知识，试图用此来让这些分流的潮水聚合。
+尽管我做的这个课题并非游戏，但如果你有心认真读完，一定能感受到我其实只是在借实体展览这个由头来讲述，而我真正想做的，就是一款个性化的自我表达的叙事游戏。游戏里的这个所谓旅人，其实就是大学本科的我的一个化身。旅人在初域·未定之原的迷茫，其实就是我在初入大学时的感受，带着些对高中时候残留的迷惘；旅人在聚落群·彼方的光影之城感受到的错乱，其实也是我在加入社团、组织、参加合唱团，遇到了许多的人，也结交了许多朋友，谈了一场恋爱，又经历了分手，这些种种，都像嘈杂、交错的十字路口，来往者行色匆匆。我逐渐在这些复杂的感受中流浪，在这些交错的道路中寻找到自己的方向，也慢慢学会了感受自己和他人的情绪。最后我终于走出这片混沌，开始迈向人生的下一个阶段。我开始复习408和高数准备考研、开始参加暑期活动，又开始结交新的一批来自不同圈子的朋友，最后我竟成功保研，就连我自己都觉得十分神奇。这一部分就对应了《回声之境》中的深流之径·未被触及的知识海。我发现，我学得越多，未知也越多。其实这整个毕设都是用来回答这个问题的，我在这里杂糅了来自很多不同学科领域的知识，试图用此来让这些分流的潮水聚合。
 
 好，我自己的经历就先讲到这里。让我们回到一开始的问题。大伟哥，即刘伟，他给出的答案是什么呢？他说，接下来在AI这个时代，游戏体验会有一个我们能够预见到的变化，就是完全个性化的游戏体验。他用一部美剧《西部世界》来举例——一个相同的世界观，但每次体验的时候，故事完全不一样，他如是讲道。他说，我们今天的游戏，因为生产成本，整场所有人的游戏体验都是一样的，但接下来因为有了AI，它可以理解你的行为，它能够给千人千面的游戏体验。我听到这个观点的时候被深深触动了，我想到米哈游近年来所做的一些其他工作，其实就是我在论文的前两章引用到的Whispers from the Star、LPM 1.0表演模型、Lumine，它们似乎都悄然在向着这个目标前进。
 
