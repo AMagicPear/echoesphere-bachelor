@@ -4,48 +4,74 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a LaTeX thesis project for Nanjing University of Posts and Telecommunications (南京邮电大学) bachelor's degree. The thesis topic is "面向实体展览的沉浸式多模态交互系统设计与实现" (Design and Implementation of an Immersive Multimodal Interaction System for Physical Exhibitions).
+NJUPT bachelor's thesis: "面向实体展览的沉浸式多模态交互系统设计与实现" (Design and Implementation of an Immersive Multimodal Interaction System for Physical Exhibitions). A LaTeX document with custom class and bibliography style.
 
 ## Build Commands
 
 ```bash
-# Compile the thesis (XeLaTeX)
-xelatex main.tex
+# One-shot full compilation
+xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex
 
-# Full compilation cycle (to include bibliography)
-xelatex main.tex
-bibtex main
-xelatex main.tex
+# Quick edit check (just LaTeX, no bib)
 xelatex main.tex
 ```
 
-For faster iteration during editing, run `xelatex main.tex` twice to get PDF output.
+Always use XeLaTeX (not pdfLaTeX) for CJK support.
 
-## Repository Structure
+## Document Structure (main.tex)
 
-- `main.tex` - Thesis main document (content goes here)
-- `reference.bib` - Bibliography database
-- `njupthesis.cls` - NJUPT thesis LaTeX class file
-- `njupthesis.bst` - Bibliography style file
-- `pic/` - Images folder (supports eps, jpg, png, pdf)
+- **Preamble**: `\documentclass[bachelor]{njupthesis}`, metadata fields (title, author, advisor, etc.)
+- **Front matter**: `\makecover`, `chineseabstract`/`englishabstract` environments, `\thesistableofcontents`, `\thesischapterexordium`
+- **6 body chapters**: 绪论 → 文献综述 → 需求分析与总体设计 → 交互系统和配套应用实现 → 应用场景演示与测试 → 总结与展望
+- **Back matter**: `\chapter*{结束语}`, `\thesisacknowledgement`, `\thesisloadbibliography[nocite]{reference}`, appendix
 
-## Architecture
+### Key LaTeX Commands (from njupthesis.cls)
 
-This is a standalone LaTeX thesis project with no code architecture to speak of. Key files:
+| Command | Purpose |
+|---------|---------|
+| `\citing{key}` | Superscript citation (NOT `\cite`) |
+| `\thesisloadbibliography[nocite]{reference}` | Loads refs with `\nocite{*}` |
+| `\thesischapterexordium` | Starts Arabic page numbering before Ch1 |
+| `\thesisacknowledgement` | 致谢 section |
+| `\thesisappendix` | Appendix wrapper |
 
-- **Template class** (`njupthesis.cls`): Defines NJUPT bachelor's thesis formatting (cover page, abstract styles, chapter/section headings, etc.)
-- **Bibliography**: Uses BibTeX with `njupthesis.bst` style, entries in `reference.bib`
-- **Citation format**: Use `\citing{key}` (NOT `\cite{key}`) for in-text citations
-- **Main document** (`main.tex`): Uses `\chapter{}` for major sections and `\section{}` for subsections
+## Custom Class (njupthesis.cls)
 
-## Important Notes
+- Based on `book` class (12pt, openany, twoside)
+- CJK fonts via xeCJK: macOS uses Songti SC / Heiti SC / Kaiti SC; Windows uses SimSun / SimHei / STKaiti
+- `\begin{spacing}{1.391}` wraps bibliography for line spacing
+- `\cite` is wrapped by `\citing` for superscript output
 
-- Chinese language support via xeCJK package - use XeLaTeX (not pdfLaTeX) for compilation
-- The `reference.bib` file uses `language={zh}` for Chinese references with 3+ authors to ensure "等." is displayed correctly instead of "et al."
-- For the `\citing{}` command to work with all references, first compile with `latex` then `bibtex` then `latex` twice
+## Bibliography Style (njupthesis.bst)
 
-## Writing Style Guidelines
+Based on **gbt7714-2025-numeric.bst** (https://github.com/zepinglee/gbt7714-bibtex-style) with these customizations:
 
-- When editing or rewriting sections in `main.tex`, maintain **academic yet natural and fluent** language style
-- Avoid overly stiff or bureaucratic phrasing; aim for clear academic prose that reads smoothly
+1. **`output.bibitem`**: Writes `\bibitem{key}` (no author-year label) for `[1]` auto-numbering
+2. **`begin.bib`**: Uses `{lo}` label width, sets `\interlinepenalty=10000`, `\small`, zero itemsep/parskip
+3. **`control.sentence.case.title`** = 0 (keeps original title capitalization)
+
+### Citation Keys
+
+The BST auto-detects language and uses:
+- Chinese entries: 等 (not et al.)
+- English entries: et~al
+- `[J]` / `[J/OL]` for journal articles
+- `[EB/OL]` for web resources (@misc)
+- `[C]` for conference papers
+- `[M]` for books
+- `[D]` for theses
+
+### reference.bib Rules
+
+- Chinese entries must use **`language = {chinese}`** (NOT `{zh}` — gbt7714 won't recognize it)
+- English entries can use `language = {english}` or omit the field (auto-detected)
+- Use `author = {{Corporate Name}}` (double braces) for corporate authors like `{Epic Games}` or `{Qwen Team}`
+- DOI field is supported and auto-links via `\doi{}`
+- For @misc entries, URL + year are the primary fields; urldate is optional
+
+## Writing Style
+
+- Academic but natural prose — avoid bureaucratic stiffness
 - Balance technical precision with readability
+- Use Chinese punctuation (，。等) in Chinese text
+- Ensure Chinese quotation marks  “ ” are paired correctly
