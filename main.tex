@@ -504,7 +504,7 @@ Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity
 
 带有relay\_to字段的消息在服务端收到后会直接转发至目标客户端，而不会送入智能体队列。该机制是为了确保一些需要频繁发送且不携带高层语义信息的消息能够直接在两个客户端之间转发。一个典型的场景是手指指向控制角色移动，它要求MediaPipe实时获取手指指向信息。如果这一链路也交由智能体处理，就只能退而求其次阶段性控制角色方向了。设计中的大部分控制命令类型的消息都会携带转发信息。
 
-除了控制命令以外，类型为text和image的消息会被TCP服务端写入消息队列，交由EchoAgent处理，这就是智能体发挥作用的地方。这两者之间与消息队列的集成方式如图\ref{fig:agent-server-topology}所示。EchoAgent是理解层的认知核心，每隔固定间隔从共享消息队列中批量获取所有消息，经大语言模型综合推理后，自主选择并调用工具函数生成控制决策。
+除了控制命令以外，类型为text和image的消息会被TCP服务端写入消息队列，交由EchoAgent处理，这就是智能体发挥作用的地方。这两者之间与消息队列的集成方式如图\ref{fig:agent-server-topology}所示。EchoAgent是理解层的认知核心，每隔固定间隔从共享消息队列中批量获取所有消息，经大语言模型综合推理后，自主选择并调用工具函数生成控制决策。这一批量处理设计将多源异步到达的消息聚合后统一推理，使智能体能够在同一上下文中综合考虑手势、表情与场景事件的关联，避免碎片化的逐条响应；同时 5 秒的轮询间隔避免了模型 API 的频繁调用，在交互响应性与资源开销之间取得了平衡。
 
 \begin{figure}[htbp]
   \centering
@@ -809,20 +809,84 @@ class JsonMessage(TypedDict):
 \end{codebox}
 \end{code}
 
-\subsubsection{EchoServer与客户端管理}
 
-TCP 服务端由 EchoServer 类实现，基于 Python \texttt{asyncio} 在端口 65432 上监听连接。每个客户端连接对应一个 LengthPrefixProtocol 实例，维护独立的接收缓冲区与长度解析状态机。客户端首次连接时须发送注册消息，内容如 \texttt{\{"type": "register", "client\_type": "..."\}}，服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
+长度前缀协议在代码中定义为\texttt{LengthPrefixProtocol}类，继承自\texttt{asyncio.Protocol}。除了初始化函数以外，还覆写了三个自带的基础方法。并且实现了消息转发协议配置、客户端管理功能。如代码\ref{code:length-prefix-protocol}所示。
 
-协议层支持中继转发机制：若消息含非空 \texttt{relay\_to} 字段，服务端直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的低延迟直通，典型场景为 MediaPipe 将指向方向数据中继至 Unity 驱动角色移动。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
-
-\subsubsection{Python端TcpClient实现}
-
-服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TcpClient 是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅/退订式的事件回调机制，调用方可按 text、image、command 三种消息类型分别注册处理函数，当对应类型消息到达时自动分派。
-
-TcpClient内部维护一个 \texttt{\_Event} 辅助类，通过 +=、-= 运算符管理回调函数的添加、移除与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节大端序长度前缀，再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例，即 \texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，此处代码已做大幅简化。
 
 \begin{code}
-\caption{简化的TcpClient 客户端核心代码}
+\caption{LengthPrefixProtocol类定义}
+\label{code:length-prefix-protocol}
+\begin{codebox}
+class LengthPrefixProtocol(asyncio.Protocol):
+
+    def __init__(self, message_queue: asyncio.Queue, server: "EchoServer"):
+        super().__init__()
+        self.message_queue = message_queue
+        self.server = server
+        self.buffer = b""
+        self.expected_length = None
+        self.transport = None
+        self.client_addr = None
+        self.client_type = None
+
+    def connection_made(self, transport: BaseTransport):
+        self.transport = transport
+        self.client_addr = transport.get_extra_info("peername")
+        self.server.connections.add(self)
+
+    def data_received(self, data):
+        self.buffer += data
+        self._try_parse_messages()
+
+    def _try_parse_messages(self):
+        while True:
+            if self.expected_length is None:
+                if len(self.buffer) < 4:
+                    break
+                self.expected_length = struct.unpack(">I", self.buffer[:4])[0]
+                self.buffer = self.buffer[4:]
+
+            if len(self.buffer) < self.expected_length:
+                break
+
+            message_data = self.buffer[:self.expected_length]
+            self.buffer = self.buffer[self.expected_length:]
+            self.expected_length = None
+
+            msg = json.loads(message_data.decode("utf-8"))
+            if msg.get("relay_to"):
+                for c in self.server.connections:
+                    if c.client_type == msg["relay_to"] and c != self:
+                        c.send_json(msg)
+            else:
+                self.message_queue.put_nowait(msg)
+
+    def connection_lost(self, exc: Exception | None):
+        self.server.connections.discard(self)
+
+    def send_json(self, obj):
+        json_bytes = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self.transport.write(struct.pack(">I", len(json_bytes)) + json_bytes)
+\end{codebox}
+\end{code}
+
+
+\subsubsection{EchoServer与客户端管理}
+
+TCP 服务端定义为 EchoServer 类，基于 Python \texttt{asyncio} 在固定端口上监听连接，默认为65432，后文中也默认以65432端口讲述。
+
+在EchoServer类中维护一个消息队列、一个asyncio服务端、以及多个连接组成的集合，集合中每一项对应一个 LengthPrefixProtocol 实例。客户端首次连接时须发送注册消息，内容如 \texttt{\{"type": "register", "client\_type": "..."\}}，服务端据此将连接与其身份类型绑定，后续的 \texttt{send\_message} 操作遍历已注册连接集合，按类型匹配目标客户端。
+
+若消息含非空 \texttt{relay\_to} 字段，服务端充当中继转发，直接将消息转发至匹配类型的所有对等连接，不经消息队列，以此实现客户端间的直接通信。这一块已在长度前缀协议中实现。不含 \texttt{relay\_to} 的普通消息则写入共享的 \texttt{asyncio.Queue}，交 EchoAgent 处理。
+
+\subsubsection{Python端TCP服务端实现}
+
+服务端负责消息的汇总与路由，而各感知模块则通过统一的TCP客户端接入系统。TCP服务端是客户端侧的协议实现，其中Python实现基于asyncio 异步IO，封装了长度前缀帧协议的编解码逻辑，并提供了订阅式的事件回调机制，调用方可按 text、image、command 三种消息类型分别注册处理函数，当对应类型消息到达时自动分派。
+
+订阅式的回调管理的思路借鉴自Unity客户端中常用的Action的实现方式。TCP服务端内部维护一个 \texttt{\_Event} 辅助类，通过 +=、-= 运算符管理回调函数的添加、移除与分发。消息接收循环 \texttt{\_receive\_loop} 以异步任务形式运行：先读取4字节大端序长度前缀，再按长度读取JSON负载，解码后根据type字段分派至对应的 \texttt{\_Event} 实例，即 \texttt{on\_text}、\texttt{on\_image}、\texttt{on\_command}。发送侧统一通过 \texttt{\_send\_json} 方法完成长度前缀编码与JSON序列化，对外暴露 \texttt{send\_text}、\texttt{send\_image}、\texttt{send\_register} 与 \texttt{send\_command} 四个高层接口。核心实现如代码\ref{code:tcp-client}所示，因篇幅原因此处代码已做大幅简化。
+
+\begin{code}
+\caption{简化的TCP服务端 客户端核心代码}
 \label{code:tcp-client}
 \lstset{style=codeblock}
 \begin{lstlisting}
@@ -833,7 +897,7 @@ class _Event:
 
     def __iadd__(self, callback):
         self._callbacks.append(callback)
-        return self
+        return 
 
     def __isub__(self, callback):
         self._callbacks.remove(callback)
@@ -878,7 +942,7 @@ def _send_json(self, obj):
 \end{lstlisting}
 \end{code}
 
-除上述基本收发逻辑外，TcpClient 还内置了自动重连机制：当连接因对端关闭或网络异常而断开时，接收循环在清理当前传输层后不会直接退出，而是按指数退避策略延迟后自动发起重连，初始间隔 1s，每次翻倍直至上限 30s。重连成功后触发 \texttt{on\_connected} 事件，调用方可借此实现自动重新注册等恢复逻辑。该机制使 MediaPipe 感知模块在服务端重启后无需人工干预即可恢复通信。
+除上述基本收发逻辑外，TCP服务端 还内置了自动重连机制：当连接因对端关闭或网络异常而断开时，接收循环在清理当前传输层后不会直接退出，而是按指数退避策略延迟后自动发起重连，初始间隔 1s，每次翻倍直至上限 30s。重连成功后触发 \texttt{on\_connected} 事件，调用方可借此实现自动重新注册等恢复逻辑。该机制使 MediaPipe 感知模块在服务端重启后无需人工干预即可恢复通信。
 
 
 \subsection{智能体EchoAgent实现}
@@ -898,20 +962,14 @@ EchoAgent 通过 LangChain 的 \texttt{@tool} 装饰器定义了五个工具函�
 
 \item \textbf{\texttt{control\_lights}}：控制实体 LED 灯阵。参数 \texttt{mode} 为灯光模式，支持 \texttt{chase} 循环点亮、\texttt{solid} 实色、\texttt{rainbow} 彩虹渐变、\texttt{breathing} 呼吸，以及 \texttt{gain\_note}、\texttt{play\_note} 两种音符联动反馈；参数 \texttt{color} 用于 \texttt{solid} 模式的颜色指定，如 \texttt{warm\_amber}、\texttt{cool\_blue} 等；参数 \texttt{note} 用于音符反馈模式下指定音符名称，取值为 \texttt{waterdrop}、\texttt{crossing}、\texttt{tide}、\texttt{breeze}。内部构造 \texttt{lights:mode[:color][:note]} 格式指令，经 TCP 发送至 Raspberry Pi。
 
-\item \textbf{\texttt{play\_music}}：控制交互应用中的音乐与音频播放。参数 \texttt{action} 为 \texttt{"类别:操作"} 格式字符串，演奏音符如 \texttt{play\_note:waterdrop} 等，切换情绪背景音乐如 \texttt{set\_mood:calm/tense/warm}。内部封装为 \texttt{music:action} 指令发送至 Unity。
+\item \textbf{\texttt{play\_music}}：控制交互应用中的音乐与音频播放。参数 \texttt{action} 为“类别:操作”格式字符串，演奏音符如 \texttt{play\_note:waterdrop} 等，切换情绪背景音乐如 \texttt{set\_mood:calm/tense/warm}。内部封装为 \texttt{music:action} 指令发送至 Unity。
 
 \item \textbf{\texttt{speak}}：通过 MiniMax TTS 服务将文本转为语音并播放。参数 \texttt{text} 为待朗读文本。内部调用 MiniMax \texttt{speech-2.8-turbo} 模型，使用 Mandarin Warm Girl 音色生成 MP3 音频并播放。
 \end{enumerate}
 
-以上五个工具覆盖了系统的全部执行端，包括 Unity 画面与音频、Raspberry Pi 灯光、TTS 语音输出以及通用客户端通信，使智能体在推理过程中可直接操作各执行端。
-
-在消息处理方面，感知层各模块的上报消息到达时机不可预测，而大语言模型的推理延迟在秒级，因此模块采用生产者—消费者模式解耦输入与决策：服务端将需处理的消息写入共享消息队列，EchoAgent 每 5 秒从队列中一次性排空所有积压消息，将其转换为 LangChain 的 \texttt{HumanMessage} 列表后批量送入智能体。对于文本类消息，直接将原始 JSON 字符串作为消息内容；对于图像类消息，则构造包含 Base64 编码图像与描述文本的多模态内容结构。智能体通过 \texttt{deep\_agent.ainvoke()} 执行推理，模型根据系统提示词与当前上下文自主决定是否调用工具以及调用哪个工具，工具执行结果以 \texttt{ToolMessage} 形式追加至对话历史，供下一轮推理使用。
-
-这一批量处理设计将多源异步到达的消息聚合后统一推理，使智能体能够在同一上下文中综合考虑手势、表情与场景事件的关联，避免碎片化的逐条响应；同时 5 秒的轮询间隔避免了模型 API 的频繁调用，在交互响应性与资源开销之间取得了平衡。
+感知层各模块的上报消息到达时机不可预测，而大语言模型的推理延迟在秒级，因此模块采用生产者—消费者模式解耦输入与决策：服务端将需处理的消息写入共享消息队列，EchoAgent 每 5 秒从队列中一次性排空所有积压消息，将其转换为 LangChain 的 \texttt{HumanMessage} 列表后批量送入智能体。对于文本类消息，直接将原始 JSON 字符串作为消息内容；对于图像类消息，则构造包含 Base64 编码图像与描述文本的多模态内容结构。智能体通过 \texttt{deep\_agent.ainvoke()} 执行推理，模型根据系统提示词与当前上下文自主决定是否调用工具以及调用哪个工具，工具执行结果以 \texttt{ToolMessage} 形式追加至对话历史，供下一轮推理使用。
 
 \subsection{MediaPipe端实现}
-
-由于某些系统要求OpenCV的展示窗口必须运行中主线程，出于调试需要，该模块会启动三条线程。主线程纯做预览渲染，不参与识别，另外一个线程专门从摄像头。
 
 \begin{figure}[htbp]
   \centering
@@ -947,7 +1005,7 @@ if changed:
 
 这一设计使手势数据的网络上报频率与参展者的手势变化节奏一致：维持同一手势时零流量，切换手势时即时响应。
 
-\textbf{食指指向方向检测}。该算法完全独立于 MediaPipe 的内置分类器，直接从手部关键点坐标计算方向向量。首先进行手部选择：若画面中仅检测到一只手则直接选用，若检测到两只手则按 MediaPipe 的 handedness 分类优先选取左手，以契合多数参展者惯用右手进行操作、左手负责指向的自然姿态。随后判定食指是否伸直，计算食指尖 landmark 8 至食指掌骨基部 MCP 关节 landmark 5 的归一化欧氏距离，超过阈值 0.07 即视为伸直态。此阈值基于经验设定，可过滤掉手指微弯或握拳状态下的误触发。最后计算方向向量：将归一化坐标乘以当前帧的实际像素尺寸，该尺寸从每次 \texttt{recognize\_async} 传入的图像 shape 中提取，可自适应不同摄像头分辨率；得到像素空间向量后做 L2 归一化，其中 y 轴取反以符合屏幕坐标系向上为正的惯例。核心实现如代码\ref{code:pointing-direction}所示。
+\textbf{食指指向方向检测}。该算法完全独立于 MediaPipe 的内置分类器，直接从手部关键点坐标计算方向向量。首先进行手部选择：若画面中仅检测到一只手则直接选用，若检测到两只手则按 MediaPipe 的 handedness 分类优先选取左手。随后判定食指是否伸直，计算食指尖 landmark 8 至食指掌骨基部 MCP 关节 landmark 5 的归一化欧氏距离，超过阈值 0.07 即视为伸直。此阈值基于经验设定，可过滤掉手指微弯或握拳状态下的误触发。最后计算方向向量：将归一化坐标乘以当前帧的实际像素尺寸，该尺寸从每次 \texttt{recognize\_async} 传入的图像 shape 中提取，可自适应不同摄像头分辨率；得到像素空间向量后做 L2 归一化，其中 y 轴取反以符合屏幕坐标系向上为正的惯例。核心实现如代码\ref{code:pointing-direction}所示。
 
 \begin{code}
 \caption{食指指向方向计算}
@@ -1039,16 +1097,16 @@ if abs(current_mean - self._last_blendshape_mean) > 0.15:
 \end{lstlisting}
 \end{code}
 
-这一设计的效果是：面无表情时几乎不产生推送，表情丰富时约每秒 2 次，在信息完整性与资源开销之间取得了平衡。面部形变数据以 \texttt{omni\_type: "face\_blendshape"} 事件格式发送，交由 EchoAgent 结合叙事上下文进行情绪语义推理。此外，FaceRecognizer 同时监测 \texttt{face\_landmarks} 的有无，在面部进入或离开摄像头视野时触发在场状态变化回调，Unity 端据此控制开场动画的启动时机。
+如此一来，在面无表情时就几乎不产生推送，表情丰富时约每秒 2 次，在信息完整性与资源开销之间取得了平衡。面部形变数据以 \texttt{omni\_type: "face\_blendshape"} 事件格式发送，交由 EchoAgent 结合叙事上下文进行情绪语义推理。此外，FaceRecognizer 同时监测 \texttt{face\_landmarks}，在面部进入或离开摄像头视野时触发在场状态变化回调，Unity 端据此控制开场动画的启动时机。
 
-\subsubsection{多线程事件上报架构}
 
-感知子系统的OpenCV 的 \texttt{cv2.imshow} 与 \texttt{cv2.waitKey} 必须在主线程调用。而 MediaPipe 的 LIVE\_STREAM 模式将检测结果派发至其内部的回调线程，TCP 通信又依赖 asyncio 事件循环在独立线程中运转。因此系统采用三条线程协同工作：主线程仅负责 OpenCV 预览窗口渲染，调用 \texttt{get\_latest\_frame()} 获取最新帧，叠加手部骨架、手势标签、FPS 计数与面部鼻尖标注后显示，不参与识别或网络操作。摄像机线程以守护线程形式运行，尽可能高的帧率从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳依次分发给所有已注册的帧回调，即 HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法。这种”一帧多发”的设计使两个识别器共享同一路视频源，避免了多摄像头或帧拷贝的开销。TCP 事件循环线程运行 asyncio 事件循环，承载 TcpClient 的全部网络收发。所有 \texttt{send\_text}、\texttt{send\_command} 等操作必须在此线程中串行执行以保证线程安全。
+\subsubsection{MediaPipe端三线程模型}
+由于某些系统要求OpenCV的展示窗口必须运行中主线程，而 MediaPipe 的 LIVE\_STREAM 模式将检测结果派发至其内部的回调线程，TCP 通信又依赖 asyncio 事件循环在独立线程中运转。出于调试需要，该模块会启动三条线程。主线程纯做预览渲染叠加手部骨架、手势标签、FPS 计数与面部鼻尖标注后显示，不参与识别或网络操作。另外一个线程以守护线程形式运行，专门从摄像头读取帧、水平镜像翻转、BGR 转 RGB 后，将 RGB 图像与毫秒时间戳依次分发给所有已注册的帧回调，即 HandsRecognizer 与 FaceRecognizer 的 \texttt{recognize\_async} 方法。这种一帧多发的设计使两个识别器共享同一路视频源，避免了多摄像头或帧拷贝的开销。TCP 事件循环线程运行 asyncio 事件循环，承载 TCP服务端 的全部网络收发。所有 \texttt{send\_text}、\texttt{send\_command} 等操作必须在此线程中串行执行以保证线程安全。
 
-三条线程之间的桥接是架构的关键。MediaPipe 回调线程中产生的手势、方向、面部结果不能直接操作 TCP 连接。解决方式是通过 \texttt{asyncio.run\_coroutine\_threadsafe()} 将发送协程从 MediaPipe 回调线程调度至 TCP 事件循环线程。\texttt{main.py} 中定义的桥接函数如代码\ref{code:thread-bridge}所示。
+三条线程之间的桥接函数如代码\ref{code:thread-bridge}所示。
 
 \begin{code}
-\caption{跨线程桥接：从 MediaPipe 回调到 TCP 事件循环}
+\caption{从 MediaPipe 回调到 TCP 事件循环的跨线程桥接}
 \label{code:thread-bridge}
 \lstset{style=codeblock}
 \begin{lstlisting}
@@ -1068,9 +1126,9 @@ def handle_sweep():
 \end{lstlisting}
 \end{code}
 
-TcpClient 在连接建立后通过 \texttt{on\_connected} 事件自动发送注册消息，内容为 \texttt{client\_type: "mediapipe", modules: ["hands", "face"]}；若连接因服务端重启或网络波动断开，TcpClient 以指数退避策略自动重连，初始间隔 1s，每次翻倍直至上限 30s，重连成功后再次触发 \texttt{on\_connected} 完成重新注册，整个过程无需人工干预。MediaPipe 客户端同时持续监听服务端下发的控制指令，例如 \texttt{hand\_direction:on/off} 用于远程开关指向检测功能，通过 \texttt{on\_command} 回调处理。
+TCP服务端在连接建立后通过 \texttt{on\_connected} 事件自动发送注册消息，内容为 \texttt{client\_type: "mediapipe", modules: ["hands", "face"]}；若连接因服务端重启或网络波动断开，TCP服务端以指数退避策略自动重连，初始间隔 1s，每次翻倍直至上限 30s，重连成功后再次触发 \texttt{on\_connected} 完成重新注册，整个过程无需人工干预。MediaPipe 客户端同时持续监听服务端下发的控制指令，例如 \texttt{hand\_direction:on/off} 用于远程开关指向检测功能，通过 \texttt{on\_command} 回调处理。
 
-\subsection{Unity框架端实现}
+\subsection{Unity端实现}
 
 Unity 交互应用内部以 GameRoot 为单例枢纽进行集中式管理。GameRoot 组件挂载于场景中标记 \texttt{DontDestroyOnLoad} 的持久化对象，其 \texttt{Awake()} 标注 \texttt{[DefaultExecutionOrder(-100)]} 以确保最先执行：若已存在实例则销毁自身，否则将自身赋给静态属性 \texttt{Instance} 并注册跨场景持久化。GameRoot 下辖五个子对象，各携带一个核心脚本，GameRoot 以公开字段持有引用，层级结构如代码\ref{code:gameroot-tree}所示。
 
@@ -1111,7 +1169,7 @@ Raspberry Pi端负责完成实体灯光控制与场景布置。实体灯光子�
 \end{figure}
 
 
-Raspberry Pi 5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令，格式见表\ref{tbl:command-table}，经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。Raspberry Pi与灯带之间通过 40 针 GPIO（通用输入输出）排针连接。WS2812B 灯带采用三线制：VCC 为 5V 供电，GND 为地线，DIN 为数据输入；其中 VCC 与 GND 分别接入Raspberry Pi对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 18，该引脚支持硬件 PWM 输出。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
+Raspberry Pi 5作为TCP客户端接入EchoAgent服务端，运行灯光控制脚本，接收EchoAgent下发的结构化灯光指令，格式见表\ref{tbl:command-table}，经解析后通过 adafruit 与 rpi-ws281x 库转换为 PWM 信号，驱动 LED 灯条呈现对应效果。Raspberry Pi与灯带之间通过 40 针 GPIO排针连接。WS2812B 灯带采用三线制：VCC 为 5V 供电，GND 为地线，DIN 为数据输入；其中 VCC 与 GND 分别接入Raspberry Pi对应的 5V 与 Ground 引脚，DIN 则连接至 GPIO 18，该引脚支持硬件 PWM 输出。三根线均以公对母杜邦线完成 GPIO 端到灯带引脚的快速插接，无需焊接即可搭建原型。
 
 软件开发与调试均在Raspberry Pi 5上完成。首先安装 rpi-ws281x 与 adafruit 等 Python 库并启用 SPI 与 PWM 外设。为便于查看 GPIO 引脚状态，还需使用WiringPi 库。该库已不再由原维护者通过包管理器分发，需要从 GitHub仓库 https://github.com/WiringPi/WiringPi 手动克隆并使用如下命令编译：\texttt{./build debian \&\& sudo apt install debian-template/wiringpi-3.x.deb}。WiringPi 安装后，在终端执行 \texttt{gpio readall} 即可一览全部 40 个引脚的 BCM 编号、物理引脚号、输入/输出模式及电平高低，快速排查接线问题。将Raspberry Pi与开发机置于同一局域网，通过 VSCode 的 Remote-SSH 扩展连接至Raspberry Pi，直接编辑Raspberry Pi上的脚本、运行灯光测试、查看日志。
 
@@ -1550,19 +1608,6 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
   \caption{定制调试客户端运行截图}
   \label{fig:debug-client-screenshot}
 \end{figure}
-
-\section{交互体验评估}
-
-本系统的交互设计理念与Phillips等人提出的基于大语言模型的目标导向交互框架\citing{phillips2025goal}存在可比较之处，在此做一个简要的对位分析。
-
-架构设计上，Phillips的框架采用DLM（对话语言模型）与QALM（问答语言模型）的双模型架构，分别负责自然语言对话生成和基于谜题图的状态评估，实现了生成与决策的解耦。本系统虽采用单VLM架构，但通过Tool Calling机制实现了类似的功能分离：对话生成、场景理解与工具调用由同一模型在统一上下文中完成，逻辑上却是三个独立的认知环节。双模型架构在对话生成质量上有优势，单模型+工具调用则在跨模态理解与开发复杂度上更为友好。
-
-在状态追踪机制方面，谜题图框架将交互场景建模为显式的有向图$G=(V,E)$，节点代表情境里程碑，边代表合法的状态转移路径，状态转换由预设的封闭式问题集驱动，这种显式建模使叙事引导具有高度的精确性与可控性。本系统则采用更为隐式的情感状态图，沿迷茫→锚定、碰撞→边界、敬畏→自由的路径演进，状态推进不依赖预设问答，而是由EchoAgent综合当前手势、表情与场景事件进行综合判断后自主决策。前者的优势在于状态转换的可预测性，适合任务导向的交互场景；后者的优势在于对模糊情境的容忍度，更适合情感导向的展览体验。
-
-在交互范式的覆盖范围上，两套方法代表了不同的设计哲学。谜题图框架允许在结构化叙事框架内进行自由对话，强调”强自主性”，这与游戏设计中”涌现式玩法”的思路一脉相承。本系统则通过情感状态引导与自适应反馈，在保持叙事连贯性的前提下支持个性化探索，更接近展览设计中“情感化体验”的追求。前者的交互载体主要是文本对话，后者则将手势、表情、交互应用状态与物理灯光统一纳入交互回路，在模态的丰富性上更为全面。
-
-两种方法各有所长且存在清晰的互补空间。从谜题图框架中引入更精细的显式状态追踪，可以提升本系统叙事引导的精确性；反之，谜题图框架若扩展多模态感知与物理反馈能力，也将使展览场景中的交互体验更为丰富。二者的融合，即双模型架构的对话生成优势加上本系统的多模态协调能力，是未来构建更强大交互系统的一个值得探索的方向。
-
 
 \chapter{总结与展望}
 
