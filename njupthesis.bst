@@ -1997,10 +1997,14 @@ FUNCTION {format.entry.type.id}
       control.entry.medium.id
         { entrymediumid empty$
             { medium empty$
-                { entry.has.url.or.doi
-                  type$ "online" = or
+                { type$ "online" =
                   type$ "webpage" = or
-                    { "/OL" * }
+                  type$ "misc" = or
+                    { entry.has.url.or.doi
+                      { "/OL" * }
+                      'skip$
+                      if$
+                    }
                     'skip$
                   if$
                 }
