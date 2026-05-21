@@ -74,7 +74,7 @@ STRINGS {
 
 FUNCTION {load.config}
 {
-  "bylanguage" 'control.bib.punct :=  % GB / half / bylanguage
+  "half" 'control.bib.punct :=  % GB / half / bylanguage
   #1 'control.convert.punct :=
   #3 'control.max.bib.names :=
   #3 'control.min.bib.names :=
@@ -3127,8 +3127,6 @@ FUNCTION {article.journal}
     }
   if$
   link.close
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3147,8 +3145,6 @@ FUNCTION {archive}
   format.full.date "year" output.check
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3169,8 +3165,6 @@ FUNCTION {book}
   format.date output
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3244,8 +3238,6 @@ FUNCTION {inbook}
       format.date output
       bbl.pages.colon set.punct
       format.pages output
-      format.url output
-      format.doi output
       new.block
       format.note output
       fin.entry
@@ -3274,8 +3266,6 @@ FUNCTION {incollection}
   format.date output
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3304,8 +3294,6 @@ FUNCTION {inproceedings}
   format.date output
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3330,15 +3318,12 @@ FUNCTION {patent}
   format.full.date "year" output.check
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
 }
 
 FUNCTION {format.periodical.volume}
-{ volume number either.or
   duplicate$ empty$
     { pop$ "" }
     { format.punctuations
@@ -3358,8 +3343,6 @@ FUNCTION {periodical}
   new.block
   format.address.publisher output
   format.date output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3380,8 +3363,6 @@ FUNCTION {proceedings}
   format.date output
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3389,7 +3370,7 @@ FUNCTION {proceedings}
 
 FUNCTION {preprint}
 { #1 'require.url :=
-  "PP" set.entry.type.id
+  "EB" set.entry.type.id
   output.bibitem
   format.authors output
   control.article.title
@@ -3424,8 +3405,6 @@ FUNCTION {thesis}
   format.date output
   bbl.pages.colon set.punct
   format.pages output
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3455,8 +3434,6 @@ FUNCTION {techreport}
       format.pages output
     }
   if$
-  format.url output
-  format.doi output
   new.block
   format.note output
   fin.entry
@@ -3559,8 +3536,6 @@ FUNCTION {map}
       format.pages output
       new.block
       format.dimensions output
-      format.url output
-      format.doi output
       new.block
       format.note output
       fin.entry

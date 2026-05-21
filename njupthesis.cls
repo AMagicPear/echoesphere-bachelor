@@ -435,6 +435,7 @@
 \setlength{\extrarowheight}{0pt}
   \renewcommand{\arraystretch}{3}
 \begin{center}
+  \vspace*{0.6cm}
   \fontsize{36pt}{36pt}\selectfont{\heiti 南京邮电大学 \\ 毕\enspace 业\enspace 设\enspace 计（论\enspace 文）\\}
   \vspace{2cm}
   
@@ -455,7 +456,7 @@
     \cline{2-2}
   \end{tabular}
   
-\vspace{5cm}
+\vspace{3.5cm}
 
 \fontsize{16pt}{16pt}\selectfont{\kaiti 日期：\quad \thebegindate {} 至\hspace{.5pc} \thefinishdate \\}
 \end{center}
@@ -464,11 +465,12 @@
 \thispagestyle{empty}
 
 \noindent
+\vspace{1cm}
 
 \begin{center}
   \fontsize{16pt}{16pt}\selectfont{\heiti
     毕业设计（论文）原创性声明
-  } \\[48bp]
+  } \\[36bp]
 \end{center}
 
 \begin{spacing}{2.0}
@@ -533,7 +535,7 @@
     \thispagestyle{fancy}
     \renewcommand{\theequation}{a-\arabic{equation}}
     \renewcommand{\thetable}{a-\arabic{table}}
-    \renewcommand{\thefigure}{a-\arabic{figure}}
+    \renewcommand{\thefigure}{A\arabic{figure}}
 }
 
 \makeatletter
