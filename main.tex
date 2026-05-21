@@ -1,7 +1,7 @@
 \documentclass[bachelor]{njupthesis}
 \usepackage{tabularx}
 
-\title{面向实体展览的沉浸式多模态交互系统设计与实现}
+\title{面向实体展览的沉浸式多模态交互系统\newline 设计与实现}
 \author{沈立}
 \advisor{刘思江}
 \school{数字媒体与设计艺术学院}
@@ -1981,7 +1981,7 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 (1) 初始阶段。体验开始前，屏幕显示标题画面，系统处于非交互状态。参展者走近摄像头，使面部进入传感器识别范围后，双手向两侧挥散即可触发标题消散动画——此时旅人从迷雾中浮现，系统开始接受交互输入。如手势识别未能触发，可按下键盘回车键作为替代方式。
 
-(2) 第一章：初域·未定之原。标题消散后，参展者伸出食指，指尖朝期望的方向短暂停留——MediaPipe实时计算食指指向向量，经TCP协议传输至Unity后驱动旅人沿该方向行走，缩回手指后角色自动停止。旅人行走至水滴音符附近时，摄像机会自动推近至水滴特写；参展者做出持续捏合手势即可触发音符获取事件，同时实体LED灯阵中对应音符区间的灯珠同步亮起。以上行走与音符触发逻辑已在Unity中完成实现。设计中的后续内容还包括：三条锚点路径（落定的石阶、无风的山谷、迷雾的边界）分别对应过去、现在与未来三重自我锚定，全部激活后迷雾散尽，通往第二章的宽阔光路显现。
+(2) 第一章：初域·未定之原。标题消散后，参展者伸出食指，指尖朝期望的方向短暂停留——MediaPipe实时计算食指指向向量，经TCP协议传输至Unity后驱动旅人沿该方向行走，缩回手指后角色自动停止。旅人行走至水滴音符附近时，摄像机会自动推近至水滴特写；参展者做出持续捏合手势即可触发音符获取事件，同时实体LED灯阵中对应音符区间的灯珠同步亮起。以上行走与音符触发逻辑已在Unity中完成实现。设计中的后续内容还包括：三条锚点路径分别对应过去、现在与未来三重自我锚定，全部激活后迷雾散尽，通往第二章的宽阔光路显现。
 
 (3) 第二章：聚落群·彼方的光影之城。进入光影之城后，MediaPipe的面部表情识别持续监测参展者的blendshape系数，VLM智能体据此推断情绪基调并驱动场景建筑形态变化——喜悦使建筑舒展向上，悲伤使其低垂收敛，愤怒引发扭曲震颤。参展者需要在四个分支区域（回声交汇所、情绪风塔、镜影回廊、离别的岔路口）中收集碎片，每收集一处将使城市建筑趋于稳定。奏响“道路交错”音符可在自身周围构建视觉化的边界范围，过滤外界情绪干扰。
 
@@ -2014,15 +2014,22 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 \titleformat{\chapter}[block]
   {\fontsize{15pt}{15pt}\selectfont\heiti\thispagestyle{fancy}}{\thechapter \quad}{0pt}{}
 
-\chapter{美术设计与展示}
+\chapter{美术设计与资产}
 
 本附录展示在《回声之境》交互应用的设计和实现过程中，产生的一些设计草图、概念和美术资产。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{pic/IMG_20260521_092722.jpeg}
+\includegraphics[width=0.85\textwidth]{pic/IMG_20260521_092722.jpeg}
 \caption{初域·未定之原场景概念手稿}
 \label{fig:concept-sketch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/Blender场景建模.png}
+\caption{Blender场景建模}
+\label{fig:concept-blender}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -2078,7 +2085,6 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 \centering
 \includegraphics[width=0.75\textwidth]{pic/周边物料卡片_1.png}
 
-\vspace{1em}
 
 \begin{minipage}{0.32\textwidth}
 \centering
@@ -2094,8 +2100,6 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 \centering
 \includegraphics[width=\textwidth]{pic/周边物料卡片_4.png}
 \end{minipage}
-
-\vspace{1em}
 
 \includegraphics[width=0.75\textwidth]{pic/周边物料卡片_5.png}
 \caption{周边物料卡片设计}
@@ -2119,8 +2123,6 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 \includegraphics[width=\textwidth]{pic/水滴.png}
 \end{minipage}
 
-\vspace{1em}
-
 \begin{minipage}{0.22\textwidth}
 \centering
 \includegraphics[width=\textwidth]{pic/海浪.png}
@@ -2135,8 +2137,15 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 \centering
 \includegraphics[width=\textwidth]{pic/风.png}
 \end{minipage}
-\caption{亚克力板视觉设计}
+\caption{亚克力挂件视觉设计}
 \label{fig:acrylic-plates}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/亚克力实物.jpg}
+\caption{亚克力挂件实物}
+\label{fig:arcylic-plates-real}
 \end{figure}
 
 \end{document}
