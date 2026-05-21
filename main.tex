@@ -246,20 +246,16 @@ s_{t+1} = v' \quad \text{if} \quad \mathcal{L}\Big(\big\{\text{QALM}(H_t, q) \mi
 \begin{table}[h]
 \centering
 \caption{手势交互控制角色移动用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 参展者、交互系统 \\
-\hline
+\midrule
 Trigger & 参展者伸直食指指向某一方向 \\
-\hline
 Preconditions & 各模块已启动并处于正常工作状态，交互应用处于可自由移动模式 \\
-\hline
 Description & 参展者伸出食指指向目标方向；系统识别指向手势并解析所指方向；角色沿参展者所指方向持续行走；摄像机平滑跟随角色移动 \\
-\hline
 Postconditions & 角色位置持续更新至参展者所指方向 \\
-\hline
 Notes & 移动速度恒定，方向随手势连续变化实时更新；仅当食指伸直且其余四指弯曲时识别为指向手势；手势识别到角色响应的端到端延迟在100ms以内 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-gesture}
 \end{table}
@@ -271,20 +267,16 @@ Notes & 移动速度恒定，方向随手势连续变化实时更新；仅当食
 \begin{table}[h]
 \centering
 \caption{表情输入用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 参展者、交互系统 \\
-\hline
+\midrule
 Trigger & 参展者面部处于摄像头视野内 \\
-\hline
 Preconditions & 已安装摄像头；交互系统的面部识别模块已启动 \\
-\hline
 Description & 参展者面部处于摄像头视野内，其自然表情变化被持续捕获；当表情发生显著变化时，系统将面部状态数据更新对参展者当前情绪状态的内部表征 \\
-\hline
 Postconditions & 智能体获得参展者当前面部状态数据，更新内部情感上下文 \\
-\hline
 Notes & 面部检测帧率不低于15fps；仅当表情变化幅度超过阈值且距上次上报超过最小间隔时才触发上报，避免频繁无效推送；情绪分类的语义理解由智能体完成；智能体可继续根据情绪状态向交互应用发出指令 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-expression}
 \end{table}
@@ -296,20 +288,16 @@ Notes & 面部检测帧率不低于15fps；仅当表情变化幅度超过阈值�
 \begin{table}[h]
 \centering
 \caption{与场景物体交互用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 参展者、交互系统 \\
-\hline
+\midrule
 Trigger & 旅人角色进入场景中可交互物体的触发范围或智能体判断情境满足主动发起物体交互条件 \\
-\hline
 Preconditions & 交互应用正常运行，旅人角色处于可移动状态，场景物体已加载 \\
-\hline
 Description & 参展者引导旅人接近场景中的可交互物体；系统检测角色与物体接触后触发对应的交互效果，如收集音符、激活机关或触发叙事事件；场景状态与交互进度随之更新；交互系统主动发送命令与场景物体交互 \\
-\hline
 Postconditions & 场景物体交互状态更新 \\
-\hline
 Notes & 不同物体触发不同的交互效果，所有交互事件通过统一通道通知智能体 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-interaction}
 \end{table}
@@ -321,20 +309,16 @@ Notes & 不同物体触发不同的交互效果，所有交互事件通过统一
 \begin{table}[h]
 \centering
 \caption{智能体场景理解用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 交互系统 \\
-\hline
+\midrule
 Trigger & 智能体接收到场景画面 \\
-\hline
 Preconditions & 智能体通信链路畅通 \\
-\hline
 Description & 系统向智能体发送当前场景画面；智能体对画面内容进行语义理解，输出场景中可交互物体、空间布局等结构化描述 \\
-\hline
 Postconditions & 智能体输出场景内容的语义描述 \\
-\hline
 Notes & 智能体基于VLM的视觉语言能力完成场景理解 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-understanding}
 \end{table}
@@ -346,20 +330,16 @@ Notes & 智能体基于VLM的视觉语言能力完成场景理解 \\
 \begin{table}[h]
 \centering
 \caption{发送控制命令用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 交互系统 \\
-\hline
+\midrule
 Trigger & 智能体生成决策输出，需要向反馈端下发指令 \\
-\hline
 Preconditions & 智能体与各反馈端通信链路正常，决策输出已生成 \\
-\hline
 Description & 系统将决策结果转化为各反馈端可解析的控制指令；指令分别下发至交互应用与灯光控制端；交互应用据此更新场景渲染参数与叙事状态；灯光控制端据此更新LED灯阵的模式与颜色 \\
-\hline
 Postconditions & 场景状态与灯光状态按指令更新 \\
-\hline
 Notes & 指令采用统一的结构化格式，各执行端按约定字段解析 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-command}
 \end{table}
@@ -371,20 +351,16 @@ Notes & 指令采用统一的结构化格式，各执行端按约定字段解析
 \begin{table}[h]
 \centering
 \caption{动态视觉生成用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 交互系统 \\
-\hline
+\midrule
 Trigger & 系统接收到视觉参数更新指令 \\
-\hline
 Preconditions & 交互应用正常运行，场景资源已加载 \\
-\hline
 Description & 系统接收视觉参数更新；实时驱动场景视觉元素的动态变化——山峦色彩改变、建筑扭曲等；画面色调与后期效果根据情绪倾向相应调整；所有视觉变化以平滑过渡方式呈现，避免突变 \\
-\hline
 Postconditions & 虚拟场景视觉呈现更新至与当前情绪状态和叙事进度匹配 \\
-\hline
 Notes & 视觉过渡过程平滑自然，画面帧率保持在可交互水平； \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-visual}
 \end{table}
@@ -396,20 +372,16 @@ Notes & 视觉过渡过程平滑自然，画面帧率保持在可交互水平；
 \begin{table}[h]
 \centering
 \caption{虚实联动灯光控制用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 交互系统 \\
-\hline
+\midrule
 Trigger & 灯光控制端收到控制命令 \\
-\hline
 Preconditions & 通信正常，LED灯阵电源接通 \\
-\hline
 Description & 开发者主动发送灯光控制命令；灯光控制器接收指令并驱动LED灯阵执行对应效果；实体展览空间的灯光氛围与虚拟场景保持协调一致 \\
-\hline
 Postconditions & LED灯阵切换至指定灯光模式，实体空间与虚拟场景视觉氛围协调一致 \\
-\hline
 Notes & 灯光变化延迟在200ms以内 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-light}
 \end{table}
@@ -421,20 +393,16 @@ Notes & 灯光变化延迟在200ms以内 \\
 \begin{table}[h]
 \centering
 \caption{调取日志记录用例结构化描述}
-\begin{tabularx}{\linewidth}{|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{cX}
+\toprule
 Actors & 开发者、交互系统 \\
-\hline
+\midrule
 Trigger & 开发者调取日志记录 \\
-\hline
 Preconditions & 系统已有运行记录；日志模块正常工作 \\
-\hline
 Description & 启动系统并运行一定时间；开发者应通过文件系统能够分别查询不同模块产生的log文件 \\
-\hline
 Postconditions & 开发者成功获取到系统运行日志 \\
-\hline
 Notes & 日志按模块和时间戳索引 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:usecase-log}
 \end{table}
@@ -494,18 +462,15 @@ JSON对象中一共设计有五个字段，分别为\texttt{type}、\texttt{data
 \begin{table}[h]
 \centering
 \caption{协议使用实例}
-\begin{tabularx}{\linewidth}{|l|X|}
-\hline
+\begin{tabularx}{\linewidth}{lX}
+\toprule
 场景 & 消息格式 \\
-\hline
+\midrule
 客户端注册 & \texttt{\{"type": "register", "client\_type": "mediapipe"\}} \\
-\hline
 Unity上报交互应用状态 & \texttt{\{"type": "text", "client\_type": "unity", "data": "chapter:2, event:enter\_scene"\}} \\
-\hline
 截图响应 & \texttt{\{"type": "image", "client\_type": "unity", "data": "base64...", "request\_id": "uuid-xxx"\}} \\
-\hline
 客户端间直接转发 & \texttt{\{"type": "text", "client\_type": "mediapipe", "data": "hand\_pos:0.5,0.3", "relay\_to": "unity"\}} \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:protocol-examples}
 \end{table}
@@ -598,36 +563,24 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \begin{table}[h]
 \centering
 \caption{系统控制命令汇总}
-\begin{tabularx}{\linewidth}{|l|c|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{lccX}
+\toprule
 命令名称 & 接收客户端 & 发起客户端 & 使用说明 \\
-\hline
+\midrule
 \texttt{hand\_direction} & mediapipe & unity & 开关手指方向识别与信息发送 \\
-\hline
 \texttt{input:submit} & unity & mediapipe & 参展者双手Open\_Palm向两侧挥散，用于驱散标题文字 \\
-\hline
 \texttt{input:move} & unity & mediapipe & 识别食指指向，在Unity端映射为输入设备坐标 \\
-\hline
 \texttt{input:cancel} & unity & echoagent, mediapipe & 取消当前输入操作 \\
-\hline
 \texttt{input:navigate} & unity & echoagent & 智能体主动触发导航操作 \\
-\hline
 \texttt{request:screenshot} & unity, mediapipe & echoagent & 智能体主动请求客户端截图以查看当前状态 \\
-\hline
 \texttt{chase} & raspberry\_pi & debug & 控制灯光为循环点亮模式 \\
-\hline
 \texttt{solid} & raspberry\_pi & debug & 控制灯光为实色模式 \\
-\hline
 \texttt{rainbow} & raspberry\_pi & debug & 控制灯光为彩虹渐变模式 \\
-\hline
 \texttt{breathing} & raspberry\_pi & debug & 控制灯光为呼吸渐变模式 \\
-\hline
 \texttt{gain\_note} & raspberry\_pi & unity & Unity中触发事件时灯条同步反馈 \\
-\hline
 \texttt{drop\_note} & raspberry\_pi & debug & 调试用，模拟失去音符时的灯光反馈 \\
-\hline
 \texttt{play\_note} & raspberry\_pi & unity & 演奏音符时的灯光伴随效果 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:command-table}
 \end{table}
@@ -651,16 +604,14 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \begin{table}[h]
 \centering
 \caption{三章情感状态与交互设计映射}
-\begin{tabularx}{\linewidth}{|c|c|c|c|X|}
-\hline
+\begin{tabularx}{\linewidth}{ccccX}
+\toprule
 \textbf{章节} & \textbf{情感转换} & \textbf{解锁音符} & \textbf{核心机制} & \textbf{视觉意象} \\
-\hline
+\midrule
 初域·未定之原 & 迷茫→锚定 & 水滴 & 固化流动元素 & 半透明抖动山峦逐渐坚实 \\
-\hline
 聚落群·彼方的光影之城 & 碰撞→边界 & 道路交错 & 情绪折射与共鸣 & 建筑随情绪舒展或扭曲 \\
-\hline
 深流之径·未被触及的知识海 & 敬畏→自由 & 海浪、风 & 知识潮渐进机制 & 潮水涨落与深渊光点 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:chapter-emotion}
 \end{table}
@@ -744,18 +695,15 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \centering
 \caption{第一章《初域·未定之原》交互流程状态表}
 \label{tbl:chapter1-flow}
-\begin{tabularx}{\linewidth}{|c|X|X|X|X|}
-\hline
+\begin{tabularx}{\linewidth}{cXXXX}
+\toprule
 序号 & 状态特征 & 旁白 & 向下一状态转换条件 & 底层程序对应 \\
-\hline
+\midrule
 0 & 标题文字浮动、处于不可交互状态 & — & 面部进入画面并做双手向两侧挥散的动作 & face:in；input:submit \\
-\hline
 1 & 标题文字消散，开始接受用户手指输入，但是不启动旅人移动控制，灯条显示一轮淡绿色跑马灯，表示存在感，开始引导用户使用手指指向输入 & — & 第一次接收到正确的手指向右信号时 & hand\_direction:on；raspberry\_pi:chase \\
-\hline
 2 & 播放固定动画：旅人向前迈一步走出出生点六边形，风忽然吹得大了些又渐渐缓和 & 没有人知道旅人从何而来。当他睁开眼时，正立于未定之原的浅雾中，风声像未完成的句子，光像正在犹豫的记忆。 & 用户离开出生点石台 & 石台TriggerExit，连续动画调度 \\
-\hline
 3 & 屏幕显示文字引导"尝试让世界听见你的形状"，此状态下水滴音符物体监测旅人进入自身范围时暂停输入 & 尝试让世界听见你的形状 & 用户处于音符范围并再次挥手 & input:submit；TriggerEnter \\
-\hline
+\bottomrule
 \end{tabularx}
 \end{table}
 
@@ -778,18 +726,15 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \begin{table}[h]
 \centering
 \caption{音符设计表}
-\begin{tabularx}{\linewidth}{|c|c|c|X|X|}
-\hline
+\begin{tabularx}{\linewidth}{cccXX}
+\toprule
 \textbf{音符} & \textbf{名称} & \textbf{音级} & \textbf{效果} & \textbf{寄语} \\
-\hline
+\midrule
 水滴 & waterdrop & $\mathrm{I}$ & 奏响它，可让流动、未定的世界元素固化成型，为自己锚定前行的路标。 & 并非世界无形，是你的呼唤还未曾抵达。 \\
-\hline
 道路交错 & crossing & $\mathrm{V}$ & 奏响它，可与他人的灵魂产生共鸣，连接彼此的道路；也可划定自己的边界，让自己不受他人情绪与评价的影响。 & 人与人之间是否都有一座眼泪做成的桥？ \\
-\hline
 海浪 & tide & $\mathrm{II}$ & 奏响它，可驾驭知识的潮水，让流动的未知成为你前行的路；也可让你在潮水里保持稳定，不被洪流吞噬。 & 也许恐惧，也许敬畏，也许疲惫，但这是成长。 \\
-\hline
 风 & breeze & $\mathrm{VI}$ & 奏响它，可让你的声音传遍整个回声之境，你走过的路，会成为后来者的路标；你也可以化作风，去往任何你想去的地方，无拘无束。 & 原来推动你前进的，不是时间，是那些来不及抓住的风。 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:note-design}
 \end{table}
@@ -1625,42 +1570,35 @@ MusicNoteController作为四个MusicNote的协调器，管理音符的获取顺�
 \centering
 \caption{测试用例表}
 \renewcommand{\arraystretch}{0.95}
-\begin{tabularx}{\linewidth}{|c|l|p{2.2cm}|X|X|}
-\hline
+\begin{tabularx}{\linewidth}{clp{2.2cm}XX}
+\toprule
 编号 & 场景 & 前置条件 & 步骤 & 预期结果 \\
-\hline
+\midrule
 用例1 & 手势控制角色移动 & 各模块已连接，摄像头正常 &
 (1) 参展者手指指向右方；(2) 观察Unity中旅人移动 &
 旅人沿指向方向移动，端到端延迟<100ms；手指放下后角色自动停止 \\
-\hline
 用例2 & 表情输入与上报 & 摄像头正常，面部在视野内 &
 (1) 参展者保持中性表情，观察控制台；(2) 表情变化（平静→微笑→惊讶） &
 变化幅度超阈值时触发上报，间隔不低于500ms；中性表情时无冗余推送 \\
-\hline
 用例3 & 与场景物体交互 & Unity正常运行，旅人可移动 &
 (1) 旅人接近场景中的可交互物体；(2) 旅人进入物体触发范围 &
 物体触发对应交互效果（收集/激活/叙事）；交互事件经AgentCommunicator上报至EchoAgent \\
-\hline
 用例4 & 智能体场景理解 & 感知层各模块正常 &
 (1) 参展者执行手势、表情变化与场景交互；(2) 查看Phoenix追踪面板中推理记录 &
 智能体汇集多源信息完成意图推理，输出结构化决策结果（视觉参数/灯光模式/叙事状态） \\
-\hline
 用例5 & 智能体发送控制命令 & 智能体已生成决策，各执行端在线 &
 (1) 查看Phoenix面板中工具调用记录；(2) 分别检查Unity与Raspberry Pi接收日志 &
 Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；各执行端返回确认 \\
-\hline
 用例6 & 动态视觉生成 & Unity接收智能体下发的视觉参数 &
 (1) 调试客户端模拟下发视觉参数变更；(2) 观察Unity场景画面变化 &
 场景视觉元素随参数变化而动态演变；过渡平滑，帧率维持在可交互水平 \\
-\hline
 用例7 & 虚实联动灯光控制 & Raspberry Pi已连接，LED灯阵通电 &
 (1) 调试客户端依次发送chase、solid、breathing、gain\_note指令；(2) 观察灯阵 &
 灯阵模式切换<200ms；chase、solid、breathing、音符联动四种效果均正确呈现 \\
-\hline
 用例8 & 调取日志记录 & 系统运行中，日志模块正常 &
 (1) 调试客户端发起日志查询请求；(2) 查看返回的日志内容 &
 智能体返回对应范围的格式化日志；支持按级别过滤与关键词模糊搜索 \\
-\hline
+\bottomrule
 \end{tabularx}
 \label{tbl:test-cases}
 \end{table}
