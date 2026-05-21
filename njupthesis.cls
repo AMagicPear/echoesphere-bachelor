@@ -129,7 +129,7 @@
   columns=fullflexible,
   extendedchars=true,
   framesep=6pt,
-  aboveskip=0pt,
+  aboveskip=6pt,
   belowskip=0pt,
   xleftmargin=2pt,
   xrightmargin=0pt,

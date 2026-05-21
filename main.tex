@@ -657,9 +657,9 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \hline
 初域·未定之原 & 迷茫→锚定 & 水滴 & 固化流动元素 & 半透明抖动山峦逐渐坚实 \\
 \hline
-聚落群·光影之城 & 碰撞→边界 & 道路交错 & 情绪折射与共鸣 & 建筑随情绪舒展或扭曲 \\
+聚落群·彼方的光影之城 & 碰撞→边界 & 道路交错 & 情绪折射与共鸣 & 建筑随情绪舒展或扭曲 \\
 \hline
-深流之径·知识海 & 敬畏→自由 & 海浪、风 & 知识潮渐进机制 & 潮水涨落与深渊光点 \\
+深流之径·未被触及的知识海 & 敬畏→自由 & 海浪、风 & 知识潮渐进机制 & 潮水涨落与深渊光点 \\
 \hline
 \end{tabularx}
 \label{tbl:chapter-emotion}
@@ -679,13 +679,13 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
 \small
 \subsubsection*{第一章：初域·未定之原}
-参展者来到交互应用前，镜头从充满迷雾的远景中慢慢推近，旅人也从迷雾中显现，站在在无边的草地上的一个六边形石台上，空中漂浮着忽起忽落的石块。参展者在系统的引导下使用手势挥散标题，随后指引旅人前行，获得并奏响水滴音符。
+参展者来到交互应用前，镜头从充满迷雾的远景中慢慢推近，旅人也从迷雾中显现，站在无边的草地上的一个六边形石台上，空中漂浮着忽起忽落的石块。参展者在系统的引导下使用手势挥散标题，随后指引旅人前行，获得并奏响水滴音符。
 
 继而进入三个方向锚点谜题——“落定的石阶”（过去的锚点）要求参展者观察漂浮石块的流动规律并在恰当时机固化，“无风的山谷”（当下的锚点）需依次固化乱流核心以平息环境扰动，“迷雾的边界”（未来的锚点）则要求参展者自主判断固化的位置与方向，独立开辟道路。三个锚点全部激活后，迷雾散去，未定之原固化为稳定地貌，一条宽阔光路延伸向下一章节。
 \end{minipage}%
 }
 
-第二章对应情感状态从碰撞到边界的转换。旅人从自我定形走向与他人的碰撞。本章解锁第二个道路交错音符，使参展者学会在关系中保持自我边界。每隔分支区域对应一段社交与情感的隐喻，围绕他人情绪对自我的影响、自我在关系中的本心展开。
+第二章对应情感状态从碰撞到边界的转换。旅人从自我定形走向与他人的碰撞。本章解锁第二个道路交错音符，使参展者学会在关系中保持自我边界。每个分支区域对应一段社交与情感的隐喻，围绕他人情绪对自我的影响、自我在关系中的本心展开。
 
 本章引入情绪状态对场景改变的关键多模态链路，在系统层面由MediaPipe面部识别子模块与EchoAgent智能体模块协同完成。面部形变系数经双重节流后上报至智能体，EchoAgent结合叙事上下文进行情绪语义推理，判定参展者当前的情绪强度与倾向后，向Unity下发视觉参数调整指令，驱动建筑形态的舒展与扭曲。共鸣系统的动作同步率检测由MediaPipe手势识别子模块承担，同步达标后EchoAgent调用\texttt{play\_music}工具触发音乐反馈，同时通过\texttt{control\_lights}工具驱动Raspberry Pi灯光控制模块切换灯光氛围。
 
@@ -698,9 +698,9 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 
 \subsubsection*{第二章：聚落群·彼方的光影之城}
 
-旅人从光路走下，踏入光影之城的入口，脚下石板随脚步发出微光，周围是光带与脉动机械结构组成的半透明建筑，随旅人的呼吸微微起伏。旅人行至第一个十字路口，周围人声突然嘈杂，两侧建筑瞬间向中间挤压，宽阔街道变得狭窄到几乎无法通行建筑仅会短暂停顿，随后继续挤压。系统由此告知参展者水滴音符只能固化未定的自然元素，而无法改变他人情绪折射出的世界，必须学会新的规则。
+旅人从光路走下，踏入光影之城的入口，脚下石板随脚步发出微光，周围是光带与脉动机械结构组成的半透明建筑，随旅人的呼吸微微起伏。旅人行至第一个十字路口，周围人声突然嘈杂，两侧建筑瞬间向中间挤压，宽阔街道变得狭窄到几乎无法通行，建筑仅会短暂停顿，随后继续挤压。系统由此告知参展者水滴音符只能固化未定的自然元素，而无法改变他人情绪折射出的世界，必须学会新的规则。
 
-接下来关卡的核心解谜线是四个分支区域与四段影子旅者的故事。每个分支对应一个社交与情感的核心命题，每个谜题都绑定一个影子旅者的困境。参展者帮助他们走出困境的过程，也是自我成长的过程。“回声交汇所”中，参展者帮助影子旅者连接断裂的光路，通过动作同步建立共鸣后用水滴音符连接彼此道路；“情绪风塔”中，参展者逐层应对欢喜、悲伤、愤怒、恐惧四种情绪，在共情与自我保护之间寻找平衡；“镜影回廊”中，参展者在布满镜面的空间里忽略扭曲的影像评价，锚定真实的自我；“离别的岔路口”中，参展者帮助影子旅者理解离别并非终结，各自走向属于自己的方向。集齐四个碎片集齐后，旅人回到光影之城中心广场，碎片化作四道光融入光核，旅人胸口亮起第二个音符印记，获得道路交错音符。
+接下来关卡的核心解谜线是四个分支区域与四段影子旅者的故事。每个分支对应一个社交与情感的核心命题，每个谜题都绑定一个影子旅者的困境。参展者帮助他们走出困境的过程，也是自我成长的过程。“回声交汇所”中，参展者帮助影子旅者连接断裂的光路，通过动作同步建立共鸣后用水滴音符连接彼此道路；“情绪风塔”中，参展者逐层应对欢喜、悲伤、愤怒、恐惧四种情绪，在共情与自我保护之间寻找平衡；“镜影回廊”中，参展者在布满镜面的空间里忽略扭曲的影像评价，锚定真实的自我；“离别的岔路口”中，参展者帮助影子旅者理解离别并非终结，各自走向属于自己的方向。集齐四个碎片后，旅人回到光影之城中心广场，碎片化作四道光融入光核，旅人胸口亮起第二个音符印记，获得道路交错音符。
 \end{minipage}%
 }
 \medskip
@@ -709,7 +709,7 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 
 第三章对应情感状态从自我与他人的关系，到自我与世界的和解，依次解锁最后两个海浪音符与风音符。使参展者获得完全的表达自由。设计理念围绕接纳自己的有限、接纳未知的永恒的核心命题展开。
 
-本章的涉及较完整的交互链条。知识碎片的收集进度由Unity GameStateManager追踪，潮水上涨的视觉变化由动态视觉生成子模块执行；海浪音符解锁后，EchoAgent的\texttt{control\_lights}与\texttt{play\_music}工具同时驱动灯光模式切换与音乐变奏；自由探索阶段四个音符的演奏分别触发对应的视觉形态变化（Shader Uniform参数调整）、音乐播放控制工具与实体灯光伴随效果（Raspberry Pi灯光控制模块的\texttt{gain\_note}/\texttt{play\_note}联动），虚拟画面与物理光影在同一指令下保持严格同步，形成虚实联动的完整交互闭环。
+本章涉及较完整的交互链条。知识碎片的收集进度由Unity GameStateManager追踪，潮水上涨的视觉变化由动态视觉生成子模块执行；海浪音符解锁后，EchoAgent的\texttt{control\_lights}与\texttt{play\_music}工具同时驱动灯光模式切换与音乐变奏；自由探索阶段四个音符的演奏分别触发对应的视觉形态变化（Shader Uniform参数调整）、音乐播放控制工具与实体灯光伴随效果（Raspberry Pi灯光控制模块的\texttt{gain\_note}/\texttt{play\_note}联动），虚拟画面与物理光影在同一指令下保持严格同步，形成虚实联动的完整交互闭环。
 
 \medskip
 \setlength{\fboxsep}{5pt}
@@ -731,7 +731,7 @@ Raspberry Pi模块属于反馈层，负责将智能体的灯光决策转化为�
 }
 \medskip
 
-三章的叙事线索层层递进：第一章聚焦自我认知，未定之原是对自我迷茫的具象化；第二章聚焦关系探索，光影之城是对人际边界的具象化；第三章聚焦世界接纳，深流之径是对知识与未知态度的具象化。四个音符作为锚定自我、连接他人、驾驭未知、通达自由的四重能力象征，共同构成了旅人从迷茫走向自由的完整成长弧线。
+三章的叙事线索层层递进：第一章聚焦自我认知，未定之原是对自我迷茫的具象化；第二章聚焦关系探索，彼方的光影之城是对人际边界的具象化；第三章聚焦世界接纳，未被触及的知识海是对知识与未知态度的具象化。四个音符作为锚定自我、连接他人、驾驭未知、通达自由的四重能力象征，共同构成了旅人从迷茫走向自由的完整成长弧线。
 
 
 \subsection{状态驱动与相机编排设计}
@@ -1543,7 +1543,7 @@ MusicNoteController作为四个MusicNote的协调器，管理音符的获取顺�
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{pic/灯珠位置示意图.pdf}
+  \includegraphics[width=\textwidth]{pic/灯珠位置示意图.pdf}
   \caption{灯珠序号与空间位置示意图}
   \label{fig:led-layout}
 \end{figure}
@@ -1677,7 +1677,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{pic/phoenix-trace-example.png}
+  \includegraphics[width=\textwidth]{pic/phoenix-trace-example.png}
   \caption{Phoenix 链路追踪面板示例}
   \label{fig:phoenix-trace}
 \end{figure}
@@ -1776,7 +1776,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 好，我自己的经历就先讲到这里。让我们回到一开始的问题。大伟哥，即刘伟，他给出的答案是什么呢？他说，接下来在AI这个时代，游戏体验会有一个我们能够预见到的变化，就是完全个性化的游戏体验。他用一部美剧《西部世界》来举例——一个相同的世界观，但每次体验的时候，故事完全不一样，他如是讲道。他说，我们今天的游戏，因为生产成本，整场所有人的游戏体验都是一样的，但接下来因为有了AI，它可以理解你的行为，它能够给千人千面的游戏体验。我听到这个观点的时候被深深触动了，我想到米哈游近年来所做的一些其他工作，其实就是我在论文的前两章引用到的Whispers from the Star、LPM 1.0表演模型、Lumine，它们似乎都悄然在向着这个目标前进。
 
-我将智能体和现实空间引入到交互叙事中，莫不是也盼着千人千面的游戏体验呢？当然，我深知我做的这东西只能算是一个勉强看得过去的demo。如果要真正达到我理想的那样一个叙事游戏，那工作量差的可不是一点半点。
+我将智能体和现实空间引入到交互叙事中，莫不是也盼着千人千面的游戏体验呢？当然，我深知我做的这东西只能算是一个勉强看得过去的demo。如果要真正达到我理想的那样一个叙事游戏，那工作量差的可不是一点半点。可尽管如此，这也算是向着未来迈出的小小一步吧。
 
 最后，我把我前一段时间，临近毕设收尾时的一些想法放在下面。
 
@@ -1806,7 +1806,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
 
 最后感谢我的家人。有时候我觉得大学生活十分漫长，却也有时候我发现这四年的时光转瞬即逝。这四年，整个世界都相当不平凡。记得刚走入大学的那会儿，疫情还欲止未止，我也像这《回声之境》中的旅人，既憧憬着未来又小心翼翼地在迷雾中前行。在那些在迷雾中迷惘的时候，家仍是港湾。
 
-本论文采用基于 \LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
+对了，还有一件事。本论文采用基于 \LaTeX 的南京邮电大学本科论文模版编写。感谢制作模板的前辈，极大地方便了本文的编写，特此附上此模板项目的GitHub链接：https://github.com/gzr-lgtm/NJUPThesis-Bachelor。
 
 \thesisloadbibliography[nocite]{reference}
 
@@ -1845,7 +1845,7 @@ Unity收到视觉/叙事参数指令；Raspberry Pi收到灯光控制指令；�
   \end{enumerate}
 \item 外部设备
   \begin{enumerate}[label=(\alph*)]
-  \item 实体装置控制器：Raspberry Pi 5或香橙派等运行完整Linux系统且可PWM输出的开发板
+  \item 实体装置控制器：Raspberry Pi等运行完整Linux系统且可PWM输出的开发板
   \item 场地：对于文中的交互应用需约1m $\times$ 2m场地，具体取决于屏幕和实体装置选用，对于不同实际应用场景可能存在不同要求
   \item 摄像头：笔记本电脑内置摄像头或通过USB连接的摄像头均可，分辨率需在720p以上
   \item 可选输入控制：26键QWERTY键盘、兼容Xbox的手柄控制器
@@ -1875,7 +1875,7 @@ Unity客户端基于6000.3.9f1版本。您需要首先前往Unity引擎官方网
 
 MediaPipe感知客户端的运行需要摄像头采集画面，请确保您的计算机已按开发环境要求连接摄像头。
 
-灯光控制模块需要运行在具备PWM信号输出能力和运行完整Linux系统的设备上，如Raspberry Pi或香橙派，此处以Raspberry Pi 5为例。由于展览环境需要持续运行，建议给开发板加装散热器，如图中带风扇的铝合金散热器。
+灯光控制模块需要运行在具备PWM信号输出能力和运行完整Linux系统的设备上，此处以Raspberry Pi 5为例。由于展览环境需要持续运行，建议给开发板加装散热器，如图中带风扇的铝合金散热器。
 
 \begin{figure}[h!]
 \centering
@@ -1887,29 +1887,29 @@ Raspberry Pi的系统安装和初始化可前往官方文档（\url{https://www.
 
 需要注意的是，为了能够调用Raspberry Pi自带的GPIO模块，在创建环境的时候必须使用系统Python环境来创建虚拟环境。与上文中提到的其他模块使用\texttt{uv}一键同步不同，此模块可使用\texttt{python3 -m venv .venv}命令手动在当前目录下创建虚拟环境，激活虚拟环境后使用下面的命令安装必要库：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 sudo apt update
 sudo apt install python3-pip
 pip3 install rpi_ws281x adafruit-circuitpython-neopixel
-\end{verbatim}
+\end{lstlisting}
 
 在 \texttt{/boot/config.txt} 中打开 PWM 通道：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 sudo nano /boot/config.txt
-\end{verbatim}
+\end{lstlisting}
 
 增加：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 dtoverlay=pwm-2chan
-\end{verbatim}
+\end{lstlisting}
 
 保存后 reboot：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 sudo reboot
-\end{verbatim}
+\end{lstlisting}
 
 WS2812B 灯带在每一端都会有 3 根线，红色是+5V电源（VCC）、白色是GND（地）、绿色是数据线（DIN/DOUT）。并且一端是输入 DIN，另一端是输出 DOUT，用于串接下一条灯带。灯带的 +5V 连接外部 5V 电源，灯带的 GND 与外部电源 GND 与Raspberry Pi GND 都必须共地，Raspberry Pi GPIO18 需串联 330$\Omega$电阻后连接灯带的绿色数据线。对于本文正文中所展示的64颗灯珠组成的小规模灯带，若暂时无外部5V电源，也可以接在Raspberry Pi的5V引脚上，但5V引脚的输出电流有限，灯珠全亮时可能超出其承载范围，存在烧路、电源跌压、Raspberry Pi重启等风险，因此建议不要同时点亮太多灯珠，也不要将灯珠的亮度设置得较高。另外，在使用外接电源时如果需要防止灯闪烁或损坏，也可在外接电源的+5V和GND之间并联一个1000$\mu$F 电容。
 
@@ -1919,9 +1919,9 @@ WS2812B 灯带在每一端都会有 3 根线，红色是+5V电源（VCC）、白
 
 在所有模块中，EchoAgent智能体模块和TCP服务端模块应首先启动。这两个模块属于同一项目，在同一进程中运行。进入项目目录，激活虚拟环境后执行：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 uv run main.py --log-level DEBUG
-\end{verbatim}
+\end{lstlisting}
 
 其中\texttt{--log-level DEBUG}开启调试级别日志，输出完整消息内容与队列积压状态，便于开发阶段观察系统运行细节；生产环境可省略此参数。智能体
 
@@ -1929,9 +1929,9 @@ uv run main.py --log-level DEBUG
 
 启动MediaPipe感知模块，进入项目目录后执行：
 
-\begin{verbatim}
+\lstset{style=codeblock}\begin{lstlisting}
 uv run main.py --preview
-\end{verbatim}
+\end{lstlisting}
 
 \texttt{--preview}参数启用摄像头预览窗口，实时显示手势识别结果与方向向量。如需连接至非本机的TCP服务端，可通过\texttt{--host}与\texttt{--port}参数指定目标地址；如需启用左手方向指示功能，可附加\texttt{--left-hand-direction}参数。
 
@@ -1979,15 +1979,15 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 需要说明的是，受限于开发周期，目前《回声之境》仅在Unity中实现了第一章的基础交互框架，包括标题交互、手指指向行走与音符触发，而后续章节的锚点谜题、情绪折射、知识潮等交互机制仍处于设计阶段，尚未在引擎中实际落地。下文所述为完整的设计体验流程。
 
-\textbf{初始阶段}。体验开始前，屏幕显示标题画面，系统处于非交互状态。参展者走近摄像头，使面部进入传感器识别范围后，双手向两侧挥散即可触发标题消散动画——此时旅人从迷雾中浮现，系统开始接受交互输入。如手势识别未能触发，可按下键盘回车键作为替代方式。
+(1) 初始阶段。体验开始前，屏幕显示标题画面，系统处于非交互状态。参展者走近摄像头，使面部进入传感器识别范围后，双手向两侧挥散即可触发标题消散动画——此时旅人从迷雾中浮现，系统开始接受交互输入。如手势识别未能触发，可按下键盘回车键作为替代方式。
 
-\textbf{第一章：行走与奏响}。标题消散后，参展者伸出食指，指尖朝期望的方向短暂停留——MediaPipe实时计算食指指向向量，经TCP协议传输至Unity后驱动旅人沿该方向行走，缩回手指后角色自动停止。旅人行走至水滴音符附近时，摄像机会自动推近至水滴特写；参展者做出持续捏合手势即可触发音符获取事件，同时实体LED灯阵中对应音符区间的灯珠同步亮起。以上行走与音符触发逻辑已在Unity中完成实现。设计中的后续内容还包括：三条锚点路径（落石阶、无风谷、雾之界）分别对应过去、现在与未来三重自我锚定，全部激活后迷雾散尽，通往第二章的宽阔光路显现。
+(2) 第一章：初域·未定之原。标题消散后，参展者伸出食指，指尖朝期望的方向短暂停留——MediaPipe实时计算食指指向向量，经TCP协议传输至Unity后驱动旅人沿该方向行走，缩回手指后角色自动停止。旅人行走至水滴音符附近时，摄像机会自动推近至水滴特写；参展者做出持续捏合手势即可触发音符获取事件，同时实体LED灯阵中对应音符区间的灯珠同步亮起。以上行走与音符触发逻辑已在Unity中完成实现。设计中的后续内容还包括：三条锚点路径（落定的石阶、无风的山谷、迷雾的边界）分别对应过去、现在与未来三重自我锚定，全部激活后迷雾散尽，通往第二章的宽阔光路显现。
 
-\textbf{第二章：情绪折射}。进入光影之城后，MediaPipe的面部表情识别持续监测参展者的blendshape系数，VLM智能体据此推断情绪基调并驱动场景建筑形态变化——喜悦使建筑舒展向上，悲伤使其低垂收敛，愤怒引发扭曲震颤。参展者需要在四个分支区域（回声交汇处、情绪风塔、镜像回廊、告别十字路）中收集碎片，每收集一处将使城市建筑趋于稳定。奏响“道路交错”音符可在自身周围构建视觉化的边界范围，过滤外界情绪干扰。
+(3) 第二章：聚落群·彼方的光影之城。进入光影之城后，MediaPipe的面部表情识别持续监测参展者的blendshape系数，VLM智能体据此推断情绪基调并驱动场景建筑形态变化——喜悦使建筑舒展向上，悲伤使其低垂收敛，愤怒引发扭曲震颤。参展者需要在四个分支区域（回声交汇所、情绪风塔、镜影回廊、离别的岔路口）中收集碎片，每收集一处将使城市建筑趋于稳定。奏响“道路交错”音符可在自身周围构建视觉化的边界范围，过滤外界情绪干扰。
 
-\textbf{第三章：知识海与自由探索}。前两章收集的音符在此汇聚。浅水区散布6枚认知碎片（观察、耐心、试错、连接、放手、接纳），每获取一枚，知识海的潮水上涨一级。集齐6枚后解锁“海浪”音符，进入深水区面对困惑、遗憾与无知三波情绪浪潮。最终触碰海心核，四音符合奏为完整旋律，解锁“风”音符，进入自由探索阶段——参展者可自由演奏四种音符，每种将改变整个世界的视觉形态。
+(4) 第三章：深流之径·未被触及的知识海。前两章收集的音符在此汇聚。浅滩区散布6枚认知碎片（观察、耐心、试错、联结、放下、接纳），每获取一枚，知识海的潮水上涨一级。集齐6枚后解锁“海浪”音符，进入深潮区面对困惑、遗憾与无知三波情绪浪潮。最终触碰海心核，四音符合奏为完整旋律，解锁“风”音符，进入自由探索阶段——参展者可自由演奏四种音符，每种将改变整个世界的视觉形态。
 
-\textbf{退出}。参展者离开摄像头识别范围后，系统自动进入待机状态，画面恢复至标题界面，等待下一位体验者。
+(5) 退出。参展者离开摄像头识别范围后，系统自动进入待机状态，画面恢复至标题界面，等待下一位体验者。
 
 \subsection{操作速查}
 
@@ -2004,4 +2004,139 @@ Unity客户端在Unity编辑器中打开即可运行。Unity客户端启动后�
 
 手势识别在均匀光照条件下效果最佳，请避免摄像头正对强光源或处于完全逆光位置。体验过程中请保持与摄像头约0.5--2m的距离，超出此范围可能导致手势识别精度下降。捏合手势需保持0.5秒以上方可触发音符奏响，避免短促的误触。LED灯带在灯珠全亮时发热明显，连续运行超过2小时后建议暂停散热；若使用Raspberry Pi 5V引脚直接供电，请勿长时间保持灯珠全白高亮状态，以免超出引脚输出电流承载能力。
 
-肢体活动范围请控制在摄像头视野内，尤其在做出挥散和指向动作时，手部尽量不超出画面边界。如遇旅人行走卡顿或方向偏移，可缩回手指等待片刻后重新伸出，系统将自动重新校准指向基准。\end{document}
+肢体活动范围请控制在摄像头视野内，尤其在做出挥散和指向动作时，手部尽量不超出画面边界。如遇旅人行走卡顿或方向偏移，可缩回手指等待片刻后重新伸出，系统将自动重新校准指向基准。
+
+\renewcommand{\thechapter}{附录B}
+\renewcommand{\thesection}{B.\arabic{section}}
+\renewcommand{\thesubsection}{B.\arabic{section}.\arabic{subsection}}
+\renewcommand{\thefigure}{B\arabic{figure}}
+\setcounter{figure}{0}
+\titleformat{\chapter}[block]
+  {\fontsize{15pt}{15pt}\selectfont\heiti\thispagestyle{fancy}}{\thechapter \quad}{0pt}{}
+
+\chapter{美术设计与展示}
+
+本附录展示在《回声之境》交互应用的设计和实现过程中，产生的一些设计草图、概念和美术资产。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/IMG_20260521_092722.jpeg}
+\caption{初域·未定之原场景概念手稿}
+\label{fig:concept-sketch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/交互场景前期设计.png}
+\caption{场景交互前期设计}
+\label{fig:interaction-sketch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/字体和色彩.jpg}
+\caption{字体和色彩}
+\label{fig:font-color}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/世界结构前期设计.png}
+\caption{世界结构前期设计}
+\label{fig:world-structure}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/旅人形象前期设计.jpg}
+\caption{旅人形象前期设计}
+\label{fig:traveler-sketch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/音符装置制作过程展示.jpg}
+\caption{音符装置制作过程——松木木板}
+\label{fig:device-build-1}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/音符装置制作过程展示2.jpg}
+\caption{音符装置制作过程——美工刀雕刻}
+\label{fig:device-build-2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{pic/音符装置制作过程展示3.jpg}
+\caption{音符装置制作过程——挂绳502胶水粘合}
+\label{fig:device-build-3}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{pic/周边物料卡片_1.png}
+
+\vspace{1em}
+
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/周边物料卡片_2.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/周边物料卡片_3.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/周边物料卡片_4.png}
+\end{minipage}
+
+\vspace{1em}
+
+\includegraphics[width=0.75\textwidth]{pic/周边物料卡片_5.png}
+\caption{周边物料卡片设计}
+\label{fig:merch-cards}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\begin{minipage}{0.5\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/ECHOESHPERE.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.22\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/旅人1.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.22\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/水滴.png}
+\end{minipage}
+
+\vspace{1em}
+
+\begin{minipage}{0.22\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/海浪.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.22\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/道路交错.png}
+\end{minipage}
+\hfill
+\begin{minipage}{0.22\textwidth}
+\centering
+\includegraphics[width=\textwidth]{pic/风.png}
+\end{minipage}
+\caption{亚克力板视觉设计}
+\label{fig:acrylic-plates}
+\end{figure}
+
+\end{document}
