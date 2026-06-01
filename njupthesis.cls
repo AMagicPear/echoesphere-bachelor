@@ -476,9 +476,9 @@
 \begin{spacing}{2.0}
 本人郑重声明：所提交的毕业设计（论文），是本人在导师指导下，独立进行研究工作所取得的成果。除文中已注明引用的内容外，本毕业设计（论文）不包含任何其他个人或集体已经发表或撰写过的作品成果。对本研究做出过重要贡献的个人和集体，均已在文中以明确方式标明并表示了谢意。\\ \\ 
 
-\hspace*{7cm} 论文作者签名：
+\hspace*{7cm} 论文作者签名：\smash{\rlap{\hspace{0.2cm}\raisebox{-0.35cm}{\includegraphics[height=1.3cm]{pic/沈立电子签名.jpg}}}}
 
-\hspace*{7cm} 日期：\quad\quad 年\quad\quad 月\quad\quad 日
+\hspace*{7cm} 日期：2026年5月29日
 \end{spacing}
 
 
